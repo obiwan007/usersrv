@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "proto"
+		},
+		{
+			"path": "pkg"
+		},
+		{
+			"path": "cli"
+		}
+	],
+	"settings": {}
+}

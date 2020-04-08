@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "UserServiceProto";
+
+package userservice;
+
+service UserService {
+  // A simple RPC.
+  //
+  // Obtains the feature at a given position.
+  //
+  // A feature with an empty name is returned if there's no feature at the given
+  // position.
+  rpc AddUser(User) returns (User) {}
+  rpc GetUser(Id) returns (User) {}
+  // rpc UpdateUser(User) returns (User) {}
+  rpc GetUsers(ListUsers) returns (UsersResponse) {}
+}
+// A feature names something at a given point.
+//
+// If a feature could not be named, the name is empty.
+message User {
+  // The name of the feature.
+  string name = 1;
+
+  // The point where the feature is detected.
+  string password = 2;
+
+  Id id = 3;
+}
+
+message Id {
+  // The name of the feature.
+  int32 id = 1;
+  // The point where the feature is detected.
+}
+
+message ListUsers {
+}
+
+message UsersResponse {
+    repeated User Users = 1;
+}
