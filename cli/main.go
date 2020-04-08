@@ -9,6 +9,7 @@ import (
 	"time"
 
 	pb "github.com/obiwan007/usersrv/proto"
+	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 )
 
@@ -21,6 +22,15 @@ var (
 
 func main() {
 	fmt.Println("Init CLI User Service")
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatalf("fail to connect to etcd: %v", err)
+	}
+	defer cli.Close()
+
 	argsWithoutProg := os.Args[1:]
 	fmt.Println(argsWithoutProg)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
