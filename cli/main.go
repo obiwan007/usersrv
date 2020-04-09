@@ -5,15 +5,18 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	pb "github.com/obiwan007/usersrv/proto"
-	"go.etcd.io/etcd/clientv3"
+
+	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
+	balancer           = flag.Bool("ectd", false, "Using etcd")
 	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
 	serverAddr         = flag.String("server_addr", "localhost:10000", "The server address in the format of host:port")
@@ -31,33 +34,51 @@ func main() {
 	}
 	defer cli.Close()
 
-	argsWithoutProg := os.Args[1:]
-	fmt.Println(argsWithoutProg)
+	var opts []grpc.DialOption
+
+	if *balancer {
+		r := &etcdnaming.GRPCResolver{Client: cli}
+		b := grpc.RoundRobin(r)
+		opts = append(opts, grpc.WithBalancer(b))
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	flag.Parse()
-	var opts []grpc.DialOption
-	// if *tls {
-	// 	if *caFile == "" {
-	// 		*caFile = testdata.Path("ca.pem")
-	// 	}
-	// 	creds, err := credentials.NewClientTLSFromFile(*caFile, *serverHostOverride)
-	// 	if err != nil {
-	// 		log.Fatalf("Failed to create TLS credentials %v", err)
-	// 	}
-	// 	opts = append(opts, grpc.WithTransportCredentials(creds))
+	if *tls {
+		if *caFile == "" {
+			log.Fatalf("No TLS crt file given")
+		}
+		creds, err := credentials.NewClientTLSFromFile(*caFile, "")
+		if err != nil {
+			log.Fatalf("Failed to create TLS credentials %v", err)
+		} else {
+			log.Println("TLS enabled")
+		}
+
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+		log.Println("Insecure connection!")
+	}
+	opts = append(opts, grpc.WithTimeout(10*time.Second))
+
+	// opts = append(opts, grpc.WithBlock())
+	log.Println("Dial")
+
+	conn, err := grpc.Dial(*serverAddr, opts...)
 	// } else {
-	opts = append(opts, grpc.WithInsecure())
+	// 	conn, err := grpc.Dial("my-service", opts...)
 	// }
 
-	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(*serverAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
+	fmt.Println("Dialed ")
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 2; i++ {
+		fmt.Println("AddUser")
 		user, err := client.AddUser(ctx, &pb.User{Name: "Markus", Password: "test"})
 		if err != nil {
 			log.Fatalf("%v.GetFeatures(_) = _, %v: ", client, err)

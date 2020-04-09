@@ -12,6 +12,7 @@ import (
 	storage "github.com/obiwan007/usersrv/pkg/storage"
 	pb "github.com/obiwan007/usersrv/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var sto storage.Storage
@@ -88,19 +89,23 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	var opts []grpc.ServerOption
-	// if *tls {
-	// 	if *certFile == "" {
-	// 		*certFile = testdata.Path("server1.pem")
-	// 	}
-	// 	if *keyFile == "" {
-	// 		*keyFile = testdata.Path("server1.key")
-	// 	}
-	// 	creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
-	// 	if err != nil {
-	// 		log.Fatalf("Failed to generate credentials %v", err)
-	// 	}
-	// 	opts = []grpc.ServerOption{grpc.Creds(creds)}
-	// }
+	if *tls {
+		if *certFile == "" {
+			log.Fatalln("No certfile")
+		}
+		if *keyFile == "" {
+			log.Fatalln("No Keyfile")
+		}
+
+		creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
+
+		if err != nil {
+			log.Fatalf("Failed to generate credentials %v", err)
+		}
+		log.Println("Certs loaded", *certFile, *keyFile)
+		opts = []grpc.ServerOption{grpc.Creds(creds)}
+		log.Printf("Credentials %v", opts)
+	}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterUserServiceServer(grpcServer, newServer())
 	grpcServer.Serve(lis)
