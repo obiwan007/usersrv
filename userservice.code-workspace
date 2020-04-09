@@ -4,10 +4,10 @@
 			"path": "proto"
 		},
 		{
-			"path": "pkg"
+			"path": "cli"
 		},
 		{
-			"path": "cli"
+			"path": "api"
 		}
 	],
 	"settings": {}
