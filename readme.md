@@ -33,3 +33,12 @@ Download via https://github.com/uw-labs/bloomrpc
 
 ## run client
 `go run main.go -tls -ca_file ../certs/cert.pem`
+
+# Docker Builds
+## Buidl container
+
+`docker build -t my-golang-app .`
+
+## Run service
+
+`docker run -it --rm -p 10000:10000 --name my-running-app my-golang-app`

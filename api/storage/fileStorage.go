@@ -21,10 +21,10 @@ func NewFileStorage() *FileStorage {
 
 	t := &FileStorage{}
 	if err := t.Load("file.json", &users); err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	maxId = len(users)
-	fmt.Println("Max Length", maxId)
+	fmt.Println("Users:", maxId)
 	return t
 
 }
