@@ -65,9 +65,9 @@ func (t *FileStorage) GetUser(id int) (User, error) {
 }
 
 func (t *FileStorage) ListUser() []User {
-	for _, u := range users {
-		fmt.Println(u)
-	}
+	// for _, u := range users {
+	// 	fmt.Println(u)
+	// }
 	return users
 }
 

@@ -51,9 +51,9 @@ func (s *routeGuideServer) GetUsers(ctx context.Context, l *pb.ListUsers) (*pb.U
 	for _, user := range users {
 		conv := convertToUser(user)
 		u.Users = append(u.Users, conv)
-		fmt.Println(u.Users)
+		// fmt.Println(u.Users)
 	}
-	fmt.Println(u.Users)
+	// fmt.Println(u.Users)
 	return u, nil
 }
 
