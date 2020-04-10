@@ -68,6 +68,7 @@ github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/obiwan007/usersrv v0.0.0-20200408081841-ebadbc5059ef h1:o3b+49z73mVwh6U7PbI21gg1C1QWmjYzAzi3RQ3eTkE=
 github.com/obiwan007/usersrv v0.0.0-20200408081841-ebadbc5059ef/go.mod h1:3rNhPx6YQNtKvLwSY/chWPCopWKRXp0afKZd/JlpOrI=
 github.com/obiwan007/usersrv v0.0.0-20200409063956-12af1b9cdb9e h1:dlrgozaols0OepG0PZSggnPg+3pHWTByMg4OV3wStQk=
+github.com/obiwan007/usersrv v0.0.0-20200409063956-12af1b9cdb9e/go.mod h1:3rNhPx6YQNtKvLwSY/chWPCopWKRXp0afKZd/JlpOrI=
 github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 h1:lM6RxxfUMrYL/f8bWEUqdXrANWtrL7Nndbm9iFN0DlU=
 github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492/go.mod h1:Ngi6UdF0k5OKD5t5wlmGhe/EDKPoUM3BXZSSfIuJbis=
 github.com/opentracing/basictracer-go v1.0.0 h1:YyUAhaEfjoWXclZVJ9sGoNct7j4TVk7lZWlQw5UXuoo=

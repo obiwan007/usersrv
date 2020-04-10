@@ -51,7 +51,7 @@ var (
 func main() {
 	grpc.EnableTracing = true
 
-	tracer, collector, err := tracing.NewTracer()
+	tracer, collector, err := tracing.NewTracer("userservice")
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +66,7 @@ func main() {
 
 	// Add Tracer
 	opts = append(opts, grpc.UnaryInterceptor(
-		otgrpc.OpenTracingServerInterceptor(tracer)))
+		otgrpc.OpenTracingServerInterceptor(tracer, otgrpc.LogPayloads())))
 	opts = append(opts, grpc.StreamInterceptor(
 		otgrpc.OpenTracingStreamServerInterceptor(tracer)))
 

@@ -65,13 +65,13 @@ func main() {
 
 	// tracer := dapperish.NewTracer("dapperish_tester")
 
-	tracer, collector, err := tracing.NewTracer()
+	tracer, collector, err := tracing.NewTracer("userservice client")
 	if err != nil {
 		panic(err)
 	}
 	defer collector.Close()
 	opts = append(opts, grpc.WithUnaryInterceptor(
-		otgrpc.OpenTracingClientInterceptor(tracer)))
+		otgrpc.OpenTracingClientInterceptor(tracer, otgrpc.LogPayloads())))
 	opts = append(opts, grpc.WithStreamInterceptor(
 		otgrpc.OpenTracingStreamClientInterceptor(tracer)))
 
