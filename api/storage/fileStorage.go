@@ -30,11 +30,10 @@ func NewFileStorage() *FileStorage {
 }
 
 func (t *FileStorage) AddUser(user User) User {
-	fmt.Println("Adding to File:", user)
 	user.Id = maxId
 	maxId = maxId + 1
 	users = append(users, user)
-	t.ListUser()
+	fmt.Println("Adding to File:", user)
 	if err := t.Save("file.json", users); err != nil {
 		fmt.Println("Err", err)
 	}
@@ -45,6 +44,7 @@ func (t *FileStorage) DeleteUser(user User) error {
 	return nil
 }
 
+// GetUser will return a user with a given Id
 func (t *FileStorage) GetUser(id int) (User, error) {
 	// idx := sort.Search(len(users), func(i int) bool {
 	// 	return users[i].Id == id
