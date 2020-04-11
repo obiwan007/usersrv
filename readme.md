@@ -37,8 +37,35 @@ Download via https://github.com/uw-labs/bloomrpc
 # Docker Builds
 ## Buidl container
 
-`docker build -t my-golang-app .`
+`docker build -t obiwan007/usersrv .`
+`docker push obiwan007/usersrv`
 
 ## Run service
 
-`docker run -it --rm -p 10000:10000 --name my-running-app my-golang-app`
+`docker run -it --rm -p 10000:10000 --name usersrv obiwan007/usersrv`
+
+# Clustering with Kubernetis
+## Kubectl
+
+https://kubernetes.io/docs/tasks/tools/install-kubectl/
+
+`kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml`
+`kubectl proxy`
+
+https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+## Local Development
+### Minicube Installation
+
+https://minikube.sigs.k8s.io/docs/start/
+
+`brew install minikube`
+
+Show Dashboard
+
+`minikube dashboard`
+
+
+### Deploy to minikube
+
+`kubectl create -f userservice.yaml`

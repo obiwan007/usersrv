@@ -6,14 +6,14 @@ import (
 	openzipkin "github.com/openzipkin/zipkin-go-opentracing"
 )
 
+// Zipkin stuff
 const (
-	endpoint_url          = "http://localhost:9411/api/v1/spans"
-	host_url              = "localhost:5051"
+	host_url              = "0.0.0.0:0"
 	service_name_call_get = "callGet"
 )
 
-func NewTracer(servicename string) (opentracing.Tracer, zipkintracer.Collector, error) {
-	collector, err := openzipkin.NewHTTPCollector(endpoint_url)
+func NewTracer(servicename string, url string) (opentracing.Tracer, zipkintracer.Collector, error) {
+	collector, err := openzipkin.NewHTTPCollector(url)
 	if err != nil {
 		return nil, nil, err
 	}

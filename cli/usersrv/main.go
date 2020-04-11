@@ -22,6 +22,7 @@ var (
 	keyFile    = flag.String("key_file", "", "The TLS key file")
 	jsonDBFile = flag.String("json_db_file", "", "A json file containing a list of features")
 	port       = flag.Int("port", 10000, "The server port")
+	zipkin     = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 )
 
 // const (
@@ -51,7 +52,7 @@ var (
 func main() {
 	grpc.EnableTracing = true
 
-	tracer, collector, err := tracing.NewTracer("userservice")
+	tracer, collector, err := tracing.NewTracer("userservice", *zipkin)
 	if err != nil {
 		panic(err)
 	}

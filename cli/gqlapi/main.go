@@ -23,6 +23,7 @@ var (
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
 	serverAddr         = flag.String("server_addr", ":10000", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
+	zipkin             = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 )
 
 // const (
@@ -65,7 +66,7 @@ func main() {
 
 	// tracer := dapperish.NewTracer("dapperish_tester")
 
-	tracer, collector, err := tracing.NewTracer("userservice client")
+	tracer, collector, err := tracing.NewTracer("userservice client", *zipkin)
 	if err != nil {
 		panic(err)
 	}
