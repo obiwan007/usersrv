@@ -5,14 +5,18 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
+	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+
+	graphql "github.com/graph-gophers/graphql-go"
+
+	gql "github.com/obiwan007/usersrv/gqlsrv/api"
 	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/obiwan007/usersrv/usersrv/api/tracing"
-
-	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -116,16 +120,28 @@ func main() {
 	}
 	fmt.Println("Dialed ")
 	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	gqlClient := pb.NewUserServiceClient(conn)
+	resolver := gql.NewResolver(gqlClient)
+	schema := graphql.MustParseSchema(gql.Schema, resolver)
+	mux := gql.NewRouter(schema)
+	srv := &http.Server{
+		Addr:    ":8090",
+		Handler: mux,
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Fatal(srv.ListenAndServe())
 	for i := 0; i < 2; i++ {
 		fmt.Println("AddUser")
-		user, err := client.AddUser(ctx, &pb.User{Name: "Markus", Password: "test"})
+		user, err := gqlClient.AddUser(ctx, &pb.User{Name: "Markus", Password: "test"})
 		if err != nil {
-			log.Fatalf("%v.GetFeatures(_) = _, %v: ", client, err)
+			log.Fatalf("%v.GetFeatures(_) = _, %v: ", gqlClient, err)
 		}
 		fmt.Println("Added User", user)
 	}
 
-	users, err := client.GetUsers(ctx, new(pb.ListUsers))
+	users, err := gqlClient.GetUsers(ctx, new(pb.ListUsers))
 	fmt.Println("Users", users)
 }
