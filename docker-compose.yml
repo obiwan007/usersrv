@@ -38,7 +38,9 @@ services:
       - app-tier      
 
   myapp:
-    build: .
+    build:
+      context: .
+      dockerfile: ./user_Dockerfile
     ports:
       - 10000:10000
     networks:

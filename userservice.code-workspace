@@ -4,10 +4,10 @@
 			"path": "proto"
 		},
 		{
-			"path": "cli"
+			"path": "gqlsrv"
 		},
 		{
-			"path": "api"
+			"path": "usersrv"
 		},
 		{
 			"path": "."
