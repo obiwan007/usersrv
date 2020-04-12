@@ -22,5 +22,5 @@ FROM alpine
 # USER appuser
 COPY --from=builder /build/gqlsrv/cli/gqlsrv /app/
 WORKDIR /app
-EXPOSE 10000
+EXPOSE 8090
 CMD ["./gqlsrv"]

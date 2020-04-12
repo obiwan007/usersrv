@@ -8,6 +8,8 @@ import (
 
 	pb "github.com/obiwan007/usersrv/proto"
 	storage "github.com/obiwan007/usersrv/usersrv/api/storage"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var sto storage.Storage
@@ -25,21 +27,47 @@ func (s *routeGuideServer) AddUser(ctx context.Context, user *pb.User) (*pb.User
 	fmt.Println("ADDING USER", user.GetName(), user.GetPassword())
 	// No feature was found, return an unnamed feature
 	newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Password: user.GetPassword()})
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: &pb.Id{Id: int32(newuser.Id)}}, nil
+	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
 }
 
 func (s *routeGuideServer) GetUser(ctx context.Context, user *pb.Id) (*pb.User, error) {
 	fmt.Println("Get USER", user.GetId())
 	// No feature was found, return an unnamed feature
-	newuser, err := s.storage.GetUser(int(user.GetId()))
+	newuser, err := s.storage.GetUser(user.GetId())
 	if err != nil {
-		return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: &pb.Id{Id: int32(newuser.Id)}}, nil
+		return nil, status.Error(codes.InvalidArgument, "User not found")
 	}
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: &pb.Id{Id: int32(newuser.Id)}}, nil
+	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
+}
+
+func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.User) (*pb.User, error) {
+	fmt.Println("Check for user with email", user.GetEmail(), user.GetId())
+	// No feature was found, return an unnamed feature
+	userExisting, err := s.storage.GetUserFromEmail(user.GetEmail())
+	fmt.Println("Existing User:", userExisting)
+	if err != nil {
+		// User is not existing, add it
+		fmt.Println("User Checked, not existing")
+		newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Email: user.GetEmail(), Password: user.GetPassword()})
+		return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
+	}
+
+	return nil, status.Error(codes.InvalidArgument, "User already existing")
+}
+
+func (s *routeGuideServer) CheckUser(ctx context.Context, mail *pb.Email) (*pb.User, error) {
+	fmt.Println("Check for user with email", mail.GetEmail())
+	// No feature was found, return an unnamed feature
+	newuser, err := s.storage.GetUserFromEmail(mail.GetEmail())
+
+	if err != nil {
+		return &pb.User{Name: newuser.Name, Email: newuser.Email, Password: newuser.Password, Id: newuser.Id}, nil
+	}
+	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
 }
 
 func convertToUser(newuser storage.User) *pb.User {
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: &pb.Id{Id: int32(newuser.Id)}}
+	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}
 }
 
 func (s *routeGuideServer) GetUsers(ctx context.Context, l *pb.ListUsers) (*pb.UsersResponse, error) {

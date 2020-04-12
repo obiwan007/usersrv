@@ -28,11 +28,12 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 //
 // If a feature could not be named, the name is empty.
 type User struct {
-	// The name of the feature.
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The point where the feature is detected.
+	// The name of the User.
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	Id                   *Id      `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	Email                string   `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	Token                string   `protobuf:"bytes,5,opt,name=token,proto3" json:"token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -77,16 +78,30 @@ func (m *User) GetPassword() string {
 	return ""
 }
 
-func (m *User) GetId() *Id {
+func (m *User) GetId() string {
 	if m != nil {
 		return m.Id
 	}
-	return nil
+	return ""
+}
+
+func (m *User) GetEmail() string {
+	if m != nil {
+		return m.Email
+	}
+	return ""
+}
+
+func (m *User) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
 }
 
 type Id struct {
 	// The name of the feature.
-	Id                   int32    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -117,11 +132,51 @@ func (m *Id) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Id proto.InternalMessageInfo
 
-func (m *Id) GetId() int32 {
+func (m *Id) GetId() string {
 	if m != nil {
 		return m.Id
 	}
-	return 0
+	return ""
+}
+
+type Email struct {
+	// The name of the feature.
+	Email                string   `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Email) Reset()         { *m = Email{} }
+func (m *Email) String() string { return proto.CompactTextString(m) }
+func (*Email) ProtoMessage()    {}
+func (*Email) Descriptor() ([]byte, []int) {
+	return fileDescriptor_116e343673f7ffaf, []int{2}
+}
+
+func (m *Email) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Email.Unmarshal(m, b)
+}
+func (m *Email) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Email.Marshal(b, m, deterministic)
+}
+func (m *Email) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Email.Merge(m, src)
+}
+func (m *Email) XXX_Size() int {
+	return xxx_messageInfo_Email.Size(m)
+}
+func (m *Email) XXX_DiscardUnknown() {
+	xxx_messageInfo_Email.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Email proto.InternalMessageInfo
+
+func (m *Email) GetEmail() string {
+	if m != nil {
+		return m.Email
+	}
+	return ""
 }
 
 type ListUsers struct {
@@ -134,7 +189,7 @@ func (m *ListUsers) Reset()         { *m = ListUsers{} }
 func (m *ListUsers) String() string { return proto.CompactTextString(m) }
 func (*ListUsers) ProtoMessage()    {}
 func (*ListUsers) Descriptor() ([]byte, []int) {
-	return fileDescriptor_116e343673f7ffaf, []int{2}
+	return fileDescriptor_116e343673f7ffaf, []int{3}
 }
 
 func (m *ListUsers) XXX_Unmarshal(b []byte) error {
@@ -166,7 +221,7 @@ func (m *UsersResponse) Reset()         { *m = UsersResponse{} }
 func (m *UsersResponse) String() string { return proto.CompactTextString(m) }
 func (*UsersResponse) ProtoMessage()    {}
 func (*UsersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_116e343673f7ffaf, []int{3}
+	return fileDescriptor_116e343673f7ffaf, []int{4}
 }
 
 func (m *UsersResponse) XXX_Unmarshal(b []byte) error {
@@ -197,6 +252,7 @@ func (m *UsersResponse) GetUsers() []*User {
 func init() {
 	proto.RegisterType((*User)(nil), "userservice.User")
 	proto.RegisterType((*Id)(nil), "userservice.Id")
+	proto.RegisterType((*Email)(nil), "userservice.Email")
 	proto.RegisterType((*ListUsers)(nil), "userservice.ListUsers")
 	proto.RegisterType((*UsersResponse)(nil), "userservice.UsersResponse")
 }
@@ -204,24 +260,28 @@ func init() {
 func init() { proto.RegisterFile("user.proto", fileDescriptor_116e343673f7ffaf) }
 
 var fileDescriptor_116e343673f7ffaf = []byte{
-	// 271 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x51, 0x4d, 0x4b, 0xc3, 0x40,
-	0x10, 0xed, 0xa6, 0xad, 0x6d, 0x27, 0xf8, 0x35, 0x88, 0x84, 0x78, 0x30, 0xe4, 0x62, 0x4e, 0x2b,
-	0x8d, 0x17, 0x8f, 0xda, 0x8b, 0x14, 0x3c, 0x94, 0x88, 0x78, 0x8e, 0xdd, 0xa1, 0x2c, 0xd8, 0x6e,
-	0xd8, 0x49, 0xd4, 0xff, 0xe5, 0x1f, 0x94, 0xdd, 0x4a, 0x68, 0x4d, 0x6f, 0x6f, 0xdf, 0x9b, 0xf7,
-	0x76, 0x1e, 0x03, 0xd0, 0x30, 0x59, 0x59, 0x59, 0x53, 0x1b, 0x0c, 0x1d, 0x66, 0xb2, 0x9f, 0x7a,
-	0x49, 0xe9, 0x1b, 0x0c, 0x5e, 0x99, 0x2c, 0x22, 0x0c, 0x36, 0xe5, 0x9a, 0x22, 0x91, 0x88, 0x6c,
-	0x52, 0x78, 0x8c, 0x31, 0x8c, 0xab, 0x92, 0xf9, 0xcb, 0x58, 0x15, 0x05, 0x9e, 0x6f, 0xdf, 0x78,
-	0x0d, 0x81, 0x56, 0x51, 0x3f, 0x11, 0x59, 0x98, 0x9f, 0xca, 0x9d, 0x44, 0x39, 0x57, 0x45, 0xa0,
-	0x55, 0x7a, 0x01, 0xc1, 0x5c, 0xe1, 0x89, 0x1f, 0x73, 0xa1, 0x43, 0xcf, 0x86, 0x30, 0x79, 0xd6,
-	0x5c, 0xbb, 0x2f, 0x39, 0xbd, 0x87, 0x63, 0x0f, 0x0a, 0xe2, 0xca, 0x6c, 0x98, 0xf0, 0x06, 0x86,
-	0x9e, 0x88, 0x44, 0xd2, 0xcf, 0xc2, 0xfc, 0x7c, 0x2f, 0xd7, 0x29, 0xc5, 0x56, 0xcf, 0x7f, 0x04,
-	0x84, 0x0e, 0xbd, 0x6c, 0x35, 0x9c, 0xc2, 0xe8, 0x51, 0x29, 0x5f, 0xa4, 0x6b, 0x8a, 0xbb, 0x54,
-	0xda, 0xc3, 0x5b, 0x18, 0x3d, 0x91, 0x5f, 0x04, 0xff, 0xef, 0x7f, 0xd8, 0xf0, 0x00, 0xe3, 0x3f,
-	0x03, 0xe3, 0xe5, 0xde, 0x40, 0xdb, 0x28, 0x8e, 0x3b, 0xc6, 0xb6, 0x5c, 0xda, 0x9b, 0x4d, 0xe1,
-	0x4a, 0x1b, 0xb9, 0xb2, 0xd5, 0x52, 0xd2, 0x77, 0xb9, 0xae, 0x3e, 0x88, 0xa5, 0x35, 0x4d, 0x4d,
-	0xab, 0x46, 0x2b, 0x9a, 0x9d, 0xed, 0x34, 0x5a, 0xb8, 0x4b, 0x2d, 0xc4, 0xfb, 0x91, 0x3f, 0xd9,
-	0xdd, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xbf, 0xa1, 0x25, 0x35, 0xc0, 0x01, 0x00, 0x00,
+	// 325 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x52, 0x5f, 0x4b, 0xfb, 0x30,
+	0x14, 0x5d, 0xbb, 0xf5, 0xb7, 0xed, 0xf6, 0xe7, 0xbf, 0x30, 0xa4, 0x54, 0x84, 0x91, 0x17, 0xf7,
+	0x14, 0xd9, 0x14, 0xf1, 0x51, 0x27, 0x22, 0x03, 0x1f, 0x46, 0xc5, 0x0f, 0x50, 0x97, 0xcb, 0x0c,
+	0xfb, 0x93, 0x92, 0xdb, 0xa9, 0x5f, 0xc7, 0x6f, 0x2a, 0x49, 0xdc, 0xd8, 0xe8, 0x5e, 0x7c, 0x3b,
+	0xf7, 0x9c, 0x9c, 0xd3, 0xe6, 0xe4, 0x02, 0xac, 0x08, 0x8d, 0x28, 0x8c, 0x2e, 0x35, 0x8b, 0x2d,
+	0x26, 0x34, 0x1f, 0x6a, 0x82, 0xdc, 0x40, 0xe3, 0x95, 0xd0, 0x30, 0x06, 0x8d, 0x65, 0xbe, 0xc0,
+	0x24, 0xe8, 0x06, 0xbd, 0x76, 0xe6, 0x30, 0x4b, 0xa1, 0x55, 0xe4, 0x44, 0x9f, 0xda, 0xc8, 0x24,
+	0x74, 0xfc, 0x66, 0x66, 0x87, 0x10, 0x2a, 0x99, 0xd4, 0x1d, 0x1b, 0x2a, 0xc9, 0x3a, 0x10, 0xe1,
+	0x22, 0x57, 0xf3, 0xa4, 0xe1, 0x28, 0x3f, 0x58, 0xb6, 0xd4, 0x33, 0x5c, 0x26, 0x91, 0x67, 0xdd,
+	0xc0, 0x3b, 0x10, 0x8e, 0xd6, 0x09, 0xc1, 0x3a, 0x81, 0x9f, 0x43, 0xf4, 0xb8, 0x36, 0xf9, 0xa8,
+	0x60, 0x2b, 0x8a, 0xc7, 0xd0, 0x7e, 0x56, 0x54, 0xda, 0x9f, 0x25, 0x7e, 0x0b, 0x07, 0x0e, 0x64,
+	0x48, 0x85, 0x5e, 0x12, 0xb2, 0x0b, 0x88, 0x1c, 0x91, 0x04, 0xdd, 0x7a, 0x2f, 0x1e, 0x9c, 0x88,
+	0xad, 0x3b, 0x0a, 0xab, 0x64, 0x5e, 0x1f, 0x7c, 0x87, 0x10, 0x5b, 0xf4, 0xe2, 0x35, 0x76, 0x03,
+	0xff, 0x33, 0x9c, 0x2a, 0x2a, 0xd1, 0xb8, 0x1e, 0xaa, 0xce, 0xb4, 0x4a, 0xf1, 0x1a, 0xeb, 0x43,
+	0xf3, 0x5e, 0xca, 0x3f, 0x59, 0x2e, 0xa1, 0xf9, 0x84, 0xee, 0x02, 0xec, 0x68, 0x47, 0x1f, 0xc9,
+	0xfd, 0x86, 0x6b, 0x68, 0x3f, 0xbc, 0xe3, 0x64, 0xe6, 0x1f, 0x68, 0xe7, 0x84, 0x6b, 0x6a, 0xbf,
+	0xeb, 0x0e, 0x5a, 0xbf, 0x9f, 0x21, 0x76, 0xba, 0x73, 0x60, 0xd3, 0x5f, 0x9a, 0x56, 0x8c, 0x9b,
+	0x2a, 0x79, 0x6d, 0xd8, 0x87, 0x33, 0xa5, 0xc5, 0xd4, 0x14, 0x13, 0x81, 0x5f, 0xf9, 0xa2, 0x98,
+	0x23, 0x09, 0xa3, 0x57, 0x25, 0x4e, 0x57, 0x4a, 0xe2, 0xf0, 0x78, 0xab, 0xbf, 0xb1, 0xdd, 0xa8,
+	0x71, 0xf0, 0xf6, 0xcf, 0xad, 0xd6, 0xd5, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x15, 0x79, 0x81,
+	0xf7, 0x68, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -242,8 +302,10 @@ type UserServiceClient interface {
 	//
 	// A feature with an empty name is returned if there's no feature at the given
 	// position.
+	RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
 	AddUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
 	GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*User, error)
+	CheckUser(ctx context.Context, in *Email, opts ...grpc.CallOption) (*User, error)
 	// rpc UpdateUser(User) returns (User) {}
 	GetUsers(ctx context.Context, in *ListUsers, opts ...grpc.CallOption) (*UsersResponse, error)
 }
@@ -254,6 +316,15 @@ type userServiceClient struct {
 
 func NewUserServiceClient(cc *grpc.ClientConn) UserServiceClient {
 	return &userServiceClient{cc}
+}
+
+func (c *userServiceClient) RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/userservice.UserService/RegisterUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userServiceClient) AddUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error) {
@@ -268,6 +339,15 @@ func (c *userServiceClient) AddUser(ctx context.Context, in *User, opts ...grpc.
 func (c *userServiceClient) GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/userservice.UserService/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) CheckUser(ctx context.Context, in *Email, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/userservice.UserService/CheckUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -291,8 +371,10 @@ type UserServiceServer interface {
 	//
 	// A feature with an empty name is returned if there's no feature at the given
 	// position.
+	RegisterUser(context.Context, *User) (*User, error)
 	AddUser(context.Context, *User) (*User, error)
 	GetUser(context.Context, *Id) (*User, error)
+	CheckUser(context.Context, *Email) (*User, error)
 	// rpc UpdateUser(User) returns (User) {}
 	GetUsers(context.Context, *ListUsers) (*UsersResponse, error)
 }
@@ -301,11 +383,17 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
+func (*UnimplementedUserServiceServer) RegisterUser(ctx context.Context, req *User) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterUser not implemented")
+}
 func (*UnimplementedUserServiceServer) AddUser(ctx context.Context, req *User) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
 }
 func (*UnimplementedUserServiceServer) GetUser(ctx context.Context, req *Id) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (*UnimplementedUserServiceServer) CheckUser(ctx context.Context, req *Email) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckUser not implemented")
 }
 func (*UnimplementedUserServiceServer) GetUsers(ctx context.Context, req *ListUsers) (*UsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
@@ -313,6 +401,24 @@ func (*UnimplementedUserServiceServer) GetUsers(ctx context.Context, req *ListUs
 
 func RegisterUserServiceServer(s *grpc.Server, srv UserServiceServer) {
 	s.RegisterService(&_UserService_serviceDesc, srv)
+}
+
+func _UserService_RegisterUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RegisterUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/userservice.UserService/RegisterUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RegisterUser(ctx, req.(*User))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -351,6 +457,24 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CheckUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Email)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CheckUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/userservice.UserService/CheckUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CheckUser(ctx, req.(*Email))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListUsers)
 	if err := dec(in); err != nil {
@@ -374,12 +498,20 @@ var _UserService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "RegisterUser",
+			Handler:    _UserService_RegisterUser_Handler,
+		},
+		{
 			MethodName: "AddUser",
 			Handler:    _UserService_AddUser_Handler,
 		},
 		{
 			MethodName: "GetUser",
 			Handler:    _UserService_GetUser_Handler,
+		},
+		{
+			MethodName: "CheckUser",
+			Handler:    _UserService_CheckUser_Handler,
 		},
 		{
 			MethodName: "GetUsers",

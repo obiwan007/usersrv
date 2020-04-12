@@ -30,7 +30,7 @@ func NewFileStorage() *FileStorage {
 }
 
 func (t *FileStorage) AddUser(user User) User {
-	user.Id = maxId
+	user.Id = fmt.Sprint(maxId)
 	maxId = maxId + 1
 	users = append(users, user)
 	fmt.Println("Adding to File:", user)
@@ -45,13 +45,32 @@ func (t *FileStorage) DeleteUser(user User) error {
 }
 
 // GetUser will return a user with a given Id
-func (t *FileStorage) GetUser(id int) (User, error) {
+func (t *FileStorage) GetUser(id string) (User, error) {
 	// idx := sort.Search(len(users), func(i int) bool {
 	// 	return users[i].Id == id
 	// })
 	var res *User = nil
 	for _, u := range users {
 		if u.Id == id {
+			res = &u
+			break
+		}
+	}
+	fmt.Println("Found index", res)
+	if res != nil {
+		return *res, nil
+	}
+	return User{}, errors.New("No such id found")
+
+}
+
+// GetUserFromEmail will return a user with a given email
+func (t *FileStorage) GetUserFromEmail(mail string) (User, error) {
+	var res *User = nil
+	for _, u := range users {
+		fmt.Println("Compare User", u.Email)
+		if u.Email == mail {
+			fmt.Println("Found User", u)
 			res = &u
 			break
 		}

@@ -13,8 +13,10 @@ service UserService {
   //
   // A feature with an empty name is returned if there's no feature at the given
   // position.
+  rpc RegisterUser(User) returns (User) {}
   rpc AddUser(User) returns (User) {}
   rpc GetUser(Id) returns (User) {}
+  rpc CheckUser(Email) returns (User) {}
   // rpc UpdateUser(User) returns (User) {}
   rpc GetUsers(ListUsers) returns (UsersResponse) {}
 }
@@ -22,18 +24,23 @@ service UserService {
 //
 // If a feature could not be named, the name is empty.
 message User {
-  // The name of the feature.
+  // The name of the User.
   string name = 1;
-
-  // The point where the feature is detected.
   string password = 2;
-
-  Id id = 3;
+  string id = 3;
+  string email = 4;
+  string token = 5;
 }
 
 message Id {
   // The name of the feature.
-  int32 id = 1;
+  string id = 1;
+  // The point where the feature is detected.
+}
+
+message Email {
+  // The name of the feature.
+  string email = 1;
   // The point where the feature is detected.
 }
 

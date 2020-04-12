@@ -37,7 +37,7 @@ services:
     networks:
       - app-tier      
 
-  myapp:
+  usersrv:
     build:
       context: .
       dockerfile: ./user_Dockerfile
@@ -45,4 +45,17 @@ services:
       - 10000:10000
     networks:
       - app-tier
+    depends_on:
+      - zipkin
 
+  gqlsrv:
+    build:
+      context: .
+      dockerfile: ./gql_Dockerfile
+    ports:
+      - 8090:8090
+    networks:
+      - app-tier
+    depends_on:
+      - usersrv
+      - zipkin
