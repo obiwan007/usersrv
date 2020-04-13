@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -56,7 +56,13 @@ var (
 // }
 
 func main() {
+	flag.Parse()
 	fmt.Println("Init CLI User Service")
+	s, err := getSchema("../schema/schema.graphql")
+	if err != nil {
+		panic(err)
+	}
+
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
 		DialTimeout: 5 * time.Second,
@@ -86,9 +92,6 @@ func main() {
 		opts = append(opts, grpc.WithBalancer(b))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	flag.Parse()
 	if *tls {
 		if *caFile == "" {
 			log.Fatalf("No TLS crt file given")
@@ -121,8 +124,10 @@ func main() {
 	fmt.Println("Dialed ")
 	defer conn.Close()
 	gqlClient := pb.NewUserServiceClient(conn)
+
 	resolver := gql.NewResolver(gqlClient)
-	schema := graphql.MustParseSchema(gql.Schema, resolver)
+	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
+
 	mux := gql.NewRouter(schema)
 	srv := &http.Server{
 		Addr:    ":8090",
@@ -133,15 +138,13 @@ func main() {
 	}
 
 	log.Fatal(srv.ListenAndServe())
-	for i := 0; i < 2; i++ {
-		fmt.Println("AddUser")
-		user, err := gqlClient.AddUser(ctx, &pb.User{Name: "Markus", Password: "test"})
-		if err != nil {
-			log.Fatalf("%v.GetFeatures(_) = _, %v: ", gqlClient, err)
-		}
-		fmt.Println("Added User", user)
+}
+
+func getSchema(path string) (string, error) {
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
 	}
 
-	users, err := gqlClient.GetUsers(ctx, new(pb.ListUsers))
-	fmt.Println("Users", users)
+	return string(b), nil
 }

@@ -27,7 +27,7 @@ func (s *routeGuideServer) AddUser(ctx context.Context, user *pb.User) (*pb.User
 	fmt.Println("ADDING USER", user.GetName(), user.GetPassword())
 	// No feature was found, return an unnamed feature
 	newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Password: user.GetPassword()})
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
+	return toAPIUser(newuser), nil
 }
 
 func (s *routeGuideServer) GetUser(ctx context.Context, user *pb.Id) (*pb.User, error) {
@@ -37,7 +37,7 @@ func (s *routeGuideServer) GetUser(ctx context.Context, user *pb.Id) (*pb.User, 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "User not found")
 	}
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
+	return toAPIUser(newuser), nil
 }
 
 func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.User) (*pb.User, error) {
@@ -49,7 +49,7 @@ func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.User) (*pb
 		// User is not existing, add it
 		fmt.Println("User Checked, not existing")
 		newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Email: user.GetEmail(), Password: user.GetPassword()})
-		return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
+		return toAPIUser(newuser), nil
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "User already existing")
@@ -63,11 +63,7 @@ func (s *routeGuideServer) CheckUser(ctx context.Context, mail *pb.Email) (*pb.U
 	if err != nil {
 		return &pb.User{Name: newuser.Name, Email: newuser.Email, Password: newuser.Password, Id: newuser.Id}, nil
 	}
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}, nil
-}
-
-func convertToUser(newuser storage.User) *pb.User {
-	return &pb.User{Name: newuser.Name, Password: newuser.Password, Id: newuser.Id}
+	return toAPIUser(newuser), nil
 }
 
 func (s *routeGuideServer) GetUsers(ctx context.Context, l *pb.ListUsers) (*pb.UsersResponse, error) {
@@ -77,7 +73,7 @@ func (s *routeGuideServer) GetUsers(ctx context.Context, l *pb.ListUsers) (*pb.U
 	// var u = pb.UsersResponse.Users
 
 	for _, user := range users {
-		conv := convertToUser(user)
+		conv := toAPIUser(user)
 		u.Users = append(u.Users, conv)
 		// fmt.Println(u.Users)
 	}
@@ -95,4 +91,12 @@ func (s *routeGuideServer) GetUsers(ctx context.Context, l *pb.ListUsers) (*pb.U
 func NewServer() *routeGuideServer {
 	s := &routeGuideServer{storage: storage.NewFileStorage()}
 	return s
+}
+
+func toAPIUser(newuser storage.User) *pb.User {
+	return &pb.User{Name: newuser.Name, Email: newuser.Email, Password: newuser.Password, Id: newuser.Id}
+}
+
+func fromAPIUser(newuser pb.User) *storage.User {
+	return &storage.User{Name: newuser.Name, Email: newuser.Email, Password: newuser.Password, Id: newuser.Id}
 }

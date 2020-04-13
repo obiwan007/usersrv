@@ -2,29 +2,10 @@ package gql
 
 import (
 	"context"
+	"fmt"
 
 	api "github.com/obiwan007/usersrv/proto"
 )
-
-var Schema = `
-	schema {
-		query: Query
-		mutation: Mutation
-	}
-	type Query {
-		hello(name: String!): String!
-	}
-	
-	type Mutation {
-  		registerUser(user: UserInput!):String
-	}
-
-	input UserInput {
-		name: String
-		email: String
-		password: String
-	  }
-`
 
 type Resolver struct {
 	userSvc api.UserServiceClient
@@ -48,6 +29,34 @@ func (r *Resolver) Hello(ctx context.Context, args struct{ Name string }) (strin
 	return res.GetName(), nil
 }
 
+type userResponse struct {
+	Name  string
+	Email string
+}
+
+type User struct {
+	Id    string
+	Name  string
+	Email string
+}
+
+func (r *Resolver) GetUser(ctx context.Context, args struct{ Id *string }) (*UserResolver, error) {
+
+	request := &api.Id{Id: *args.Id}
+
+	res, err := r.userSvc.GetUser(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(res)
+	s := UserResolver{
+		u: &User{Name: res.Name, Email: res.Email, Id: res.Id},
+	}
+
+	return &s, nil
+
+}
+
 type userInput struct {
 	Name     *string
 	Password *string
@@ -64,4 +73,22 @@ func (r *Resolver) RegisterUser(ctx context.Context, args struct{ User userInput
 	}
 	name := res.GetName()
 	return &name, nil
+}
+
+/*
+ * UserResolver
+ */
+
+type UserResolver struct{ u *User }
+
+func (r *UserResolver) Name() *string {
+	return &r.u.Name
+}
+
+func (r *UserResolver) Email() *string {
+	return &r.u.Email
+}
+
+func (r *UserResolver) Id() *string {
+	return &r.u.Id
 }
