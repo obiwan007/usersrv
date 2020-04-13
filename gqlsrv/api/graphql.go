@@ -57,6 +57,26 @@ func (r *Resolver) GetUser(ctx context.Context, args struct{ Id *string }) (*Use
 
 }
 
+func (r *Resolver) GetUsers(ctx context.Context) (*[]*UserResolver, error) {
+
+	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(users)
+
+	var userRxs []*UserResolver
+	for _, res := range users.Users {
+		user := &User{Name: res.Name, Email: res.Email, Id: res.Id}
+		s := UserResolver{u: user}
+		userRxs = append(userRxs, &s)
+
+	}
+
+	return &userRxs, nil
+
+}
+
 type userInput struct {
 	Name     *string
 	Password *string

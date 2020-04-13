@@ -6,6 +6,7 @@ schema {
 		hello(name: String!): String!
 		# Users(): [User]
 		GetUser(id: String): User
+		GetUsers(): [User]
 	}
 	
 	type Mutation {
