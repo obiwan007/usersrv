@@ -10,12 +10,13 @@
 
 # CMD ["usersrv"]
 
-
-FROM golang:alpine as builder
+# FROM golang:alpine as builder
+FROM golang:1.14 as builder
 RUN mkdir /build 
 ADD . /build/
 WORKDIR /build 
 # RUN go get -d -v ./...
+RUN git version
 RUN cd usersrv/cli && go build -v -o usersrv
 FROM alpine
 # RUN adduser -S -D -H -h /app appuser

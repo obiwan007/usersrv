@@ -26,7 +26,7 @@ func Init(storage storage.Storage) {
 func (s *routeGuideServer) AddUser(ctx context.Context, user *pb.User) (*pb.User, error) {
 	fmt.Println("ADDING USER", user.GetName(), user.GetPassword())
 	// No feature was found, return an unnamed feature
-	newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Password: user.GetPassword()})
+	newuser := s.storage.AddUser(*fromAPIUser(*user))
 	return toAPIUser(newuser), nil
 }
 
@@ -48,7 +48,7 @@ func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.User) (*pb
 	if err != nil {
 		// User is not existing, add it
 		fmt.Println("User Checked, not existing")
-		newuser := s.storage.AddUser(storage.User{Name: user.GetName(), Email: user.GetEmail(), Password: user.GetPassword()})
+		newuser := s.storage.AddUser(*fromAPIUser(*user))
 		return toAPIUser(newuser), nil
 	}
 
@@ -61,7 +61,7 @@ func (s *routeGuideServer) CheckUser(ctx context.Context, mail *pb.Email) (*pb.U
 	newuser, err := s.storage.GetUserFromEmail(mail.GetEmail())
 
 	if err != nil {
-		return &pb.User{Name: newuser.Name, Email: newuser.Email, Password: newuser.Password, Id: newuser.Id}, nil
+		return nil, err
 	}
 	return toAPIUser(newuser), nil
 }

@@ -13,5 +13,27 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"go.useLanguageServer": true,
+		"go.alternateTools": {
+			 "go-langserver": "gopls"
+		},
+		"go.languageServerExperimentalFeatures": {
+			"format": true,
+			"autoComplete": true,
+			"goToDefinition": true,
+			"hover": true,
+			"signatureHelp": true,
+			"goToTypeDefinition": true
+		},
+		"go.buildOnSave": "off",
+		"go.vetOnSave": "off",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true
+		},
+
+
+	},
+	"go.editorContextMenuCommands": {}
 }
