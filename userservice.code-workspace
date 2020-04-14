@@ -1,6 +1,9 @@
 {
 	"folders": [
 		{
+			"path": "."
+		},
+		{
 			"path": "proto"
 		},
 		{
@@ -10,13 +13,13 @@
 			"path": "usersrv"
 		},
 		{
-			"path": "."
+			"path": "frontend"
 		}
 	],
 	"settings": {
 		"go.useLanguageServer": true,
 		"go.alternateTools": {
-			 "go-langserver": "gopls"
+			"go-langserver": "gopls"
 		},
 		"go.languageServerExperimentalFeatures": {
 			"format": true,
@@ -32,8 +35,6 @@
 		"editor.codeActionsOnSave": {
 			"source.organizeImports": true
 		},
-
-
 	},
 	"go.editorContextMenuCommands": {}
 }

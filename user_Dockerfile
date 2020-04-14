@@ -12,6 +12,10 @@
 
 # FROM golang:alpine as builder
 FROM golang:1.14 as builder
+
+ENV CGO_ENABLED 0
+ENV GOOS linux
+
 RUN mkdir /build 
 ADD . /build/
 WORKDIR /build 
@@ -21,7 +25,7 @@ RUN cd usersrv/cli && go build -v -o usersrv
 FROM alpine
 # RUN adduser -S -D -H -h /app appuser
 # USER appuser
-COPY --from=builder /build/usersrv/cli/usersrv /app/
-WORKDIR /app
+COPY --from=builder /build/usersrv/ /app/
+WORKDIR /app/cli
 EXPOSE 10000
 CMD ["./usersrv"]

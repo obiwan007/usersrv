@@ -20,7 +20,7 @@ RUN cd gqlsrv/cli && go build -v -o gqlsrv
 FROM alpine
 # RUN adduser -S -D -H -h /app appuser
 # USER appuser
-COPY --from=builder /build/gqlsrv/cli/gqlsrv /app/
-WORKDIR /app
+COPY --from=builder /build/gqlsrv/ /app/
+WORKDIR /app/cli
 EXPOSE 8090
 CMD ["./gqlsrv"]

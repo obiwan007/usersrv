@@ -40,7 +40,7 @@ type User struct {
 	Email string
 }
 
-func (r *Resolver) GetUser(ctx context.Context, args struct{ Id *string }) (*UserResolver, error) {
+func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserResolver, error) {
 
 	request := &api.Id{Id: *args.Id}
 
@@ -57,7 +57,7 @@ func (r *Resolver) GetUser(ctx context.Context, args struct{ Id *string }) (*Use
 
 }
 
-func (r *Resolver) GetUsers(ctx context.Context) (*[]*UserResolver, error) {
+func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 
 	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
 	if err != nil {
@@ -83,7 +83,7 @@ type userInput struct {
 	Email    *string
 }
 
-func (r *Resolver) RegisterUser(ctx context.Context, args struct{ User userInput }) (*string, error) {
+func (r *Resolver) CreateUser(ctx context.Context, args struct{ User userInput }) (*string, error) {
 
 	request := &api.User{Name: *args.User.Name, Password: *args.User.Password, Email: *args.User.Email}
 

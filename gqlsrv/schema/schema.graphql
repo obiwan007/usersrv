@@ -4,13 +4,12 @@ schema {
 	}
 	type Query {
 		hello(name: String!): String!
-		# Users(): [User]
-		GetUser(id: String): User
-		GetUsers(): [User]
+		User(id: String): User
+		allUsers: [User]
 	}
 	
 	type Mutation {
-  		registerUser(user: UserInput!):String
+  		createUser(user: UserInput!):String
 	}
 	type User {
 		id: String
