@@ -4,18 +4,17 @@
 // IMPORTS
 
 /* Node */
-import path from "path";
-
 /* NPM */
 import CompressionPlugin from "compression-webpack-plugin";
 import { mergeWith } from "lodash";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import path from "path";
 import webpack from "webpack";
-const BrotliCompression = require("brotli-webpack-plugin");
-
 /* Local */
 import common, { defaultMerger, files } from "./common";
 import css, { rules } from "./css";
+
+const BrotliCompression = require("brotli-webpack-plugin");
 
 // ----------------------------------------------------------------------------
 
@@ -103,6 +102,7 @@ const base: webpack.Configuration = {
 
     // Add global variables
     new webpack.DefinePlugin({
+      ZIPKIN: JSON.stringify(process.env.ZIPKIN),
       GRAPHQL: JSON.stringify(process.env.GRAPHQL),
       SERVER: false,
       WS_SUBSCRIPTIONS: process.env.WS_SUBSCRIPTIONS,

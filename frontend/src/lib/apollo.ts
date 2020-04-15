@@ -4,10 +4,12 @@
 // IMPORTS
 
 /* NPM */
+/* Local */
+import introspectionQueryResultData from "@/graphql/fragments";
 import {
   InMemoryCache,
-  NormalizedCacheObject,
-  IntrospectionFragmentMatcher
+  IntrospectionFragmentMatcher,
+  NormalizedCacheObject
 } from "apollo-cache-inmemory";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink, split } from "apollo-link";
@@ -17,8 +19,25 @@ import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 
-/* Local */
-import introspectionQueryResultData from "@/graphql/fragments";
+const { HttpLogger } = require("zipkin-transport-http");
+const { Tracer, ExplicitContext } = require("zipkin");
+const { recorder } = require("./recorder");
+const {
+  jsonEncoder: { JSON_V2 }
+} = require("zipkin");
+
+const ctxImpl = new ExplicitContext();
+const localServiceName = "browser";
+const tracer = new Tracer({
+  ctxImpl,
+  recorder: recorder(localServiceName),
+  localServiceName
+});
+
+// instrument fetch
+const wrapFetch = require("zipkin-instrumentation-fetch");
+const remoteServiceName = "gql service";
+const zipkinFetch = wrapFetch(fetch, { tracer, remoteServiceName });
 
 // ----------------------------------------------------------------------------
 
@@ -40,7 +59,8 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
   // set to an external playground at https://graphqlhub.com/graphql
   const httpLink = new HttpLink({
     credentials: "same-origin",
-    uri: GRAPHQL
+    uri: GRAPHQL ? GRAPHQL : "http://gqlsrv:8090/query",
+    fetch: zipkinFetch
   });
 
   // If we're in the browser, we'd have received initial state from the

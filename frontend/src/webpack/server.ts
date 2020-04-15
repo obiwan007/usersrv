@@ -4,12 +4,10 @@
 // IMPORTS
 
 /* Node */
-import path from "path";
-
 /* NPM */
 import { mergeWith } from "lodash";
+import path from "path";
 import webpack from "webpack";
-
 /* Local */
 import common, { defaultMerger, files } from "./common";
 import css from "./css";
@@ -83,6 +81,7 @@ const base: webpack.Configuration = {
 
     // Add global variables
     new webpack.DefinePlugin({
+      ZIPKIN: JSON.stringify(process.env.ZIPKIN),
       GRAPHQL: JSON.stringify(process.env.GRAPHQL),
       SERVER: true,
       WS_SUBSCRIPTIONS: JSON.stringify(process.env.WS_SUBSCRIPTIONS),
