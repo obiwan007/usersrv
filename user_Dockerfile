@@ -1,30 +1,26 @@
-# FROM golang:alpine as builder
-
-# WORKDIR /go/src/app
-# COPY . .
-
-# RUN go get -d -v ./...
-# RUN go install -v ./...
-
-# EXPOSE 10000
-
-# CMD ["usersrv"]
-
-# FROM golang:alpine as builder
 FROM golang:1.14 as builder
 
+ENV GO111MODULE=on
 ENV CGO_ENABLED 0
 ENV GOOS linux
+ENV GOARCH=amd64 
 
 RUN mkdir /build 
-ADD . /build/
 WORKDIR /build 
-# RUN go get -d -v ./...
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+
 RUN git version
 RUN cd usersrv/cli && go build -v -o usersrv
+
+
 FROM alpine
-# RUN adduser -S -D -H -h /app appuser
-# USER appuser
+
 COPY --from=builder /build/usersrv/ /app/
 WORKDIR /app/cli
 EXPOSE 10000
