@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/Shopify/sarama v1.26.1 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
+	github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a // indirect
 	github.com/coreos/etcd v3.3.20+incompatible
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect

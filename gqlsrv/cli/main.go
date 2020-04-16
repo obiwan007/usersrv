@@ -12,8 +12,9 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 
+	"github.com/common-nighthawk/go-figure"
 	graphql "github.com/graph-gophers/graphql-go"
-
+	"github.com/graph-gophers/graphql-go/trace"
 	gql "github.com/obiwan007/usersrv/gqlsrv/api"
 	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/obiwan007/usersrv/usersrv/api/tracing"
@@ -56,6 +57,8 @@ var (
 // }
 
 func main() {
+	myFigure := figure.NewFigure("GQLSRV", "", true)
+	myFigure.Print()
 	flag.Parse()
 	fmt.Println("Init CLI User Service")
 	s, err := getSchema("../schema/schema.graphql")
@@ -126,9 +129,10 @@ func main() {
 	gqlClient := pb.NewUserServiceClient(conn)
 
 	resolver := gql.NewResolver(gqlClient)
-	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
-
+	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
+	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	mux := gql.NewRouter(schema)
+
 	srv := &http.Server{
 		Addr:    ":8090",
 		Handler: mux,

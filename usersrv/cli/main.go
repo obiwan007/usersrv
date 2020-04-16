@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/obiwan007/usersrv/usersrv/api"
@@ -50,6 +51,8 @@ var (
 // 	return tracer, collector, nil
 // }
 func main() {
+	myFigure := figure.NewFigure("USERSRV", "", true)
+	myFigure.Print()
 	grpc.EnableTracing = true
 
 	tracer, collector, err := tracing.NewTracer("userservice", "localhost:10000", *zipkin)
