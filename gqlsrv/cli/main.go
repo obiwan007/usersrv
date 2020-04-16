@@ -11,10 +11,10 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/common-nighthawk/go-figure"
 	graphql "github.com/graph-gophers/graphql-go"
-	"github.com/graph-gophers/graphql-go/trace"
 	gql "github.com/obiwan007/usersrv/gqlsrv/api"
 	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/obiwan007/usersrv/usersrv/api/tracing"
@@ -60,7 +60,7 @@ func main() {
 	myFigure := figure.NewFigure("GQLSRV", "", true)
 	myFigure.Print()
 	flag.Parse()
-	fmt.Println("Init CLI User Service")
+	fmt.Println("Init GraphQL Service")
 	s, err := getSchema("../schema/schema.graphql")
 	if err != nil {
 		panic(err)
@@ -79,15 +79,17 @@ func main() {
 
 	// tracer := dapperish.NewTracer("dapperish_tester")
 
-	tracer, collector, err := tracing.NewTracer("gql service", "localhost:10000", *zipkin)
+	_, collector, err := tracing.NewTracer("gql service", "localhost:10000", *zipkin)
 	if err != nil {
 		panic(err)
 	}
+	log.Println("Logging to Zipkin:", *zipkin)
 	defer collector.Close()
+	t := opentracing.GlobalTracer()
 	opts = append(opts, grpc.WithUnaryInterceptor(
-		otgrpc.OpenTracingClientInterceptor(tracer, otgrpc.LogPayloads())))
+		otgrpc.OpenTracingClientInterceptor(t, otgrpc.LogPayloads())))
 	opts = append(opts, grpc.WithStreamInterceptor(
-		otgrpc.OpenTracingStreamClientInterceptor(tracer)))
+		otgrpc.OpenTracingStreamClientInterceptor(t)))
 
 	if *balancer {
 		r := &etcdnaming.GRPCResolver{Client: cli}
@@ -129,8 +131,9 @@ func main() {
 	gqlClient := pb.NewUserServiceClient(conn)
 
 	resolver := gql.NewResolver(gqlClient)
+
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
-	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
+	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
 	mux := gql.NewRouter(schema)
 
 	srv := &http.Server{

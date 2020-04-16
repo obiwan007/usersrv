@@ -51,17 +51,21 @@ var (
 // 	return tracer, collector, nil
 // }
 func main() {
+	flag.Parse()
+
 	myFigure := figure.NewFigure("USERSRV", "", true)
 	myFigure.Print()
+
+	fmt.Println("Init User Service")
 	grpc.EnableTracing = true
 
 	tracer, collector, err := tracing.NewTracer("userservice", "localhost:10000", *zipkin)
 	if err != nil {
 		panic(err)
 	}
+	log.Println("Logging to Zipkin:", *zipkin)
 	defer collector.Close()
 	// tracer := dapperish.NewTracer("dapperish_tester")
-	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
