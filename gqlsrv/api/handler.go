@@ -5,6 +5,7 @@ import (
 
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	"github.com/opentracing/opentracing-go"
 )
 
 var page = []byte(`
@@ -87,8 +88,9 @@ var page = []byte(`
 </html>
 `)
 
-func NewRouter(schema *graphql.Schema) *http.ServeMux {
-	mux := http.NewServeMux()
+func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMux {
+	// mux := http.NewServeMux()
+	mux := NewServeMux(tracer)
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(page)

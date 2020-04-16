@@ -134,7 +134,7 @@ func main() {
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
-	mux := gql.NewRouter(schema)
+	mux := gql.NewRouter(schema, t)
 
 	srv := &http.Server{
 		Addr:    ":8090",
