@@ -16,6 +16,8 @@
 package gql
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
@@ -38,9 +40,12 @@ type TracedServeMux struct {
 
 // Handle implements http.ServeMux#Handle
 func (tm *TracedServeMux) Handle(pattern string, handler http.Handler) {
+
+	// handlerWithAuth := auth(handler)
+	handlerWithAuth := isAuthorized(handler)
 	middleware := nethttp.Middleware(
 		tm.tracer,
-		handler,
+		handlerWithAuth,
 		nethttp.OperationNameFunc(func(r *http.Request) string {
 			return "HTTP " + r.Method + " " + pattern
 		}))
@@ -50,4 +55,18 @@ func (tm *TracedServeMux) Handle(pattern string, handler http.Handler) {
 // ServeHTTP implements http.ServeMux#ServeHTTP
 func (tm *TracedServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tm.mux.ServeHTTP(w, r)
+}
+
+func auth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		token := r.Header.Get("Authorization")
+		jwt := "Testtoken"
+		// jwt, err := checkToken(token)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
+		fmt.Println("Token found", token)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwt)))
+	})
 }

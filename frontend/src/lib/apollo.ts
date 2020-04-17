@@ -46,6 +46,21 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData
 });
 
+let appJWTToken: string =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
+const authMiddleware = new ApolloLink((operation: any, forward: any) => {
+  if (appJWTToken) {
+    operation.setContext({
+      headers: {
+        Authorization: `${appJWTToken}`
+      }
+    });
+  }
+
+  return forward && forward(operation);
+});
+
 export function createClient(): ApolloClient<NormalizedCacheObject> {
   // Create the cache first, which we'll share across Apollo tooling.
   // This is an in-memory cache. Since we'll be calling `createClient` on
@@ -75,6 +90,7 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
   return new ApolloClient({
     cache,
     link: ApolloLink.from([
+      authMiddleware,
       // General error handler, to log errors back to the console.
       // Replace this in production with whatever makes sense in your
       // environment. Remember you can use the global `SERVER` variable to

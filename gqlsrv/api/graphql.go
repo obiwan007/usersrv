@@ -63,7 +63,7 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(users)
+	fmt.Println(ctx.Value("jwt"))
 
 	var userRxs []*UserResolver
 	for _, res := range users.Users {
