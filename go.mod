@@ -23,6 +23,7 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5
 	github.com/openzipkin/zipkin-go-opentracing v0.3.5
+	github.com/pkg/errors v0.8.1
 	github.com/rs/cors v1.7.0 // indirect
 	go.etcd.io/etcd v3.3.20+incompatible
 	go.uber.org/zap v1.14.1 // indirect

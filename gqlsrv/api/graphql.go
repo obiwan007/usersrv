@@ -6,6 +6,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	api "github.com/obiwan007/usersrv/proto"
+	"github.com/pkg/errors"
 )
 
 type Resolver struct {
@@ -62,7 +63,10 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 
 	token, ok := t.(*jwt.Token)
 	if !ok || !token.Valid {
-		return nil, fmt.Errorf("Invalid Token")
+
+		return nil, errors.Errorf("Unauthorized")
+
+		// return nil, fmt.Errorf("Invalid Token")
 	}
 
 	fmt.Println(t)
