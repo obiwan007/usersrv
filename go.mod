@@ -23,6 +23,7 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5
 	github.com/openzipkin/zipkin-go-opentracing v0.3.5
+	github.com/rs/cors v1.7.0 // indirect
 	go.uber.org/zap v1.14.1 // indirect
 	google.golang.org/grpc v1.26.0
 )

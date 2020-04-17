@@ -11,6 +11,7 @@ import Example from "@/components/example";
 /* Local */
 // Components
 import ScrollTop from "@/components/helpers/scrollTop";
+import Login from "@/components/login";
 // Global styles
 import globalStyles from "@/global/styles";
 import { Global } from "@emotion/core";
@@ -30,6 +31,7 @@ const Root: React.FunctionComponent = () => (
     <ScrollTop>
       <Switch>
         <Route path="/" exact component={Example} />
+        <Route path="/login" component={Login} />
       </Switch>
     </ScrollTop>
   </div>

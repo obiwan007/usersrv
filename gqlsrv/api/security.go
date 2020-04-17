@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -12,9 +13,21 @@ import (
 var mySigningKey = []byte("captainjacksparrowsayshi")
 
 func homePage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Endpoint Hit: homePage")
 	fmt.Fprintf(w, "Hello World")
-	fmt.Println("Endpoint Hit: homePage")
 
+}
+
+func getToken() (string, error) {
+	// Create the Claims
+	claims := &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+		Issuer:    "test",
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString(mySigningKey)
+	log.Println("Generated Token", ss)
+	return ss, err
 }
 
 func isAuthorized(next http.Handler) http.Handler {
@@ -34,14 +47,25 @@ func isAuthorized(next http.Handler) http.Handler {
 				log.Println("ERROR: Invalid token:", err.Error())
 				// fmt.Fprintf(w, err.Error())
 			}
+
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if ok != true {
+				log.Println("No claim in token")
+			}
+			if token.Valid != true {
+				log.Println("Claims invalid", claims)
+				fmt.Println(claims["exp"])
+				fmt.Println(token.Valid)
+			}
+
 			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))
 			// if token.Valid {
 			// 	next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))
 			// }
 		} else {
-			log.Fatalln("No Token provided")
+			log.Println("No Token provided")
 			// fmt.Fprintf(w, "Not Authorized")
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
 }

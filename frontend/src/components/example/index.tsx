@@ -6,12 +6,9 @@
 /* NPM */
 
 import React from "react";
-
 /* Local */
-
 // Counter, controlled by local Apollo state
 import { Count } from "./count";
-
 // Hacker News GraphQL example
 import { HackerNews } from "./hackernews";
 
@@ -21,8 +18,11 @@ interface IIndexState {
   dynamic: React.SFC | null;
 }
 
+interface IProps {
+  history: any;
+}
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
-class Index extends React.PureComponent<{}, IIndexState> {
+class Index extends React.PureComponent<IProps, IIndexState> {
   public state = {
     dynamic: null
   };
@@ -47,6 +47,7 @@ class Index extends React.PureComponent<{}, IIndexState> {
         <DynamicComponent />
         <Count />
         <HackerNews />
+        <button onClick={() => this.props.history.push("/login")}>Login</button>
       </>
     );
   }

@@ -1,6 +1,8 @@
 package gql
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	graphql "github.com/graph-gophers/graphql-go"
@@ -88,6 +90,39 @@ var page = []byte(`
 </html>
 `)
 
+type loginUser struct {
+	Username string
+	Password string
+}
+type loginResponse struct {
+	Token string `json:"token"`
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("LOGIN HIT")
+
+	var u loginUser
+	if r.Body == nil {
+		http.Error(w, "Please send a request body", 400)
+		return
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	fmt.Println(u.Username, u.Password)
+	token, err := getToken()
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+	loginRes := &loginResponse{Token: token}
+	res, err := json.Marshal(loginRes)
+
+	w.Write(res)
+}
+
 func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMux {
 	// mux := http.NewServeMux()
 	mux := NewServeMux(tracer)
@@ -97,6 +132,7 @@ func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMu
 	}))
 	mux.Handle("/query", &relay.Handler{Schema: schema})
 
+	mux.Handle("/auth/login", http.HandlerFunc(handleLogin))
 	// TODO: Add more routes here for other endpoints.
 	// TODO: Add authentication endpoints or serving up regular assets?
 

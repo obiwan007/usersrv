@@ -18,6 +18,7 @@ import { HttpLink } from "apollo-link-http";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 import { SubscriptionClient } from "subscriptions-transport-ws";
+import Security from "./security";
 
 const { HttpLogger } = require("zipkin-transport-http");
 const { Tracer, ExplicitContext } = require("zipkin");
@@ -46,14 +47,11 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData
 });
 
-let appJWTToken: string =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-
 const authMiddleware = new ApolloLink((operation: any, forward: any) => {
-  if (appJWTToken) {
+  if (Security.inMemoryToken) {
     operation.setContext({
       headers: {
-        Authorization: `${appJWTToken}`
+        Authorization: `${Security.inMemoryToken}`
       }
     });
   }

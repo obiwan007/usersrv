@@ -12,6 +12,7 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/opentracing/opentracing-go"
+	"github.com/rs/cors"
 
 	"github.com/common-nighthawk/go-figure"
 	graphql "github.com/graph-gophers/graphql-go"
@@ -136,9 +137,21 @@ func main() {
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
 	mux := gql.NewRouter(schema, t)
 
+	// cors.Default() setup the middleware with default options being
+	// all origins accepted with simple methods (GET, POST). See
+	// documentation below for more options.
+	// mux2 := cors.Default().Handler(mux)
+	mux2 := cors.New(cors.Options{
+		// AllowedOrigins:   []string{"http://foo.com", "http://foo.com:8080"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		AllowedHeaders: []string{"Authorization", "Content-Type", "X-B3-Sampled", "X-B3-Spanid", "X-B3-Traceid"},
+		Debug:          true,
+	}).Handler(mux)
+
 	srv := &http.Server{
 		Addr:    ":8090",
-		Handler: mux,
+		Handler: mux2,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
