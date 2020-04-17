@@ -46,6 +46,7 @@ func isAuthorized(next http.Handler) http.Handler {
 			if err != nil {
 				log.Println("ERROR: Invalid token:", err.Error())
 				// fmt.Fprintf(w, err.Error())
+				token = nil
 			}
 
 			claims, ok := token.Claims.(jwt.MapClaims)
@@ -56,6 +57,7 @@ func isAuthorized(next http.Handler) http.Handler {
 				log.Println("Claims invalid", claims)
 				fmt.Println(claims["exp"])
 				fmt.Println(token.Valid)
+				token = nil
 			}
 
 			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))

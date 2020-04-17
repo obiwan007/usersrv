@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	api "github.com/obiwan007/usersrv/proto"
 )
 
@@ -56,15 +57,20 @@ func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserRe
 	return &s, nil
 
 }
-
 func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
+	t := ctx.Value("jwt")
+
+	token, ok := t.(*jwt.Token)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("Invalid Token")
+	}
+
+	fmt.Println(t)
 
 	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(ctx.Value("jwt"))
-
 	var userRxs []*UserResolver
 	for _, res := range users.Users {
 		user := &User{Name: res.Name, Email: res.Email, Id: res.Id}
