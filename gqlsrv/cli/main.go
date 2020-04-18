@@ -144,6 +144,7 @@ func main() {
 	mux2 := cors.New(cors.Options{
 		// AllowedOrigins:   []string{"http://foo.com", "http://foo.com:8080"},
 		AllowCredentials: true,
+		AllowedOrigins:   []string{"http://localhost:3000"},
 		// Enable Debugging for testing, consider disabling in production
 		AllowedHeaders: []string{"Authorization", "Content-Type", "X-B3-Sampled", "X-B3-Spanid", "X-B3-Traceid"},
 		Debug:          true,

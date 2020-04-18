@@ -10,6 +10,7 @@ class Security {
       {
         method: "POST",
         credentials: "same-origin", // include, *same-origin, omit
+        // credentials: "include", // include, *same-origin, omit
         headers: {
           "Content-Type": "application/json"
           // 'Content-Type': 'application/x-www-form-urlencoded',

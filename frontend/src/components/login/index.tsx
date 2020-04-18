@@ -48,6 +48,7 @@ class Index extends React.PureComponent<IProps, IIndexState> {
     const ok = await Security.login("MyUsername", "MyPassword");
     console.log("Redirecting");
     if (ok) {
+      const ok2 = await Security.login("MyUsername", "MyPassword");
       this.props.history.replace("/");
     }
   }

@@ -52,7 +52,7 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
   // server from the `GRAPHQL` environment variable, which by default is
   // set to an external playground at https://graphqlhub.com/graphql
   const httpLink = new HttpLink({
-    credentials: "same-origin",
+    credentials: "include",
     uri: GRAPHQL ? GRAPHQL : "http://gqlsrv:8090/query",
     fetch: zipkinFetch
   });

@@ -120,6 +120,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	loginRes := &loginResponse{Token: token}
 	res, err := json.Marshal(loginRes)
 
+	http.SetCookie(w, &http.Cookie{Name: "Flavor", Value: "Chocolate Chip", HttpOnly: true, Path: "/"})
+
 	w.Write(res)
 }
 
