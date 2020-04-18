@@ -6,11 +6,7 @@
 /* NPM */
 
 import React from "react";
-/* Local */
-// Counter, controlled by local Apollo state
-import { Count } from "./count";
-// Hacker News GraphQL example
-import { HackerNews } from "./hackernews";
+import Users from "./users";
 
 // ----------------------------------------------------------------------------
 
@@ -44,10 +40,11 @@ class Index extends React.PureComponent<IProps, IIndexState> {
       <>
         {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
         <h1>Hi from ReactQL</h1>
-        <DynamicComponent />
+        <Users />
+        {/* <DynamicComponent />
         <Count />
         <HackerNews />
-        <button onClick={() => this.props.history.push("/login")}>Login</button>
+        <button onClick={() => this.props.history.push("/login")}>Login</button> */}
       </>
     );
   }

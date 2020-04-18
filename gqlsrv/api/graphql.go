@@ -6,7 +6,9 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	api "github.com/obiwan007/usersrv/proto"
-	"github.com/pkg/errors"
+
+	// "github.com/pkg/errors"
+	errors "github.com/graph-gophers/graphql-go/errors"
 )
 
 type Resolver struct {
