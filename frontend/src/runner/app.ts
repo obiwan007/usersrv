@@ -185,15 +185,15 @@ export const app = new Koa()
   .use(koaCors())
 
   // Error catcher
-  // .use(async (ctx, next) => {
-  //   try {
-  //     await next();
-  //   } catch (e) {
-  //     console.log("Error:", e);
-  //     ctx.status = 500;
-  //     ctx.body = "!!!There was an error. Please try again later.";
-  //   }
-  // })
+  .use(async (ctx, next) => {
+    try {
+      await next();
+    } catch (e) {
+      console.log("Error:", e);
+      ctx.status = 500;
+      ctx.body = "!!!There was an error. Please try again later.";
+    }
+  })
 
   // Timing
   .use(async (ctx, next) => {

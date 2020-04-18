@@ -72,7 +72,8 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 	}
 
 	fmt.Println(t)
-
+	claims := token.Claims.(*MyCustomClaims)
+	fmt.Println("Email Claim:", claims.Email)
 	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
 	if err != nil {
 		return nil, err

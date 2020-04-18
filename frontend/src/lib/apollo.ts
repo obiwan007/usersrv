@@ -19,26 +19,7 @@ import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import Security from "./security";
-
-const { HttpLogger } = require("zipkin-transport-http");
-const { Tracer, ExplicitContext } = require("zipkin");
-const { recorder } = require("./recorder");
-const {
-  jsonEncoder: { JSON_V2 }
-} = require("zipkin");
-
-const ctxImpl = new ExplicitContext();
-const localServiceName = "browser";
-const tracer = new Tracer({
-  ctxImpl,
-  recorder: recorder(localServiceName),
-  localServiceName
-});
-
-// instrument fetch
-const wrapFetch = require("zipkin-instrumentation-fetch");
-const remoteServiceName = "gql service";
-const zipkinFetch = wrapFetch(fetch, { tracer, remoteServiceName });
+import { zipkinFetch } from "./tracing";
 
 // ----------------------------------------------------------------------------
 

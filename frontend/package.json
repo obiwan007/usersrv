@@ -9,6 +9,7 @@
     "clean": "rimraf dist",
     "dev": "cross-env RUNNER=development NODE_ENV=development ts-node index.ts",
     "dev:static": "cross-env RUNNER=static NODE_ENV=development ts-node index.ts",
+    "prod:static": "cross-env RUNNER=static NODE_ENV=production ts-node index.ts",
     "gen:graphql": "gql-gen --config codegen.yml",
     "lint": "prettier -c \"src/**\"",
     "lint:save": "prettier --write \"src/**\"",

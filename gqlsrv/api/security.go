@@ -18,12 +18,25 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type MyCustomClaims struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
+}
+
 func getToken() (string, error) {
 	// Create the Claims
-	claims := &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
-		Issuer:    "test",
+	claims := MyCustomClaims{
+		"bar",
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+			Issuer:    "test",
+		},
 	}
+	// claims := &jwt.StandardClaims{
+	// 	ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+	// 	Issuer:    "test",
+	// }
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(mySigningKey)
 	log.Println("Generated Token", ss)
@@ -36,7 +49,7 @@ func isAuthorized(next http.Handler) http.Handler {
 		ctx := r.Context()
 		if r.Header["Authorization"] != nil {
 			log.Println("Token is provided")
-			token, err := jwt.Parse(r.Header["Authorization"][0], func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.ParseWithClaims(r.Header["Authorization"][0], &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}
@@ -49,14 +62,16 @@ func isAuthorized(next http.Handler) http.Handler {
 				token = nil
 			}
 
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if ok != true {
-				log.Println("No claim in token")
+			// claims, ok := token.Claims.(*MyCustomClaims)
+
+			if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+				log.Printf("%v %v", claims.Email, claims.StandardClaims.ExpiresAt)
+			} else {
+				log.Println(err)
 			}
+
 			if token.Valid != true {
-				log.Println("Claims invalid", claims)
-				fmt.Println(claims["exp"])
-				fmt.Println(token.Valid)
+				log.Println(token.Valid)
 				token = nil
 			}
 
