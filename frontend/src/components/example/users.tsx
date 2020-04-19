@@ -72,6 +72,7 @@ export class Users extends React.PureComponent<IProps, any> {
                   </Story>
                 ))}
               </List>
+              <button onClick={() => this.refreshClick()}>Refresh</button>
             </>
           );
         }}

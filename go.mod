@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/Shopify/sarama v1.26.1 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
-	github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a // indirect
+	github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a
 	github.com/coreos/etcd v3.3.20+incompatible
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
@@ -24,7 +24,7 @@ require (
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5
 	github.com/openzipkin/zipkin-go-opentracing v0.3.5
 	github.com/pkg/errors v0.8.1
-	github.com/rs/cors v1.7.0 // indirect
+	github.com/rs/cors v1.7.0
 	go.etcd.io/etcd v3.3.20+incompatible
 	go.uber.org/zap v1.14.1 // indirect
 	google.golang.org/grpc v1.26.0
