@@ -4,15 +4,14 @@
 // IMPORTS
 
 /* Node */
-import fs from "fs";
-
 /* NPM */
 import chalk from "chalk";
-
+import fs from "fs";
 /* Local */
 import Output from "../lib/output";
 import Stats, { IStats } from "../lib/stats";
 import { app, build, common } from "./app";
+const proxy = require("koa-proxies");
 
 // ----------------------------------------------------------------------------
 
@@ -49,6 +48,33 @@ void (async () => {
 
   // Attach middleware
   app.use(require(common.compiled.server).default(output));
+
+  app.use(
+    proxy("/auth/login", {
+      target: "http://gqlsrv:8090",
+      changeOrigin: true,
+      // agent: new httpsProxyAgent('http://1.2.3.4:88'), // if you need or just delete this line
+      // rewrite: path => path.replace(/^\/octocat(\/|\/\w+)?$/, '/vagusx'),
+      logs: true
+    })
+  );
+  app.use(
+    proxy("/auth/refresh", {
+      target: "http://gqlsrv:8090",
+      changeOrigin: true,
+      logs: true
+    })
+  );
+
+  app.use(
+    proxy("/query", {
+      target: "http://gqlsrv:8090",
+      changeOrigin: true,
+      // agent: new httpsProxyAgent('http://1.2.3.4:88'), // if you need or just delete this line
+      // rewrite: path => path.replace(/^\/octocat(\/|\/\w+)?$/, '/vagusx'),
+      logs: true
+    })
+  );
 
   app.listen(common.port, () => {
     common.spinner.succeed(`Running on http://localhost:${common.port}`);

@@ -39,26 +39,41 @@ void (async () => {
   // }
 
   // middleware
+  const API = process.env.GRAPHQL
+    ? process.env.GRAPHQL
+    : "http://localhost:8090";
+  const ZIPKIN = process.env.ZIPKIN
+    ? process.env.ZIPKIN
+    : "http://localhost:9411";
+  console.log("PROXY to " + API);
   app.use(
     proxy("/auth/login", {
-      target: "http://localhost:8090",
+      target: API, // "http://localhost:8090",
       changeOrigin: true,
       // agent: new httpsProxyAgent('http://1.2.3.4:88'), // if you need or just delete this line
       // rewrite: path => path.replace(/^\/octocat(\/|\/\w+)?$/, '/vagusx'),
       logs: true
     })
   );
+
   app.use(
     proxy("/auth/refresh", {
-      target: "http://localhost:8090",
+      target: API,
       changeOrigin: true,
       logs: true
     })
   );
 
   app.use(
+    proxy("/api/v2/spans", {
+      target: ZIPKIN,
+      changeOrigin: true,
+      logs: true
+    })
+  );
+  app.use(
     proxy("/query", {
-      target: "http://localhost:8090",
+      target: API,
       changeOrigin: true,
       // agent: new httpsProxyAgent('http://1.2.3.4:88'), // if you need or just delete this line
       // rewrite: path => path.replace(/^\/octocat(\/|\/\w+)?$/, '/vagusx'),

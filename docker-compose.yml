@@ -65,7 +65,9 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile
     environment:
-      - GRAPHQL="http://gqlsrv:8090/query"
+      - GRAPHQL=http://gqlsrv:8090
+      - GQLSRV="gqlsrv"
+      - ZIPKIN=http://zipkin:9411
     ports:
       - 3000:3000
     networks:

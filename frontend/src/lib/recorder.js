@@ -11,7 +11,7 @@ const debug =
     : process.env.DEBUG;
 
 // Send spans to Zipkin asynchronously over HTTP
-const zipkinBaseUrl = ZIPKIN ? ZIPKIN : "http://zipkin:9411";
+const zipkinBaseUrl = window.location.origin;
 
 const httpLogger = new HttpLogger({
   endpoint: `${zipkinBaseUrl}/api/v2/spans`,

@@ -3,21 +3,18 @@ import { zipkinFetch } from "./tracing";
 class Security {
   inMemoryToken: string = "";
   async login(username: string, password: string) {
-    const uri = GRAPHQL ? GRAPHQL : "http://gqlsrv:8090";
+    const uri = window.location.origin; // uri = GRAPHQL ? GRAPHQL : "http://gqlsrv:8090";
     console.log("Login clicked");
-    const response = await zipkinFetch(
-      `${uri.replace("/query", "")}/auth/login`,
-      {
-        method: "POST",
-        credentials: "same-origin", // include, *same-origin, omit
-        // credentials: "include", // include, *same-origin, omit
-        headers: {
-          "Content-Type": "application/json"
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: JSON.stringify({ username, password })
-      }
-    );
+    const response = await zipkinFetch(`${uri}/auth/login`, {
+      method: "POST",
+      credentials: "same-origin", // include, *same-origin, omit
+      // credentials: "include", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json"
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: JSON.stringify({ username, password })
+    });
     //...
     // Extract the JWT from the response
     const { token } = await response.json();
@@ -27,20 +24,17 @@ class Security {
   }
 
   async refresh() {
-    const uri = GRAPHQL ? GRAPHQL : "http://gqlsrv:8090";
+    const uri = window.location.origin; // GRAPHQL ? GRAPHQL : "http://gqlsrv:8090";
     console.log("Login clicked");
-    const response = await zipkinFetch(
-      `${uri.replace("/query", "")}/auth/refresh`,
-      {
-        method: "POST",
-        credentials: "same-origin", // include, *same-origin, omit
-        // credentials: "include", // include, *same-origin, omit
-        headers: {
-          "Content-Type": "application/json"
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        }
+    const response = await zipkinFetch(`${uri}/auth/refresh`, {
+      method: "POST",
+      credentials: "same-origin", // include, *same-origin, omit
+      // credentials: "include", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json"
+        // 'Content-Type': 'application/x-www-form-urlencoded',
       }
-    );
+    });
     //...
     // Extract the JWT from the response
     if (response.status !== 200) {

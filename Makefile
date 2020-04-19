@@ -25,7 +25,11 @@ rungql:
 
 runuser:
 	cd usersrv/cli && $(GOBUILD) -o $(BINARY_NAME_USER) -v 
-	cd usersrv/cli && ./$(BINARY_NAME_USER) --server_addr localhost:10000 --zipkin http://localhost:9411/api/v1/spans
+	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
+
+runfrontend:
+	cd frontend && GRAPHQL="http://localhost:8090" && npm run dev:static 
+	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
 
 
 docker: docker-build docker-push

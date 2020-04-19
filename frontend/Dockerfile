@@ -26,4 +26,4 @@ WORKDIR /app
 COPY --from=builder /build .
 
 # by default, run in production mode
-CMD npm run production
+CMD npm run dev:static
