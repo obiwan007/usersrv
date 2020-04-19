@@ -11,7 +11,7 @@ import { GetUsersComponent } from "@/graphql";
 import styled from "@emotion/styled";
 import React from "react";
 import { withRouter } from "react-router-dom";
-
+import Security from "../../lib/security";
 // ----------------------------------------------------------------------------
 
 // Unstyled Emotion parent block, to avoid repeating <style> tags
@@ -45,6 +45,7 @@ export class Users extends React.PureComponent<IProps, any> {
                 <button onClick={() => this.props.history.push("/login")}>
                   Login
                 </button>
+                <button onClick={() => this.refreshClick()}>Refresh</button>
               </div>
             );
           }
@@ -76,6 +77,14 @@ export class Users extends React.PureComponent<IProps, any> {
         }}
       </GetUsersComponent>
     );
+  }
+
+  async refreshClick() {
+    try {
+      const ok = await Security.refresh();
+    } catch (ex) {
+      console.log("Error in refreshing", ex);
+    }
   }
 }
 

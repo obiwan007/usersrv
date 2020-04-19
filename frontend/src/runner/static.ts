@@ -48,6 +48,13 @@ void (async () => {
       logs: true
     })
   );
+  app.use(
+    proxy("/auth/refresh", {
+      target: "http://localhost:8090",
+      changeOrigin: true,
+      logs: true
+    })
+  );
 
   app.use(
     proxy("/query", {

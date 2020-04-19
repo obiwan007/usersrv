@@ -3,9 +3,11 @@ package gql
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/opentracing/opentracing-go"
@@ -99,8 +101,33 @@ type loginResponse struct {
 	Token string `json:"token"`
 }
 
+func handleRefresh(w http.ResponseWriter, r *http.Request) {
+	log.Println("Refresh HIT")
+
+	t := r.Context().Value("jwt")
+
+	existingToken, ok := t.(*jwt.Token)
+	if !ok || !existingToken.Valid {
+		http.Error(w, "Unauthorized, no valid token provided", 401)
+		return
+	}
+
+	claims := existingToken.Claims.(*MyCustomClaims)
+	log.Println("Refresh Subject:", claims.Subject)
+	token, err := getToken(claims.Subject)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+	loginRes := &loginResponse{Token: token}
+	res, err := json.Marshal(loginRes)
+
+	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
+
+	w.Write(res)
+}
+
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("LOGIN HIT")
+	log.Println("Login HIT")
 
 	var u loginUser
 	if r.Body == nil {
@@ -136,6 +163,7 @@ func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMu
 	mux.Handle("/query", &relay.Handler{Schema: schema})
 
 	mux.Handle("/auth/login", http.HandlerFunc(handleLogin))
+	mux.Handle("/auth/refresh", http.HandlerFunc(handleRefresh))
 	// TODO: Add more routes here for other endpoints.
 	// TODO: Add authentication endpoints or serving up regular assets?
 
