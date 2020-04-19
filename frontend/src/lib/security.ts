@@ -15,7 +15,7 @@ class Security {
           "Content-Type": "application/json"
           // 'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ username: "MyUsername", password: "MyPassword" })
+        body: JSON.stringify({ username, password })
       }
     );
     //...

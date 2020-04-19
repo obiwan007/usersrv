@@ -3,6 +3,7 @@ package gql
 import (
 	"context"
 	"fmt"
+	"log"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	api "github.com/obiwan007/usersrv/proto"
@@ -73,7 +74,7 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 
 	fmt.Println(t)
 	claims := token.Claims.(*MyCustomClaims)
-	fmt.Println("Email Claim:", claims.Email)
+	log.Println("Subject:", claims.Subject)
 	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
 	if err != nil {
 		return nil, err

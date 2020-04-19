@@ -23,13 +23,14 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
-func getToken() (string, error) {
+func getToken(subject string) (string, error) {
 	// Create the Claims
 	claims := MyCustomClaims{
 		"bar",
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
-			Issuer:    "test",
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+			Issuer:    "gqlsrv",
+			Subject:   subject,
 		},
 	}
 	// claims := &jwt.StandardClaims{
@@ -47,9 +48,22 @@ func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Handling AUthorization")
 		ctx := r.Context()
+		var foundAuth *string = nil
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == "Auth" {
+				foundAuth = &cookie.Value
+				log.Println("Authorization Cookie given")
+				break
+			}
+		}
 		if r.Header["Authorization"] != nil {
-			log.Println("Token is provided")
-			token, err := jwt.ParseWithClaims(r.Header["Authorization"][0], &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+			foundAuth = &r.Header["Authorization"][0]
+			log.Println("Authorization Header given")
+		}
+
+		if foundAuth != nil {
+			log.Println("Auth", *foundAuth)
+			token, err := jwt.ParseWithClaims(*foundAuth, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}
@@ -60,22 +74,24 @@ func isAuthorized(next http.Handler) http.Handler {
 				log.Println("ERROR: Invalid token:", err.Error())
 				// fmt.Fprintf(w, err.Error())
 				token = nil
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
 			}
-
-			// claims, ok := token.Claims.(*MyCustomClaims)
-
-			if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
-				log.Printf("%v %v", claims.Email, claims.StandardClaims.ExpiresAt)
-			} else {
-				log.Println(err)
-			}
-
 			if token.Valid != true {
 				log.Println(token.Valid)
-				token = nil
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
 			}
+			// claims, ok := token.Claims.(*MyCustomClaims)
+
+			// if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+			// 	log.Printf("%v %v", claims.StandardClaims.Subject, claims.StandardClaims.ExpiresAt)
+			// } else {
+			// 	log.Println(err)
+			// }
 
 			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))
+
 			// if token.Valid {
 			// 	next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))
 			// }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
@@ -113,14 +114,14 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(u.Username, u.Password)
-	token, err := getToken()
+	token, err := getToken(u.Username)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
 	loginRes := &loginResponse{Token: token}
 	res, err := json.Marshal(loginRes)
 
-	http.SetCookie(w, &http.Cookie{Name: "Flavor", Value: "Chocolate Chip", HttpOnly: true, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
 
 	w.Write(res)
 }
