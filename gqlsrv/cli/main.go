@@ -127,7 +127,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
-	fmt.Println("Dialed ")
+	log.Println("Dialed ")
 	defer conn.Close()
 	gqlClient := pb.NewUserServiceClient(conn)
 
@@ -157,7 +157,7 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
+	log.Println("Listening on port 8090")
 	log.Fatal(srv.ListenAndServe())
 }
 

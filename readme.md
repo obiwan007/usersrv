@@ -111,3 +111,12 @@ Show Dashboard
 ### Deploy to minikube
 
 `kubectl create -f userservice.yaml`
+
+### Usefull commands
+
+`k kubectl apply -f config/nginx.yaml`
+
+`k get pods`
+
+`kubectl expose deployment nginx-deployment --port=80 --type=LoadBalancer`
+

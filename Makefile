@@ -8,6 +8,8 @@ GOGET=$(GOCMD) get
 BINARY_NAME_GQL=gqlsrv
 BINARY_NAME_USER=usersrv
 
+VERSION ?= latest
+
 all: test buildgql builduser
 buildgql: 
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
@@ -35,17 +37,30 @@ runfrontend:
 docker: docker-build docker-push
 
 docker-build:
-	docker build -t obiwan007/gqlsrv -f ./gql_Dockerfile . 
-	docker build -t obiwan007/usersrv -f ./user_Dockerfile . 
-	cd frontend && docker build -t obiwan007/frontend -f ./Dockerfile .
+	docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
+	docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
+	cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./Dockerfile .
 	
 docker-push:	
-	docker push obiwan007/frontend	
-	docker push obiwan007/gqlsrv
-	docker push obiwan007/usersrv
+	docker push obiwan007/frontend:${VERSION}	
+	docker push obiwan007/gqlsrv:${VERSION}
+	docker push obiwan007/usersrv:${VERSION}
 
 compose-build:
 	docker-compose build
 
 compose-up:
 	docker-compose up
+
+kapply:
+	kubectl apply -f config/frontendservice.yaml
+	kubectl apply -f config/gqlservice.yaml
+	kubectl apply -f config/userservice.yaml
+	kubectl apply -f config/zipkin.yaml
+
+redeploy:
+	kubectl rollout restart deployment api-deployment
+	kubectl rollout restart deployment user-deployment
+	kubectl rollout restart deployment frontend-deployment
+	
+#	k get deployment api-deployment -o yaml | sed "s/\(image: obiwan007\/gqlsrv\):.*$/\1:VERSION/" | grep image
