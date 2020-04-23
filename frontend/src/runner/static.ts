@@ -55,6 +55,15 @@ void (async () => {
       logs: true
     })
   );
+  app.use(
+    proxy("/auth/callback", {
+      target: API, // "http://localhost:8090",
+      changeOrigin: true,
+      // agent: new httpsProxyAgent('http://1.2.3.4:88'), // if you need or just delete this line
+      // rewrite: path => path.replace(/^\/octocat(\/|\/\w+)?$/, '/vagusx'),
+      logs: true
+    })
+  );
 
   app.use(
     proxy("/auth/refresh", {

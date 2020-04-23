@@ -23,7 +23,7 @@ clean:
 	rm -f $(BINARY_NAME_USER)
 rungql:
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
-	cd gqlsrv/cli && ./$(BINARY_NAME_GQL) --server_addr localhost:10000 --zipkin http://localhost:9411/api/v1/spans
+	cd gqlsrv/cli && ./$(BINARY_NAME_GQL) -config config.conf --server_addr localhost:10000 --zipkin http://localhost:9411/api/v1/spans
 
 runuser:
 	cd usersrv/cli && $(GOBUILD) -o $(BINARY_NAME_USER) -v 
@@ -62,5 +62,7 @@ redeploy:
 	kubectl rollout restart deployment api-deployment
 	kubectl rollout restart deployment user-deployment
 	kubectl rollout restart deployment frontend-deployment
-	
+
+okteto:
+	export KUBECONFIG=$HOME/Downloads/okteto-kube.config:${KUBECONFIG:-$HOME/.kube/config}
 #	k get deployment api-deployment -o yaml | sed "s/\(image: obiwan007\/gqlsrv\):.*$/\1:VERSION/" | grep image

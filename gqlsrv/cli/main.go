@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/namsral/flag"
 
 	"github.com/coreos/etcd/clientv3"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
@@ -24,8 +25,12 @@ import (
 )
 
 var (
+	config             = flag.String("config", "", "Using configfile")
 	balancer           = flag.Bool("ectd", false, "Using etcd")
 	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
+	gClientID          = flag.String("clientid", "xxxxxxxxxxxxxx", "OAuth2 client Id")
+	gClientSecr        = flag.String("clientsecret", "yyyyyyyyyyyyy", "OAuth2 client secret")
+	redirect           = flag.String("redirect", "http://localhost:3000/auth/callback", "OAuth2 client redirect callback")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
 	serverAddr         = flag.String("server_addr", "usersrv:10000", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
@@ -58,6 +63,9 @@ var (
 // }
 
 func main() {
+	// Your credentials should be obtained from the Google
+	// Developer Console (https://console.developers.google.com).
+
 	myFigure := figure.NewFigure("GQLSRV", "", true)
 	myFigure.Print()
 	flag.Parse()
@@ -117,7 +125,7 @@ func main() {
 	opts = append(opts, grpc.WithTimeout(10*time.Second))
 
 	// opts = append(opts, grpc.WithBlock())
-	log.Println("Dial")
+	log.Println("Dial", *serverAddr)
 
 	conn, err := grpc.Dial(*serverAddr, opts...)
 	// } else {
@@ -127,7 +135,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
-	log.Println("Dialed ")
 	defer conn.Close()
 	gqlClient := pb.NewUserServiceClient(conn)
 
@@ -135,7 +142,7 @@ func main() {
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
-	mux := gql.NewRouter(schema, t)
+	mux := gql.NewRouter(schema, t, gClientID, gClientSecr, redirect)
 
 	// cors.Default() setup the middleware with default options being
 	// all origins accepted with simple methods (GET, POST). See

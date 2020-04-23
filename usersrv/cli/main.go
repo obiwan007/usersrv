@@ -3,10 +3,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/namsral/flag"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"

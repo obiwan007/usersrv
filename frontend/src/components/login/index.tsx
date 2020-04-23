@@ -6,7 +6,6 @@
 /* NPM */
 
 import React from "react";
-import Security from "../../lib/security";
 /* Local */
 
 // ----------------------------------------------------------------------------
@@ -45,11 +44,13 @@ class Index extends React.PureComponent<IProps, IIndexState> {
   }
 
   async loginClick() {
-    const ok = await Security.login("MyUsername@hotmail.com", "MyPassword");
-    console.log("Redirecting");
-    if (ok) {
-      this.props.history.replace("/");
-    }
+    window.location.href = "/auth/login";
+    // this.props.history.replace("/auth/login");
+    // const ok = await Security.login("MyUsername@hotmail.com", "MyPassword");
+    // console.log("Redirecting");
+    // if (ok) {
+    //   this.props.history.replace("/auth/login");
+    // }
   }
 }
 

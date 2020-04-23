@@ -34,5 +34,3 @@ spec:
     - name: http
       port: 8090
       targetPort: graphqlport
-      nodePort: 30012
-  type: NodePort

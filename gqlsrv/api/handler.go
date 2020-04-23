@@ -3,6 +3,7 @@ package gql
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -11,6 +12,8 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/opentracing/opentracing-go"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 var page = []byte(`
@@ -93,6 +96,12 @@ var page = []byte(`
 </html>
 `)
 
+var (
+	googleOauthConfig *oauth2.Config
+	// TODO: randomize it
+	oauthStateString = "pseudo-random"
+)
+
 type loginUser struct {
 	Username string
 	Password string
@@ -153,8 +162,83 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMux {
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	url := googleOauthConfig.AuthCodeURL(oauthStateString)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	content, err := getUserInfo(r.FormValue("state"), r.FormValue("code"))
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	log.Println("Content", content)
+	token, err := getToken(content.Email)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+	// loginRes := &loginResponse{Token: token}
+	// res, err := json.Marshal(loginRes)
+
+	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
+	// w.Write(res)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	// log.Fprintf(w, "Content: %s\n", content)
+}
+
+type UserInfo struct {
+	Sub           string `json:"sub"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Profile       string `json:"profile"`
+	Picture       string `json:"picture"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Gender        string `json:"gender"`
+}
+
+func getUserInfo(state string, code string) (*UserInfo, error) {
+	if state != oauthStateString {
+		return nil, fmt.Errorf("invalid oauth state")
+	}
+
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
+	}
+
+	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
+	}
+
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
+	}
+
+	var result UserInfo
+	if err := json.Unmarshal(contents, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer, gClientID, gClientSecr, redirectUrl *string) *TracedServeMux {
 	// mux := http.NewServeMux()
+
+	googleOauthConfig = &oauth2.Config{
+		ClientID:     *gClientID,   //
+		ClientSecret: *gClientSecr, //
+		RedirectURL:  *redirectUrl,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
+	log.Printf("OAuth %s %s %s", (*gClientID)[:6], (*gClientSecr)[:6], *redirectUrl)
 	mux := NewServeMux(tracer)
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -162,7 +246,8 @@ func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer) *TracedServeMu
 	}))
 	mux.Handle("/query", &relay.Handler{Schema: schema})
 
-	mux.Handle("/auth/login", http.HandlerFunc(handleLogin))
+	mux.Handle("/auth/login", http.HandlerFunc(handleGoogleLogin))
+	mux.Handle("/auth/callback", http.HandlerFunc(handleGoogleCallback))
 	mux.Handle("/auth/refresh", http.HandlerFunc(handleRefresh))
 	// TODO: Add more routes here for other endpoints.
 	// TODO: Add authentication endpoints or serving up regular assets?
