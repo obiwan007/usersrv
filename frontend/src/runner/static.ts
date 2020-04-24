@@ -6,6 +6,9 @@
 /* Node */
 /* NPM */
 import chalk from "chalk";
+import fs from "fs";
+import http from "http";
+import https from "https";
 import path from "path";
 import clientConfig from "../webpack/client";
 /* Local */
@@ -103,9 +106,18 @@ void (async () => {
   //   host: 'http://localhost:8090/query'
   // }));
 
-  app.listen({ port: common.port, host: common.host }, async () => {
-    // Build the static dev server
-    const middleware = await devServer(app, staticCompiler);
+  const middleware = await devServer(app, staticCompiler);
+
+  app.use(async ctx => {
+    const filename = path.resolve(clientConfig.output.path, "index.html");
+    ctx.response.type = "html";
+    ctx.response.body = middleware.devMiddleware.fileSystem.createReadStream(
+      filename
+    );
+  });
+
+  const handler = async () => {
+    // const middleware = await devServer(app, staticCompiler);
 
     // Fallback to /index.html on 404 routes, for client-side SPAs
     app.use(async ctx => {
@@ -115,5 +127,42 @@ void (async () => {
         filename
       );
     });
-  });
+  };
+
+  const options = {
+    // passphrase: '',
+    key: fs.readFileSync("../certs/server.rsa.key"), // not goto browser
+    // ca: fs.readFileSync('c:/xampp/apache/conf/certs/IntermediateCA.crt'),   // goes to browser
+    cert: fs.readFileSync("../certs/server.rsa.crt"), // goes to browser
+    requestCert: false,
+    rejectUnauthorized: false
+  };
+  https
+    .createServer(options, app.callback())
+    .listen({ port: common.sslport, host: common.host }, listeningReporter);
+
+  http
+    .createServer(app.callback())
+    .listen({ port: common.port, host: common.host }, listeningReporter);
+
+  // app.listen({ port: common.port, host: common.host }, async () => {
+  //   // Build the static dev server
+  //   const middleware = await devServer(app, staticCompiler);
+
+  //   // Fallback to /index.html on 404 routes, for client-side SPAs
+  //   app.use(async ctx => {
+  //     const filename = path.resolve(clientConfig.output.path, "index.html");
+  //     ctx.response.type = "html";
+  //     ctx.response.body = middleware.devMiddleware.fileSystem.createReadStream(
+  //       filename
+  //     );
+  //   });
+  // });
 })();
+
+function listeningReporter(this: any) {
+  // `this` refers to the http server here
+  const { address, port } = this.address();
+  const protocol = this.addContext ? "https" : "http";
+  console.log(`YYYYY Listening on ${protocol}://${address}:${port}...`);
+}

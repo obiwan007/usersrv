@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -27,7 +28,7 @@ import (
 var (
 	config             = flag.String("config", "", "Using configfile")
 	balancer           = flag.Bool("ectd", false, "Using etcd")
-	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
+	tlsForGrpc         = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	gClientID          = flag.String("clientid", "xxxxxxxxxxxxxx", "OAuth2 client Id")
 	gClientSecr        = flag.String("clientsecret", "yyyyyyyyyyyyy", "OAuth2 client secret")
 	redirect           = flag.String("redirect", "http://localhost:3000/auth/callback", "OAuth2 client redirect callback")
@@ -75,6 +76,18 @@ func main() {
 		panic(err)
 	}
 
+	tlsCfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
 		DialTimeout: 5 * time.Second,
@@ -106,7 +119,7 @@ func main() {
 		opts = append(opts, grpc.WithBalancer(b))
 	}
 
-	if *tls {
+	if *tlsForGrpc {
 		if *caFile == "" {
 			log.Fatalf("No TLS crt file given")
 		}
@@ -151,21 +164,24 @@ func main() {
 	mux2 := cors.New(cors.Options{
 		// AllowedOrigins:   []string{"http://foo.com", "http://foo.com:8080"},
 		AllowCredentials: true,
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://frontend-obiwan007.cloud.okteto.net"},
 		// Enable Debugging for testing, consider disabling in production
 		AllowedHeaders: []string{"Authorization", "Content-Type", "X-B3-Sampled", "X-B3-Spanid", "X-B3-Traceid"},
 		Debug:          true,
 	}).Handler(mux)
 
 	srv := &http.Server{
-		Addr:    ":8090",
-		Handler: mux2,
+		Addr:         ":8090",
+		Handler:      mux2,
+		TLSConfig:    tlsCfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 	log.Println("Listening on port 8090")
 	log.Fatal(srv.ListenAndServe())
+	// log.Fatal(srv.ListenAndServeTLS("server.rsa.crt", "server.rsa.key"))
 }
 
 func getSchema(path string) (string, error) {

@@ -74,6 +74,7 @@ export const common = {
 
   // Port to start web server on
   port: (process.env.PORT && parseInt(process.env.PORT)) || 3000,
+  sslport: (process.env.SSLPORT && parseInt(process.env.SSLPORT)) || 3001,
 
   // WebSocket port (for dev)
   websocketPort:

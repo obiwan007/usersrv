@@ -114,7 +114,6 @@ const base: webpack.Configuration = {
 // Development client config
 const dev: webpack.Configuration = {
   devtool: "inline-source-map",
-
   // Output
   output: {
     chunkFilename: "[name].js",

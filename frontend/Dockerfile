@@ -15,7 +15,7 @@ RUN npm i
 ADD . .
 
 # build
-RUN npm run build:production
+RUN npm run build:statuc
 
 ########################
 

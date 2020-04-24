@@ -33,4 +33,4 @@ spec:
   ports:
     - name: grpc
       port: 10000
-  type: NodePort
+  type: ClusterIP

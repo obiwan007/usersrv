@@ -4,3 +4,4 @@ gqlsrv/cli/__debug_bin
 gqlsrv/cli/config.conf
 usersrv/cli/usersrv
 gqlsrv/cli/gqlsrv
+frontend/.env

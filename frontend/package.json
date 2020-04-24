@@ -139,6 +139,7 @@
     "react-hot-loader": "^4.8.4",
     "react-router-dom": "^5.1.2",
     "react-tracing": "^0.1.5",
+    "serve": "^11.3.0",
     "subscriptions-transport-ws": "^0.9.16",
     "utf-8-validate": "^5.0.2",
     "zipkin": "^0.19.1",

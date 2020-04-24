@@ -86,6 +86,8 @@ Download via https://github.com/uw-labs/bloomrpc
 
 `docker run -it --rm -p 10000:10000 --name usersrv obiwan007/usersrv`
 
+`docker run -it --rm -p 8080:80 custom-nginx`
+
 # Clustering with Kubernetis
 ## Kubectl
 

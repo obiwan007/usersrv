@@ -1,0 +1,38 @@
+FROM node:12.2.0-alpine AS builder
+
+# log most things
+ENV NPM_CONFIG_LOGLEVEL notice
+
+# OS packages for compilation
+RUN apk add --no-cache python2 make g++
+
+# install NPM packages
+WORKDIR /build
+ADD package*.json ./
+RUN npm i
+
+# add source
+ADD . .
+
+# build
+RUN npm run build:static
+
+########################
+
+run ls /build/
+
+run ls /build/certs
+
+FROM nginx
+WORKDIR /usr/share/nginx/html
+
+# copy source + compiled `node_modules` 
+
+COPY --from=builder /build/dist/public /usr/share/nginx/html
+COPY --from=builder /build/certs /etc/nginx/certs
+run ls /etc/nginx/certs
+# run ls /usr/share/nginx/html
+# run more /usr/share/nginx/html/index.html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# CMD ["nginx", "-g", "daemon off;"]

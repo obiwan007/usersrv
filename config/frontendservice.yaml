@@ -17,7 +17,7 @@ spec:
       containers:
         - name: frontend
           image: obiwan007/frontend:latest
-          imagePullPolicy: "Always"
+          imagePullPolicy: Always
           env:
             - name: GRAPHQL
               value: "http://gqlsrv:8090"
@@ -26,10 +26,26 @@ spec:
             - name: ZIPKIN
               value: "http://zipkin:9411"
           ports:
-            - name: frontend
-              containerPort: 3000
+            - name: http
+              containerPort: 80
+            - name: frontendport
+              containerPort: 443
 
 ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend
+#   annotations:
+#     dev.okteto.com/auto-ingress: "true"
+# spec:
+#   selector:
+#     app: frontend
+#   ports:
+#     - name: http
+#       port: 3000
+#   type: NodePort
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -37,9 +53,12 @@ metadata:
   annotations:
     dev.okteto.com/auto-ingress: "true"
 spec:
+  #  type: NodePort
+  type: ClusterIP
+  ports:
+    - name: frontendhttp
+      port: 80
+    - name: frontend
+      port: 443
   selector:
     app: frontend
-  ports:
-    - name: http
-      port: 3000
-  type: NodePort

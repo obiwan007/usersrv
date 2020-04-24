@@ -62,17 +62,22 @@ services:
     depends_on:
       - usersrv
       - zipkin
+    environment:
+      - CLIENTID=${CLIENTID}
+      - CLIENTSECRET=${CLIENTSECRET}
+      - REDIRECT=${REDIRECT
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: ./Dockerfile
+      dockerfile: ./nginxDockerfile
     environment:
       - GRAPHQL=http://gqlsrv:8090
       - GQLSRV="gqlsrv"
       - ZIPKIN=http://zipkin:9411
     ports:
-      - 3000:3000
+      - 3000:80
+      - 3001:443
     networks:
       - app-tier
     depends_on:

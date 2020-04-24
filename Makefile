@@ -36,15 +36,41 @@ runfrontend:
 
 docker: docker-build docker-push
 
-docker-build:
-	docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
-	docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
-	cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./Dockerfile .
+docker-build: builddockerfrontend builddockergqlsrv builddockerusersrv
+	# docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
+	# docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
+	# cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./nginxDockerfile .
 	
-docker-push:	
-	docker push obiwan007/frontend:${VERSION}	
+docker-push: pushdockerusersrv 	pushdockergqlsrv pushdockerfrontend
+	# docker push obiwan007/frontend:${VERSION}	
+	# docker push obiwan007/gqlsrv:${VERSION}
+	# docker push obiwan007/usersrv:${VERSION}
+
+dockerfrontend: builddockerfrontend pushdockerfrontend
+
+dockergqlsrv: builddockergqlsrv pushdockergqlsrv
+
+dockerusersrv: builddockerusersrv pushdockerusersrv
+
+builddockerfrontend:
+	cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./nginxDockerfile .
+
+pushdockerfrontend:
+	docker push obiwan007/frontend:${VERSION}
+
+builddockergqlsrv:
+	docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
+
+pushdockergqlsrv:
 	docker push obiwan007/gqlsrv:${VERSION}
+
+builddockerusersrv:
+	docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
+
+pushdockerusersrv:
 	docker push obiwan007/usersrv:${VERSION}
+
+
 
 compose-build:
 	docker-compose build
@@ -56,7 +82,13 @@ kapply:
 	kubectl apply -f config/frontendservice.yaml
 	kubectl apply -f config/gqlservice.yaml
 	kubectl apply -f config/userservice.yaml
-	kubectl apply -f config/zipkin.yaml
+#	kubectl apply -f config/zipkin.yaml
+
+kfrontend:
+	kubectl rollout restart deployment frontend-deployment
+
+kgql:
+	kubectl rollout restart deployment api-deployment
 
 redeploy:
 	kubectl rollout restart deployment api-deployment
