@@ -7,8 +7,8 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { Button, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
-import { Person } from '@material-ui/icons';
+import { Button, List, ListItem } from '@material-ui/core';
+import MaterialTable from 'material-table';
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { GetUsersComponent } from "../../graphql";
@@ -25,6 +25,11 @@ interface IProps {
 }
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 export class Users extends React.PureComponent<IProps, any> {
+
+  columns = [
+    { title: 'Name', field: 'name' },
+    { title: 'Email', field: 'email' },];
+
   render() {
     return (
       <GetUsersComponent>
@@ -55,14 +60,20 @@ export class Users extends React.PureComponent<IProps, any> {
               <h3>Registered Users</h3>
 
               <List component="nav" aria-label="main mailbox folders">
-                {data!.allUsers!.map(story => (
+                <MaterialTable
+                  options={{ minBodyHeight: "calc(100vh - 360px)", maxBodyHeight: "calc(100vh - 360px)" }}
+                  title="Editable Example"
+                  columns={this.columns}
+                  data={data?.allUsers?.map(u => u) as any[]}
+                />
+                {/* {data!.allUsers!.map(data => (
                   <ListItem button>
                     <ListItemIcon>
                       <Person />
                     </ListItemIcon>
-                    <ListItemText primary={story!.name} secondary={story!.email} />
+                    <ListItemText primary={data!.name} secondary={data!.email} />
                   </ListItem>
-                ))}
+                ))} */}
               </List>
 
               <Button variant="contained" color="primary" onClick={() => this.refreshClick()}>Refresh</Button>
