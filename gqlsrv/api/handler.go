@@ -164,6 +164,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
+	log.Println("Handling Google Login Redirect", googleOauthConfig.ClientID)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 

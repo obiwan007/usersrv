@@ -6,27 +6,15 @@
 /* NPM */
 /* Local */
 // Query to get top stories from HackerNews
-import { GetUsersComponent } from "@/graphql";
 // Emotion styled component
-import styled from "@emotion/styled";
+import Button from '@material-ui/core/Button';
 import React from "react";
 import { withRouter } from "react-router-dom";
+import { GetUsersComponent } from "../../graphql";
 import Security from "../../lib/security";
+
 // ----------------------------------------------------------------------------
 
-// Unstyled Emotion parent block, to avoid repeating <style> tags
-// on child elements -- see https://github.com/emotion-js/emotion/issues/1061
-const List = styled.ul``;
-
-// Style the list item so it overrides the default font
-const Story = styled("li")`
-  font-size: 16px;
-
-  a:hover {
-    /* shows an example of how we can use themes */
-    color: orange;
-  }
-`;
 
 interface IProps {
   history?: any;
@@ -61,18 +49,19 @@ export class Users extends React.PureComponent<IProps, any> {
           return (
             <>
               <h3>Registered Users</h3>
-              <List>
+              <ul>
                 {data!.allUsers!.map(story => (
-                  <Story key={story!.id!}>
+                  <li key={story!.id!}>
                     <a href={story!.email!} target="_blank">
                       {story!.name}
                     </a>
                     &nbsp;
                     <span>{story!.email}</span>
-                  </Story>
+                  </li>
                 ))}
-              </List>
-              <button onClick={() => this.refreshClick()}>Refresh</button>
+              </ul>
+
+              <Button color="primary" onClick={() => this.refreshClick()}>Refresh</Button>
             </>
           );
         }}

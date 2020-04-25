@@ -46,7 +46,7 @@ func getToken(subject string) (string, error) {
 
 func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Handling AUthorization")
+		log.Println("Handling AUthorization", r.URL.String())
 		ctx := r.Context()
 		var foundAuth *string = nil
 		for _, cookie := range r.Cookies() {

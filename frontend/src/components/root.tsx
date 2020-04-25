@@ -7,24 +7,23 @@
 // By default, pull in the ReactQL example. In your own project, just nix
 // the `src/components/example` folder and replace the following line with
 // your own React components
-import Example from "@/components/example";
+// Global styles
+// import globalStyles from "@/global/styles";
+// import { Global } from "@emotion/core";
+import React from "react";
+import { Helmet } from "react-helmet";
+import { Route, Switch } from "react-router-dom";
+import Example from "./example";
 /* Local */
 // Components
-import ScrollTop from "@/components/helpers/scrollTop";
-import Login from "@/components/login";
-// Global styles
-import globalStyles from "@/global/styles";
-import { Global } from "@emotion/core";
-import React from "react";
-import Helmet from "react-helmet";
-import { hot } from "react-hot-loader/root";
-import { Route, Switch } from "react-router-dom";
+import ScrollTop from "./helpers/scrollTop";
+import Login from "./login";
 
 // ----------------------------------------------------------------------------
 
 const Root: React.FunctionComponent = () => (
   <div>
-    <Global styles={globalStyles} />
+    {/* <Global styles={globalStyles} /> */}
     <Helmet>
       <title>Userservice Admin!</title>
     </Helmet>
@@ -37,4 +36,5 @@ const Root: React.FunctionComponent = () => (
   </div>
 );
 
-export default hot(Root);
+export default Root;
+// export default hot(Root);

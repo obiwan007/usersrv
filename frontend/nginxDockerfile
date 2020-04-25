@@ -28,7 +28,7 @@ WORKDIR /usr/share/nginx/html
 
 # copy source + compiled `node_modules` 
 
-COPY --from=builder /build/dist/public /usr/share/nginx/html
+COPY --from=builder /build/build /usr/share/nginx/html
 COPY --from=builder /build/certs /etc/nginx/certs
 run ls /etc/nginx/certs
 # run ls /usr/share/nginx/html

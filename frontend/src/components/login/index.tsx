@@ -44,7 +44,8 @@ class Index extends React.PureComponent<IProps, IIndexState> {
   }
 
   async loginClick() {
-    window.location.href = "/auth/login";
+    console.log('Redirect')
+    window.location.href = window.location.origin + "/auth/login";
     // this.props.history.replace("/auth/login");
     // const ok = await Security.login("MyUsername@hotmail.com", "MyPassword");
     // console.log("Redirecting");
