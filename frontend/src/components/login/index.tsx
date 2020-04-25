@@ -4,7 +4,7 @@
 // IMPORTS
 
 /* NPM */
-
+import { Button } from '@material-ui/core';
 import React from "react";
 /* Local */
 
@@ -38,7 +38,7 @@ class Index extends React.PureComponent<IProps, IIndexState> {
       <>
         {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
         <h1>Login</h1>
-        <button onClick={() => this.loginClick()}>Login</button>
+        <Button variant="contained" color="primary" onClick={() => this.loginClick()}>Signin with Google</Button>
       </>
     );
   }

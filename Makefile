@@ -30,7 +30,7 @@ runuser:
 	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
 
 runfrontend:
-	cd frontend && GRAPHQL="http://localhost:8090" && npm run dev:static 
+	cd frontend && GRAPHQL="http://localhost:8090" && npm run start
 	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
 
 

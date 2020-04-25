@@ -10,30 +10,51 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
 import React from "react";
-import { Helmet } from "react-helmet";
 import { Route, Switch } from "react-router-dom";
 import Example from "./example";
-/* Local */
-// Components
 import ScrollTop from "./helpers/scrollTop";
 import Login from "./login";
-
+import './root.css';
 // ----------------------------------------------------------------------------
 
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link color="inherit" href="https://material-ui.com/">
+        Markus Miertschink
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
+
+
 const Root: React.FunctionComponent = () => (
+  // <Container maxWidth="lg">
   <div>
     {/* <Global styles={globalStyles} /> */}
-    <Helmet>
-      <title>Userservice Admin!</title>
-    </Helmet>
-    <ScrollTop>
-      <Switch>
-        <Route path="/" exact component={Example} />
-        <Route path="/login" component={Login} />
-      </Switch>
-    </ScrollTop>
+    {/* <Helmet>
+        <title>Userservice Admin!</title>
+      </Helmet> */}
+    <div className="content">
+
+      <ScrollTop>
+        <Switch>
+          <Route path="/" exact component={Example} />
+          <Route path="/login" component={Login} />
+        </Switch>
+
+      </ScrollTop>
+    </div>
+    <Copyright></Copyright>
   </div>
+  // </Container>
+
 );
 
 export default Root;

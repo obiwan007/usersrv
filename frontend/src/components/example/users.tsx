@@ -7,13 +7,17 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import Button from '@material-ui/core/Button';
+import { Button, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Person } from '@material-ui/icons';
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { GetUsersComponent } from "../../graphql";
 import Security from "../../lib/security";
-
 // ----------------------------------------------------------------------------
+
+function ListItemLink(props: any) {
+  return <ListItem button component="a" {...props} />;
+}
 
 
 interface IProps {
@@ -30,10 +34,10 @@ export class Users extends React.PureComponent<IProps, any> {
             return (
               <div>
                 <h1>Error retrieving users list &mdash; {error.message}</h1>
-                <button onClick={() => this.props.history.push("/login")}>
+                <Button variant="contained" color="primary" onClick={() => this.props.history.push("/login")}>
                   Login
-                </button>
-                <button onClick={() => this.refreshClick()}>Refresh</button>
+                </Button>
+                {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
               </div>
             );
           }
@@ -49,19 +53,19 @@ export class Users extends React.PureComponent<IProps, any> {
           return (
             <>
               <h3>Registered Users</h3>
-              <ul>
-                {data!.allUsers!.map(story => (
-                  <li key={story!.id!}>
-                    <a href={story!.email!} target="_blank">
-                      {story!.name}
-                    </a>
-                    &nbsp;
-                    <span>{story!.email}</span>
-                  </li>
-                ))}
-              </ul>
 
-              <Button color="primary" onClick={() => this.refreshClick()}>Refresh</Button>
+              <List component="nav" aria-label="main mailbox folders">
+                {data!.allUsers!.map(story => (
+                  <ListItem button>
+                    <ListItemIcon>
+                      <Person />
+                    </ListItemIcon>
+                    <ListItemText primary={story!.name} secondary={story!.email} />
+                  </ListItem>
+                ))}
+              </List>
+
+              <Button variant="contained" color="primary" onClick={() => this.refreshClick()}>Refresh</Button>
             </>
           );
         }}

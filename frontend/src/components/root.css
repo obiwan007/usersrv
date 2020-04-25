@@ -13,6 +13,8 @@ code {
 }
 
 
-content {
-  height: 300px
+.content {
+  min-height: 100%;
+  height: calc( 100vh - 30px );
+  overflow-y: auto;  
 }

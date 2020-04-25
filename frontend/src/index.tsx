@@ -1,6 +1,8 @@
 // Helper function that creates a new Apollo client per request
 // Create browser history, for navigation a la single page apps
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
+import { ThemeProvider } from '@material-ui/core';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import { createBrowserHistory } from "history";
 import React from 'react';
 // HOC for enabling Apollo GraphQL `<Query>` and `<Mutation>`
@@ -12,21 +14,37 @@ import Root from "./components/root";
 import './index.css';
 import { createClient } from "./lib/apollo";
 import * as serviceWorker from './serviceWorker';
-
+import theme from './theme';
 // Create Apollo client
 const client = createClient();
 console.log("Apolleclient created", client);
 
+// let theme = createMuiTheme({
+//   typography: {
+//     fontFamily: [
+//       '-apple-system',
+//       'BlinkMacSystemFont',
+//       '"Segoe UI"',
+//       'Roboto',
+//       '"Helvetica Neue"',
+//       'Arial',
+//       'sans-serif',
+//       '"Apple Color Emoji"',
+//       '"Segoe UI Emoji"',
+//       '"Segoe UI Symbol"',
+//     ].join(','),
+//   },
+// });
 
 function MyComponent() {
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={client} >
       <ApolloHooksProvider client={client}>
         <Router history={history}>
           <Root />
         </Router>
       </ApolloHooksProvider>
-    </ApolloProvider>
+    </ApolloProvider >
   )
 }
 
@@ -34,7 +52,12 @@ function MyComponent() {
 const history = createBrowserHistory();
 ReactDOM.render(
   // <React.StrictMode>
-  <MyComponent />
+  <React.Fragment>
+    <ThemeProvider theme={theme}>
+      <CssBaseline></CssBaseline>
+      <MyComponent />
+    </ThemeProvider>
+  </React.Fragment>
   // </React.StrictMode>,
   , document.getElementById('root')
 );
