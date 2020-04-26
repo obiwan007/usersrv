@@ -123,7 +123,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 
 	claims := existingToken.Claims.(*MyCustomClaims)
 	log.Println("Refresh Subject:", claims.Subject)
-	token, err := getToken(claims.Subject)
+	token, err := getToken(claims.Name, claims.Picture, claims.Subject)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
@@ -135,32 +135,32 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
-	log.Println("Login HIT")
+// func handleLogin(w http.ResponseWriter, r *http.Request) {
+// 	log.Println("Login HIT")
 
-	var u loginUser
-	if r.Body == nil {
-		http.Error(w, "Please send a request body", 400)
-		return
-	}
+// 	var u loginUser
+// 	if r.Body == nil {
+// 		http.Error(w, "Please send a request body", 400)
+// 		return
+// 	}
 
-	err := json.NewDecoder(r.Body).Decode(&u)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	fmt.Println(u.Username, u.Password)
-	token, err := getToken(u.Username)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-	}
-	loginRes := &loginResponse{Token: token}
-	res, err := json.Marshal(loginRes)
+// 	err := json.NewDecoder(r.Body).Decode(&u)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), 400)
+// 		return
+// 	}
+// 	fmt.Println(u.Username, u.Password)
+// 	token, err := getToken(u.Username, u.)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), 400)
+// 	}
+// 	loginRes := &loginResponse{Token: token}
+// 	res, err := json.Marshal(loginRes)
 
-	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
+// 	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
 
-	w.Write(res)
-}
+// 	w.Write(res)
+// }
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
@@ -176,7 +176,8 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Content", content)
-	token, err := getToken(content.Email)
+	log.Println("Name", content.Name)
+	token, err := getToken(content.Name, content.Picture, content.Email)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
@@ -236,8 +237,9 @@ func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer, gClientID, gCl
 		ClientID:     *gClientID,   //
 		ClientSecret: *gClientSecr, //
 		RedirectURL:  *redirectUrl,
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint:     google.Endpoint,
+		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint: google.Endpoint,
 	}
 	log.Printf("OAuth %s %s %s", (*gClientID)[:6], (*gClientSecr)[:6], *redirectUrl)
 	mux := NewServeMux(tracer)

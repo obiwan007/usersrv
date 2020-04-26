@@ -19,18 +19,20 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 type MyCustomClaims struct {
-	Email string `json:"email"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
 	jwt.StandardClaims
 }
 
-func getToken(subject string) (string, error) {
+func getToken(username, picture, email string) (string, error) {
 	// Create the Claims
 	claims := MyCustomClaims{
-		"bar",
+		username,
+		picture,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 			Issuer:    "gqlsrv",
-			Subject:   subject,
+			Subject:   email,
 		},
 	}
 	// claims := &jwt.StandardClaims{

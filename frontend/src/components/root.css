@@ -15,6 +15,7 @@ code {
 
 .content {
   min-height: 100%;
+  margin-top: 50px;
   height: calc( 100vh - 90px );
   overflow-y: auto;  
 }
