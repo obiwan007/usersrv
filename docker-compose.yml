@@ -65,7 +65,7 @@ services:
     environment:
       - CLIENTID=${CLIENTID}
       - CLIENTSECRET=${CLIENTSECRET}
-      - REDIRECT=${REDIRECT
+      - REDIRECT=${REDIRECT}
 
   frontend:
     build:

@@ -15,8 +15,14 @@ spec:
       containers:
         - name: zipkin
           image: jaegertracing/all-in-one:1.17
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              memory: 256Mi
           ports:
             - containerPort: 9411
+            - containerPort: 16686
           env:
             - name: COLLECTOR_ZIPKIN_HTTP_PORT
               value: "9411"

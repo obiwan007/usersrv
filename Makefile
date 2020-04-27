@@ -78,11 +78,14 @@ compose-build:
 compose-up:
 	docker-compose up
 
+kapplyzipkin:
+	kubectl apply -f config/zipkin.yaml
+
 kapply:
 	kubectl apply -f config/frontendservice.yaml
 	kubectl apply -f config/gqlservice.yaml
 	kubectl apply -f config/userservice.yaml
-#	kubectl apply -f config/zipkin.yaml
+	kubectl apply -f config/zipkin.yaml
 
 kfrontend:
 	kubectl rollout restart deployment frontend-deployment
@@ -90,7 +93,7 @@ kfrontend:
 kgql:
 	kubectl rollout restart deployment api-deployment
 
-redeploy:
+kredeploy:
 	kubectl rollout restart deployment api-deployment
 	kubectl rollout restart deployment user-deployment
 	kubectl rollout restart deployment frontend-deployment
