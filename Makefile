@@ -7,6 +7,7 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME_GQL=gqlsrv
 BINARY_NAME_USER=usersrv
+BINARY_NAME_ORDER=usersrv
 
 VERSION ?= latest
 
@@ -31,7 +32,10 @@ runuser:
 
 runfrontend:
 	cd frontend && GRAPHQL="http://localhost:8090" && npm run start
-	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
+
+runorder:
+	cd ordersrv/cli && $(GOBUILD) -o $(BINARY_NAME_ORDER) -v 
+	cd ordersrv/cli && ./$(BINARY_NAME_ORDER) --port 10001 --zipkin http://localhost:9411/api/v1/spans
 
 
 docker: docker-build docker-push
@@ -104,3 +108,6 @@ kdashboard:
 okteto:
 	export KUBECONFIG=$HOME/Downloads/okteto-kube.config:${KUBECONFIG:-$HOME/.kube/config}
 #	k get deployment api-deployment -o yaml | sed "s/\(image: obiwan007\/gqlsrv\):.*$/\1:VERSION/" | grep image
+
+protobuf:
+	protoc -I proto/ proto/*.proto --go_out=plugins=grpc:proto

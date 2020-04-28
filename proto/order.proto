@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "UserServiceProto";
+
+package pb;
+
+service OrderService {
+  rpc CreateOrder(OrderRequest) returns (OrderResponse) {}
+}
+// A feature names something at a given point.
+//
+// If a feature could not be named, the name is empty.
+message OrderRequest {
+  // The name of the User.
+  string id = 1;
+  string customer = 2;
+  string status = 3;
+  int64 created_on = 4;
+  message OrderItem {
+        string code = 1;
+        string name = 2;
+        float unit_price = 3;
+        int32 quantity = 4;
+    }
+
+  repeated OrderItem order_items = 7;
+}
+
+message OrderResponse {
+    string status = 1;
+}
