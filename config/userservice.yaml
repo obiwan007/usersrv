@@ -18,6 +18,11 @@ spec:
         - name: user
           image: obiwan007/usersrv:latest
           imagePullPolicy: "Always"
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              memory: 256Mi
           ports:
             - name: usersrv
               containerPort: 10000

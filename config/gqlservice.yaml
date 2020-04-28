@@ -18,6 +18,11 @@ spec:
         - name: api
           image: obiwan007/gqlsrv:latest
           imagePullPolicy: "Always"
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              memory: 256Mi
           ports:
             - name: graphqlport
               containerPort: 8090
