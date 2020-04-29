@@ -7,16 +7,29 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME_GQL=gqlsrv
 BINARY_NAME_USER=usersrv
-BINARY_NAME_ORDER=usersrv
+BINARY_NAME_ORDER=ordersrv
 BINARY_NAME_STORE=storesrv
 
 VERSION ?= latest
 
-all: test buildgql builduser
+all: test buildgql builduser buildorder buildstore buildfrontend
 buildgql: 
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
+
 builduser: 
 	cd usersrv/cli && $(GOBUILD) -o $(BINARY_NAME_USER) -v 
+
+buildstore: 
+	cd eventstore/cli && $(GOBUILD) -o $(BINARY_NAME_STORE) -v 
+
+buildorder: 
+	cd ordersrv/cli && $(GOBUILD) -o $(BINARY_NAME_ORDER) -v 
+
+buildfrontend: 
+	cd frontend && npm i && npm run build
+
+
+
 test: 
 	$(GOTEST) -v ./...
 clean: 
