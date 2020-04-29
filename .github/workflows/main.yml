@@ -17,9 +17,11 @@ jobs:
         env:
           DOCKER: ${{ secrets.DOCKER }}
       - name: login1
-        run: echo $DOCKER
+        run: echo $DOCKER > out.tmp
+      - name: login11
+        run: ls -la out.tmp
       - name: login2
-        run: echo $DOCKER | docker login docker.pkg.github.com -u obiwan007 --password-stdin        
+        run: cat out.tmp | docker login docker.pkg.github.com -u obiwan007 --password-stdin        
       - name: Run Makefile
         env:
           TOKEN: ${{ secrets.TOKEN }}
