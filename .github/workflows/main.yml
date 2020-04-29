@@ -20,9 +20,6 @@ jobs:
         run: echo ${{ secrets.DOCKER }} > out.tmp
       - name: login11
         run: ls -la out.tmp
-      - name: login2
-        run: cat out.tmp | docker login docker.pkg.github.com -u obiwan007 --password-stdin        
-      - name: Run Makefile
-        env:
-          TOKEN: ${{ secrets.TOKEN }}
-        run: make all
+      - name: Makefile
+        run: echo ${{ secrets.DOCKER }} | docker login docker.pkg.github.com -u obiwan007 --password-stdin && cat out.tmp | docker login docker.pkg.github.com -u obiwan007 --password-stdin && make builddockergqlsrv pushdockergqlsrv        
+
