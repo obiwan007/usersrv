@@ -16,9 +16,10 @@ jobs:
           fetch-depth: 1
         env:
           DOCKER: ${{ secrets.DOCKER }}
-      - name: login
-        run: echo $DOCKER | docker login docker.pkg.github.com -u obiwan007 --password-stdin
-        
+      - name: login1
+        run: echo $DOCKER
+      - name: login2
+        run: echo $DOCKER | docker login docker.pkg.github.com -u obiwan007 --password-stdin        
       - name: Run Makefile
         env:
           TOKEN: ${{ secrets.TOKEN }}
