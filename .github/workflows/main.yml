@@ -17,7 +17,7 @@ jobs:
         env:
           DOCKER: ${{ secrets.DOCKER }}
       - name: Docker login
-        run: echo ${{ secrets.DOCKER }} | docker login docker.io -u obiwan007 --password-stdin && cat out.tmp | 
+        run: echo ${{ secrets.DOCKER }} | docker login docker.io -u obiwan007 --password-stdin
       - name: Makefile
         run: make docker        
 
