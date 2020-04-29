@@ -16,7 +16,10 @@
 			"path": "frontend"
 		},
 		{
-			"path": "orderservice"
+			"path": "eventstore"
+		},
+		{
+			"path": "ordersrv"
 		}
 	],
 	"settings": {
@@ -26,6 +29,17 @@
 		"editor.codeActionsOnSave": {
 			"source.organizeImports": true
 		},
+		"sqltools.connections": [
+			{
+				"askForPassword": true,
+				"database": "orderdb",
+				"dialect": "PostgreSQL",
+				"name": "Connection",
+				"port": 26257,
+				"server": "localhost",
+				"username": "markus"
+			}
+		],
 	},
 	"go.editorContextMenuCommands": {},
 	"go.gopath": ""

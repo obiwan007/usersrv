@@ -6,3 +6,8 @@ usersrv/cli/usersrv
 gqlsrv/cli/gqlsrv
 frontend/.env
 frontend.bak
+ordersdb*
+data
+storesrv
+ordersrv
+usersrv

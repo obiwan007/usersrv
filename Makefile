@@ -8,6 +8,7 @@ GOGET=$(GOCMD) get
 BINARY_NAME_GQL=gqlsrv
 BINARY_NAME_USER=usersrv
 BINARY_NAME_ORDER=usersrv
+BINARY_NAME_STORE=storesrv
 
 VERSION ?= latest
 
@@ -35,8 +36,11 @@ runfrontend:
 
 runorder:
 	cd ordersrv/cli && $(GOBUILD) -o $(BINARY_NAME_ORDER) -v 
-	cd ordersrv/cli && ./$(BINARY_NAME_ORDER) --port 10001 --zipkin http://localhost:9411/api/v1/spans
+	cd ordersrv/cli && ./$(BINARY_NAME_ORDER) -config config.conf --port 10001 --zipkin http://localhost:9411/api/v1/spans
 
+runstore:
+	cd eventstore/cli && $(GOBUILD) -o $(BINARY_NAME_STORE) -v 
+	cd eventstore/cli && ./$(BINARY_NAME_STORE) --port 10002 --zipkin http://localhost:9411/api/v1/spans
 
 docker: docker-build docker-push
 
@@ -111,3 +115,23 @@ okteto:
 
 protobuf:
 	protoc -I proto/ proto/*.proto --go_out=plugins=grpc:proto
+
+dbinstall:
+	brew install cockroachdb/tap/cockroach
+
+dbcreate:
+	brew install cockroachdb/tap/cockroach
+	cockroach user set markus --insecure
+	cockroach sql --insecure -e 'CREATE DATABASE ordersdb'
+	cockroach sql --insecure -e 'GRANT ALL ON DATABASE ordersdb TO markus'
+
+dbcluster:
+	cockroach start --insecure --store=ordersdb-1 --host=localhost --background
+	cockroach start --insecure --store=ordersdb-2 --host=localhost --port=26258 --http-port=8081 --join=localhost:26257 --background
+	cockroach start --insecure --store=ordersdb-3 --host=localhost --port=26259 --http-port=8082 --join=localhost:26257 --background
+
+dbshell:
+	cockroach sql --url="postgresql://markus@localhost:26257/ordersdb?sslmode=disable";
+
+runnats:
+	nats-streaming-server --store file --dir ./data --max_msgs 0 --max_bytes 0
