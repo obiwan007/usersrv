@@ -12,7 +12,7 @@ BINARY_NAME_STORE=storesrv
 
 VERSION ?= latest
 
-all: test buildgql builduser buildorder buildstore buildfrontend
+all: test buildgql builduser buildorder buildstore buildfrontend docker
 buildgql: 
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
 
