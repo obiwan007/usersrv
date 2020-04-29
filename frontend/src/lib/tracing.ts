@@ -1,9 +1,8 @@
-const { HttpLogger } = require("zipkin-transport-http");
 const { Tracer, ExplicitContext } = require("zipkin");
 const { recorder } = require("./recorder");
-const {
-  jsonEncoder: { JSON_V2 }
-} = require("zipkin");
+// const {
+//   jsonEncoder: { JSON_V2 }
+// } = require("zipkin");
 
 const ctxImpl = new ExplicitContext();
 const localServiceName = "browser";

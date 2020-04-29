@@ -7,17 +7,13 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { Button, List, ListItem } from '@material-ui/core';
+import { Button, List } from '@material-ui/core';
 import MaterialTable from 'material-table';
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { GetUsersComponent } from "../../graphql";
 import Security from "../../lib/security";
 // ----------------------------------------------------------------------------
-
-function ListItemLink(props: any) {
-  return <ListItem button component="a" {...props} />;
-}
 
 
 interface IProps {
@@ -86,7 +82,7 @@ export class Users extends React.PureComponent<IProps, any> {
 
   async refreshClick() {
     try {
-      const ok = await Security.refresh();
+      await Security.refresh();
     } catch (ex) {
       console.log("Error in refreshing", ex);
     }

@@ -7,14 +7,9 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { ListItem } from '@material-ui/core';
 import React from "react";
 import { withRouter } from "react-router-dom";
 // ----------------------------------------------------------------------------
-
-function ListItemLink(props: any) {
-  return <ListItem button component="a" {...props} />;
-}
 
 
 interface IProps {

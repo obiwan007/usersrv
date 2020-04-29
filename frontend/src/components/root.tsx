@@ -122,7 +122,7 @@ export function ButtonAppBar(props: any) {
 
 export function MainMenu(props: any) {
   const classes = useStyles();
-  const { picture, container, mobileOpen, handleDrawerToggle } = props;
+  const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
   console.log('MobileOpen', mobileOpen)
   const drawer = (
@@ -225,7 +225,6 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   };
 
   public render() {
-    const DynamicComponent = this.state.dynamic || (() => <h2>Loading...</h2>);
     const { menuVisible } = this.state;
     return (
       <div>

@@ -34,7 +34,6 @@ class Index extends React.PureComponent<IProps, IIndexState> {
   };
 
   public render() {
-    const DynamicComponent = this.state.dynamic || (() => <h2>Loading...</h2>);
 
     return (
       <>
