@@ -17,7 +17,7 @@ jobs:
         env:
           DOCKER: ${{ secrets.DOCKER }}
       - name: login1
-        run: echo $DOCKER > out.tmp
+        run: echo ${{ secrets.DOCKER }} > out.tmp
       - name: login11
         run: ls -la out.tmp
       - name: login2
