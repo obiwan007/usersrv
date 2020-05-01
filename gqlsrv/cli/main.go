@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,18 +10,13 @@ import (
 	"github.com/namsral/flag"
 
 	"github.com/coreos/etcd/clientv3"
-	etcdnaming "github.com/coreos/etcd/clientv3/naming"
-	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
-	"github.com/opentracing/opentracing-go"
 	"github.com/rs/cors"
 
 	"github.com/common-nighthawk/go-figure"
 	graphql "github.com/graph-gophers/graphql-go"
 	gql "github.com/obiwan007/usersrv/gqlsrv/api"
+	"github.com/obiwan007/usersrv/pkg"
 	pb "github.com/obiwan007/usersrv/proto"
-	"github.com/obiwan007/usersrv/usersrv/api/tracing"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -70,12 +64,15 @@ func main() {
 	myFigure := figure.NewFigure("GQLSRV", "", true)
 	myFigure.Print()
 	flag.Parse()
-	fmt.Println("Init GraphQL Service")
+
+	p := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "gqpservice"}
+
 	s, err := getSchema("../schema/schema.graphql")
 	if err != nil {
 		panic(err)
 	}
 
+	// for GraphQL/http endpoint
 	tlsCfg := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
@@ -97,57 +94,7 @@ func main() {
 	}
 	defer cli.Close()
 
-	var opts []grpc.DialOption
-
-	// tracer := dapperish.NewTracer("dapperish_tester")
-
-	_, collector, err := tracing.NewTracer("gql service", "localhost:10000", *zipkin)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Logging to Zipkin:", *zipkin)
-	defer collector.Close()
-	t := opentracing.GlobalTracer()
-	opts = append(opts, grpc.WithUnaryInterceptor(
-		otgrpc.OpenTracingClientInterceptor(t, otgrpc.LogPayloads())))
-	opts = append(opts, grpc.WithStreamInterceptor(
-		otgrpc.OpenTracingStreamClientInterceptor(t)))
-
-	if *balancer {
-		r := &etcdnaming.GRPCResolver{Client: cli}
-		b := grpc.RoundRobin(r)
-		opts = append(opts, grpc.WithBalancer(b))
-	}
-
-	if *tlsForGrpc {
-		if *caFile == "" {
-			log.Fatalf("No TLS crt file given")
-		}
-		creds, err := credentials.NewClientTLSFromFile(*caFile, "")
-		if err != nil {
-			log.Fatalf("Failed to create TLS credentials %v", err)
-		} else {
-			log.Println("TLS enabled")
-		}
-
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		opts = append(opts, grpc.WithInsecure())
-		log.Println("Insecure connection!")
-	}
-	opts = append(opts, grpc.WithTimeout(10*time.Second))
-
-	// opts = append(opts, grpc.WithBlock())
-	log.Println("Dial", *serverAddr)
-
-	conn, err := grpc.Dial(*serverAddr, opts...)
-	// } else {
-	// 	conn, err := grpc.Dial("my-service", opts...)
-	// }
-
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
+	conn, tracer, err := pkg.CreateClient(p, *serverAddr)
 	defer conn.Close()
 	gqlClient := pb.NewUserServiceClient(conn)
 
@@ -155,7 +102,7 @@ func main() {
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
-	mux := gql.NewRouter(schema, t, gClientID, gClientSecr, redirect)
+	mux := gql.NewRouter(schema, tracer, gClientID, gClientSecr, redirect)
 
 	// cors.Default() setup the middleware with default options being
 	// all origins accepted with simple methods (GET, POST). See

@@ -10,22 +10,34 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
-import { AppBar, Button, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, useTheme } from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import MailIcon from '@material-ui/icons/Mail';
-import MenuIcon from '@material-ui/icons/Menu';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
+import {
+  AppBar,
+  Button,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  makeStyles,
+  Toolbar,
+  useTheme,
+} from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
+import Drawer from "@material-ui/core/Drawer";
+import Hidden from "@material-ui/core/Hidden";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
+import MailIcon from "@material-ui/icons/Mail";
+import MenuIcon from "@material-ui/icons/Menu";
+import InboxIcon from "@material-ui/icons/MoveToInbox";
 import React from "react";
-import { Link as RouterLink, Route, Switch } from 'react-router-dom';
-import security from '../lib/security';
+import { Link as RouterLink, Route, Switch } from "react-router-dom";
+import security from "../lib/security";
 import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
 import Login from "./login";
-import './root.css';
+import "./root.css";
 import Users from "./users";
 
 // ----------------------------------------------------------------------------
@@ -36,21 +48,21 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: theme.spacing(2),
-    [theme.breakpoints.up('sm')]: {
-      display: 'none',
+    [theme.breakpoints.up("sm")]: {
+      display: "none",
     },
   },
   title: {
     flexGrow: 1,
   },
   appBar: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       width: `calc(100% - ${drawerWidth}px)`,
       marginLeft: drawerWidth,
     },
   },
   drawer: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       width: drawerWidth,
       flexShrink: 0,
     },
@@ -59,12 +71,12 @@ const useStyles = makeStyles((theme) => ({
     width: drawerWidth,
   },
   drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   content: {
     flexGrow: 1,
@@ -73,32 +85,43 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
 }));
 
-
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
+      {"Copyright © "}
       <Link color="inherit" href="https://material-ui.com/">
         Markus Miertschink
-      </Link>{' '}
+      </Link>{" "}
       {new Date().getFullYear()}
-      {'.'}
+      {"."}
     </Typography>
   );
 }
 export function ButtonAppBar(props: any) {
   const classes = useStyles();
-  const { picture, handleDrawerToggle } = props;
+  const { picture, handleDrawerToggle, isLoggedIn } = props;
   return (
     // <div className={classes.root}>
-    <AppBar position="fixed" className={classes.appBar}>
+    <AppBar
+      position="fixed"
+      className={classes.appBar}
+      style={!isLoggedIn ? { width: "100%" } : {}}
+    >
       <Toolbar>
-        <IconButton onClick={handleDrawerToggle} edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-          <MenuIcon />
-        </IconButton>
+        {isLoggedIn && (
+          <IconButton
+            onClick={handleDrawerToggle}
+            edge="start"
+            className={classes.menuButton}
+            color="inherit"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         <Typography variant="h6" className={classes.title}>
-          News
-          </Typography>
+          MyPlaner
+        </Typography>
         {/* <Link
             component={RouterLink} to="/login"
             variant="body1"
@@ -107,13 +130,21 @@ export function ButtonAppBar(props: any) {
           >
             Login
           </Link> */}
-        {!props.isLoggedIn && <Button component={RouterLink} to="/login" color="inherit" >Login</Button>}
-        {props.isLoggedIn && <>
-          <Button component={RouterLink} to="/user" color="inherit" >{props.username}</Button>
-          <Avatar alt="Remy Sharp" src={picture} >{props.username}</Avatar>
-        </>
-        }
-
+        {!props.isLoggedIn && (
+          <Button component={RouterLink} to="/login" color="inherit">
+            Login
+          </Button>
+        )}
+        {props.isLoggedIn && (
+          <>
+            <Button component={RouterLink} to="/user" color="inherit">
+              {props.username}
+            </Button>
+            <Avatar alt="Remy Sharp" src={picture}>
+              {props.username}
+            </Avatar>
+          </>
+        )}
       </Toolbar>
     </AppBar>
     // </div >
@@ -124,10 +155,10 @@ export function MainMenu(props: any) {
   const classes = useStyles();
   const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
-  console.log('MobileOpen', mobileOpen)
+  console.log("MobileOpen", mobileOpen);
   const drawer = (
     <div>
-      <div className={classes.toolbar} />
+      {/* <div className={classes.toolbar} /> */}
       {/* <div className={classes.drawerHeader}>
         <IconButton onClick={handleDrawerToggle}>
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -135,18 +166,43 @@ export function MainMenu(props: any) {
       </div> */}
       <Divider />
       <List>
-        {[{ txt: 'Home', link: '/' },].map((o, index) => (
+        {[{ txt: "Timer", link: "/timer" }].map((o, index) => (
           <ListItem component={RouterLink} to={o.link} button key={o.txt}>
-            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+            <ListItemIcon>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListItemIcon>
             <ListItemText primary={o.txt} />
           </ListItem>
         ))}
       </List>
       <Divider />
       <List>
-        {[{ txt: 'User Admin', link: '/user' }].map((o, index) => (
+        {[
+          { txt: "Home", link: "/" },
+          { txt: "Reports", link: "/reports" },
+        ].map((o, index) => (
+          <ListItem component={RouterLink} to={o.link} button key={o.txt}>
+            <ListItemIcon>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListItemIcon>
+            <ListItemText primary={o.txt} />
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {[
+          { txt: "Projects", link: "/projects" },
+          { txt: "Clients", link: "/clients" },
+          { txt: "Team", link: "/team" },
+          { txt: "Tags", link: "/tags" },
+          { txt: "Settings", link: "/settings" },
+          { txt: "User Admin", link: "/user" },
+        ].map((o, index) => (
           <ListItem button key={o.txt} component={RouterLink} to={o.link}>
-            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+            <ListItemIcon>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListItemIcon>
             <ListItemText primary={o.txt} />
           </ListItem>
         ))}
@@ -161,7 +217,7 @@ export function MainMenu(props: any) {
         <Drawer
           container={container}
           variant="temporary"
-          anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+          anchor={theme.direction === "rtl" ? "right" : "left"}
           open={mobileOpen}
           onClose={handleDrawerToggle}
           classes={{
@@ -189,7 +245,6 @@ export function MainMenu(props: any) {
   );
 }
 
-
 interface IStateRoot {
   dynamic: React.SFC | null;
   isLoggedIn: boolean;
@@ -198,16 +253,14 @@ interface IStateRoot {
   menuVisible: boolean;
 }
 
-interface IPropsRoot {
-
-}
+interface IPropsRoot {}
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   public state = {
     dynamic: null,
     isLoggedIn: false,
-    picture: '',
-    name: '',
+    picture: "",
+    name: "",
     menuVisible: false,
   };
   public componentDidMount = async () => {
@@ -225,7 +278,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   };
 
   public render() {
-    const { menuVisible } = this.state;
+    const { menuVisible, isLoggedIn } = this.state;
     return (
       <div>
         {/* <Global styles={globalStyles} /> */}
@@ -233,11 +286,24 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           <title>Userservice Admin!</title>
         </Helmet> */}
 
+        <div style={{ display: "flex" }}>
+          <ButtonAppBar
+            handleDrawerToggle={() =>
+              this.setState({ menuVisible: !menuVisible })
+            }
+            username={this.state.name}
+            picture={this.state.picture}
+            isLoggedIn={this.state.isLoggedIn}
+          ></ButtonAppBar>
+          {isLoggedIn && (
+            <MainMenu
+              handleDrawerToggle={() =>
+                this.setState({ menuVisible: !menuVisible })
+              }
+              mobileOpen={menuVisible}
+            ></MainMenu>
+          )}
 
-        <div style={{ display: 'flex' }}>
-          <ButtonAppBar handleDrawerToggle={() => this.setState({ menuVisible: !menuVisible })} username={this.state.name} picture={this.state.picture} isLoggedIn={this.state.isLoggedIn}></ButtonAppBar>
-
-          <MainMenu handleDrawerToggle={() => this.setState({ menuVisible: !menuVisible })} mobileOpen={menuVisible}></MainMenu>>
           <div className="content" style={{ flexGrow: 1, padding: 0 }}>
             <ScrollTop>
               <Switch>
@@ -253,8 +319,6 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     );
   }
 }
-
-
 
 export default Root;
 // export default hot(Root);
