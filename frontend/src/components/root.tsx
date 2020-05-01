@@ -34,9 +34,11 @@ import InboxIcon from "@material-ui/icons/MoveToInbox";
 import React from "react";
 import { Link as RouterLink, Route, Switch } from "react-router-dom";
 import security from "../lib/security";
+import Clients from "./clients/clients";
 import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
 import Login from "./login";
+import Projects from "./projects/projects";
 import "./root.css";
 import Timer from "./timer/timer";
 import Users from "./users";
@@ -310,6 +312,8 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
               <Switch>
                 <Route path="/" exact component={Home} />
                 <Route path="/timer" exact component={Timer} />
+                <Route path="/projects" exact component={Projects} />
+                <Route path="/clients" exact component={Clients} />
                 <Route path="/user" exact component={Users} />
                 <Route path="/login" component={Login} />
               </Switch>

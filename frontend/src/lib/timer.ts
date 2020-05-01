@@ -8,6 +8,12 @@ export class TimeEntry {
   timerEnd: Date = new Date();
   description: string = "";
   isRunning: boolean = false;
+  get tStart(): string {
+    return this.timerStart.toLocaleTimeString();
+  }
+  get tEnd(): string {
+    return this.timerEnd.toLocaleTimeString();
+  }
   /**
    *
    */

@@ -28,7 +28,10 @@ interface IProps {
 
 export class Timer extends React.PureComponent<IProps, IState> {
   columns = [
-    // { title: "Start", field: "timerStart" },
+    { title: "Customer", field: "customer" },
+    { title: "Project", field: "project" },
+    { title: "Start", field: "tStart" },
+    { title: "End", field: "tEnd" },
     { title: "Seconds", field: "elapsedSeconds" },
   ];
   interval?: NodeJS.Timeout;
