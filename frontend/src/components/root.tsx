@@ -38,6 +38,7 @@ import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
 import Login from "./login";
 import "./root.css";
+import Timer from "./timer/timer";
 import Users from "./users";
 
 // ----------------------------------------------------------------------------
@@ -308,6 +309,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
             <ScrollTop>
               <Switch>
                 <Route path="/" exact component={Home} />
+                <Route path="/timer" exact component={Timer} />
                 <Route path="/user" exact component={Users} />
                 <Route path="/login" component={Login} />
               </Switch>

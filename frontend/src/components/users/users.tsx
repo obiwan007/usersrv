@@ -7,24 +7,23 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { Button, List } from '@material-ui/core';
-import MaterialTable from 'material-table';
+import { Button, List } from "@material-ui/core";
+import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { GetUsersComponent } from "../../graphql";
 import Security from "../../lib/security";
 // ----------------------------------------------------------------------------
 
-
 interface IProps {
   history?: any;
 }
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 export class Users extends React.PureComponent<IProps, any> {
-
   columns = [
-    { title: 'Name', field: 'name' },
-    { title: 'Email', field: 'email' },];
+    { title: "Name", field: "name" },
+    { title: "Email", field: "email" },
+  ];
 
   render() {
     return (
@@ -35,7 +34,11 @@ export class Users extends React.PureComponent<IProps, any> {
             return (
               <div>
                 <h1>Error retrieving users list &mdash; {error.message}</h1>
-                <Button variant="contained" color="primary" onClick={() => this.props.history.push("/login")}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => this.props.history.push("/login")}
+                >
                   Login
                 </Button>
                 {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
@@ -57,10 +60,13 @@ export class Users extends React.PureComponent<IProps, any> {
 
               <List component="nav" aria-label="main mailbox folders">
                 <MaterialTable
-                  options={{ minBodyHeight: "calc(100vh - 360px)", maxBodyHeight: "calc(100vh - 360px)" }}
+                  options={{
+                    minBodyHeight: "calc(100vh - 360px)",
+                    maxBodyHeight: "calc(100vh - 360px)",
+                  }}
                   title="Editable Example"
                   columns={this.columns}
-                  data={data?.allUsers?.map(u => u) as any[]}
+                  data={data?.allUsers?.map((u) => u) as any[]}
                 />
                 {/* {data!.allUsers!.map(data => (
                   <ListItem button>
@@ -72,7 +78,13 @@ export class Users extends React.PureComponent<IProps, any> {
                 ))} */}
               </List>
 
-              <Button variant="contained" color="primary" onClick={() => this.refreshClick()}>Refresh</Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => this.refreshClick()}
+              >
+                Refresh
+              </Button>
             </>
           );
         }}
