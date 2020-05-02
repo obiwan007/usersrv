@@ -88,6 +88,12 @@ export class Timer {
     this.currentTimer.isRunning = true;
     this.save();
   }
+  discardTimer() {
+    this.currentTimer.timerStart = new Date();
+    this.currentTimer.isRunning = false;
+    this.currentTimer.description = "";
+    this.save();
+  }
   getTimer() {
     return this.currentTimer;
   }
@@ -96,7 +102,9 @@ export class Timer {
     this.currentTimer.isRunning = false;
     this.currentTimer.elapsedSeconds = this.currentTimer.elapsed();
     this.entries.push(this.currentTimer);
+    const lastProject = this.currentTimer.project;
     this.currentTimer = new TimeEntry();
+    this.currentTimer.project = lastProject;
     index = index + 1;
     this.currentTimer.id = index;
     this.save();

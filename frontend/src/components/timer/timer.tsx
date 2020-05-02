@@ -21,7 +21,7 @@ import {
   withStyles,
   WithStyles,
 } from "@material-ui/core";
-import { PlayArrow, Stop } from "@material-ui/icons";
+import { Delete, PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -44,11 +44,16 @@ const styles = ({ palette, spacing }: Theme) =>
     formControl: {
       margin: spacing(1),
       paddingRight: spacing(1),
+      paddingLeft: spacing(1),
       minWidth: 120,
       width: "100%",
     },
+    topButtons: {
+      marginLeft: spacing(2),
+      paddingRight: spacing(1),
+    },
     selectEmpty: {
-      marginTop: 13,
+      // marginTop: 13,
     },
   });
 
@@ -59,6 +64,8 @@ interface IState {
   elapsed: number;
   list: TimeEntry[];
   columns: any[];
+  description: string;
+  currentProject: string;
 }
 interface IProps {
   history?: any;
@@ -74,6 +81,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
     this.state = {
+      currentProject: timer.getTimer().project,
+      description: timer.getTimer().description,
       isRunning: timer.getTimer().isRunning,
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
@@ -84,7 +93,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   componentDidMount() {
-    this.setState({ columns: this.getColumns() });
+    this.setState({
+      columns: this.getColumns(),
+      description: timer.getTimer().description,
+      currentProject: timer.getTimer().project,
+    });
     this.interval = setInterval(() => {
       this.checkTimer();
     }, 500);
@@ -92,24 +105,34 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   componentWillUnmount() {
     clearInterval(this.interval!);
   }
+  handleDescriptionField = (event: any) => {
+    timer.currentTimer.description = event.target.value!;
+    timer.save();
+    this.setState({ description: event.target.value });
+    event.preventDefault();
+  };
+
   render() {
-    const { isRunning, list, columns } = this.state;
+    const {
+      description,
+      currentProject,
+      isRunning,
+      list,
+      columns,
+    } = this.state;
     const { classes } = this.props;
     const seconds = timer.elapsed();
     return (
       <div>
         <h3>Timer</h3>
-        <Box display="flex" flexDirection="row">
+        <Box display="flex" flexDirection="row" alignItems="center">
           <Box flexGrow={1}>
             <FormControl className={classes.formControl}>
               <TextField
                 required
                 autoFocus
-                defaultValue={timer.currentTimer.description}
-                onChange={(data) => {
-                  timer.currentTimer.description = data.target.value!;
-                  timer.save();
-                }}
+                value={description}
+                onChange={this.handleDescriptionField}
                 margin="dense"
                 id="name"
                 label="What are your working on"
@@ -127,7 +150,35 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 className={classes.selectEmpty}
                 label="Project"
                 native
-                defaultValue={timer.currentTimer.project}
+                value={currentProject}
+                onChange={(event) => {
+                  console.log("Projectselection:", event.target);
+                  timer.currentTimer.project = event.target.value as string;
+                  timer.save();
+                  this.setState({ currentProject: timer.currentTimer.project });
+                }}
+                // inputProps={{
+                //   name: "age",
+                //   id: "age-native-simple",
+                // }}
+              >
+                <option aria-label="None" value="" />
+                {project.Entries().map((e) => (
+                  <option value={e.id}>{e.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box>
+            <FormControl
+              className={[classes.formControl, classes.selectEmpty].join(" ")}
+            >
+              <InputLabel>Project</InputLabel>
+              <Select
+                className={classes.selectEmpty}
+                label="Tag"
+                native
+                value={timer.currentTimer.project}
                 onChange={(event) => {
                   console.log("Projectselection:", event.target);
                   timer.currentTimer.project = event.target.value as string;
@@ -146,10 +197,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               </Select>
             </FormControl>
           </Box>
-          <Box>
-            <FormControl
-              className={[classes.formControl, classes.selectEmpty].join(" ")}
-            >
+          <Box flex alignItems="center">
+            <FormControl className={classes.topButtons}>
               <IconButton
                 onClick={() => this.startStopTimer()}
                 edge="start"
@@ -162,8 +211,21 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             </FormControl>
           </Box>
           <Box>
+            <FormControl className={classes.topButtons}>
+              <IconButton
+                disabled={!isRunning}
+                onClick={() => this.discardTimer()}
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+              >
+                <Delete />
+              </IconButton>
+            </FormControl>
+          </Box>
+          <Box>
             <Typography variant="body2" color="textSecondary" align="center">
-              {timer.currentTimer.hms()}
+              {isRunning ? timer.currentTimer.hms() : "00:00:00"}
             </Typography>
           </Box>
         </Box>
@@ -264,7 +326,17 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     this.state.isRunning ? timer.endTimer() : timer.startTimer();
     this.setState({
       list: timer.Entries(),
+      currentProject: timer.getTimer().project,
+      description: timer.getTimer().description,
     });
+  }
+  discardTimer() {
+    timer.discardTimer();
+    this.setState({
+      description: timer.getTimer().description,
+      list: timer.Entries(),
+    });
+    console.log("Dsicard timer:", timer.getTimer());
   }
 
   checkTimer = () => {
