@@ -307,7 +307,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
             ></MainMenu>
           )}
 
-          <div className="content" style={{ flexGrow: 1, padding: 0 }}>
+          <div className="content" style={{ flexGrow: 1, padding: 10 }}>
             <ScrollTop>
               <Switch>
                 <Route path="/" exact component={Home} />

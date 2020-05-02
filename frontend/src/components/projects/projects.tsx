@@ -78,7 +78,7 @@ interface IProps {
 export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   getColumns = () => {
     return [
-      { title: "Project", field: "project", editable: () => true },
+      { title: "Title", field: "name", editable: () => true },
       {
         title: "Client",
         field: "client",
@@ -111,7 +111,7 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   componentDidMount() {
-    this.setState({ columns: this.getColumns() });
+    this.setState({ columns: this.getColumns(), list: project.Entries() });
   }
   componentWillUnmount() {}
   render() {
@@ -135,7 +135,6 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             data={list?.map((u) => u) as any[]}
             editable={{
               isEditable: (rowData) => {
-                console.log("Rorwdata", rowData);
                 return true;
               }, // only name(a) rows would be editable
               isDeletable: (rowData) => true, // only name(a) rows would be deletable

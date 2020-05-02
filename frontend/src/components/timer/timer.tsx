@@ -9,10 +9,17 @@
 // Emotion styled component
 import {
   Box,
+  createStyles,
+  FormControl,
   IconButton,
+  InputLabel,
   List,
+  Select,
   TextField,
+  Theme,
   Typography,
+  withStyles,
+  WithStyles,
 } from "@material-ui/core";
 import { PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
@@ -22,6 +29,28 @@ import client from "../../lib/client";
 import project from "../../lib/project";
 import timer, { TimeEntry } from "../../lib/timer";
 // ----------------------------------------------------------------------------
+
+const styles = ({ palette, spacing }: Theme) =>
+  createStyles({
+    root: {
+      display: "flex",
+      width: "300px",
+      flexDirection: "column",
+      padding: spacing,
+      margin: spacing(1),
+      backgroundColor: palette.background.default,
+      color: palette.primary.main,
+    },
+    formControl: {
+      margin: spacing(1),
+      paddingRight: spacing(1),
+      minWidth: 120,
+      width: "100%",
+    },
+    selectEmpty: {
+      marginTop: 13,
+    },
+  });
 
 interface IState {
   startTime: Date;
@@ -34,15 +63,15 @@ interface IState {
 interface IProps {
   history?: any;
 }
-
-export class Timer extends React.PureComponent<IProps, IState> {
+export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
+export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   interval?: NodeJS.Timeout;
 
   /**
    *
    *
    */
-  constructor(props: IProps, state: IState) {
+  constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
     this.state = {
       isRunning: timer.getTimer().isRunning,
@@ -65,37 +94,72 @@ export class Timer extends React.PureComponent<IProps, IState> {
   }
   render() {
     const { isRunning, list, columns } = this.state;
+    const { classes } = this.props;
     const seconds = timer.elapsed();
     return (
-      <div style={{ margin: 10 }}>
+      <div>
         <h3>Timer</h3>
         <Box display="flex" flexDirection="row">
           <Box flexGrow={1}>
-            <TextField
-              required
-              autoFocus
-              defaultValue={timer.currentTimer.description}
-              onChange={(data) => {
-                timer.currentTimer.description = data.target.value!;
-                timer.save();
-              }}
-              margin="dense"
-              id="name"
-              label="What are your working on"
-              type="text"
-              fullWidth
-            />
+            <FormControl className={classes.formControl}>
+              <TextField
+                required
+                autoFocus
+                defaultValue={timer.currentTimer.description}
+                onChange={(data) => {
+                  timer.currentTimer.description = data.target.value!;
+                  timer.save();
+                }}
+                margin="dense"
+                id="name"
+                label="What are your working on"
+                type="text"
+                fullWidth
+              />
+            </FormControl>
           </Box>
           <Box>
-            <IconButton
-              onClick={() => this.startStopTimer()}
-              edge="start"
-              color="inherit"
-              aria-label="menu"
+            <FormControl
+              className={[classes.formControl, classes.selectEmpty].join(" ")}
             >
-              {!isRunning && <PlayArrow />}
-              {isRunning && <Stop />}
-            </IconButton>
+              <InputLabel>Project</InputLabel>
+              <Select
+                className={classes.selectEmpty}
+                label="Project"
+                native
+                defaultValue={timer.currentTimer.project}
+                onChange={(event) => {
+                  console.log("Projectselection:", event.target);
+                  timer.currentTimer.project = event.target.value as string;
+
+                  timer.save();
+                }}
+                // inputProps={{
+                //   name: "age",
+                //   id: "age-native-simple",
+                // }}
+              >
+                <option aria-label="None" value="" />
+                {project.Entries().map((e) => (
+                  <option value={e.id}>{e.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box>
+            <FormControl
+              className={[classes.formControl, classes.selectEmpty].join(" ")}
+            >
+              <IconButton
+                onClick={() => this.startStopTimer()}
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+              >
+                {!isRunning && <PlayArrow />}
+                {isRunning && <Stop />}
+              </IconButton>
+            </FormControl>
           </Box>
           <Box>
             <Typography variant="body2" color="textSecondary" align="center">
@@ -108,8 +172,8 @@ export class Timer extends React.PureComponent<IProps, IState> {
           <MaterialTable
             options={{
               sorting: true,
-              minBodyHeight: "calc(100vh - 360px)",
-              maxBodyHeight: "calc(100vh - 360px)",
+              minBodyHeight: "calc(100vh - 380px)",
+              maxBodyHeight: "calc(100vh - 380px)",
               pageSize: 20,
               pageSizeOptions: [10, 20, 100],
             }}
@@ -118,7 +182,6 @@ export class Timer extends React.PureComponent<IProps, IState> {
             data={list?.map((u) => u) as any[]}
             editable={{
               isEditable: (rowData) => {
-                console.log("Rorwdata", rowData);
                 return true;
               }, // only name(a) rows would be editable
               isDeletable: (rowData) => true, // only name(a) rows would be deletable
@@ -158,7 +221,6 @@ export class Timer extends React.PureComponent<IProps, IState> {
       </div>
     );
   }
-
   getColumns = () => {
     const columns = [
       { title: "Description", field: "description" },
@@ -215,4 +277,4 @@ export class Timer extends React.PureComponent<IProps, IState> {
   };
 }
 
-export default withRouter(Timer as any);
+export default withStyles(styles as any)(withRouter(Timer as any));
