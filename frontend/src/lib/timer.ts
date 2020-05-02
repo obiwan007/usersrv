@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+import moment from "moment";
 let index = 0;
 export class TimeEntry {
   id: number = 0;
@@ -136,7 +138,7 @@ export class Timer {
     this.save();
     return this.Entries();
   }
-  Entries(): TimeEntry[] {
+  Entries(filter = "0"): TimeEntry[] {
     this.entries.sort(function (a, b) {
       if (a.timerStart > b.timerStart) {
         return -1;
@@ -146,6 +148,46 @@ export class Timer {
       }
       return 0;
     });
+    console.log('"timefilter', filter);
+    switch (filter) {
+      case "0": // show all
+        return [...this.entries];
+      case "1": {
+        // Today
+        const cd = new Date().toDateString();
+        const entries = _.filter(this.entries, (e) => {
+          return e.timerStart.toDateString() === cd;
+        });
+        return entries;
+      }
+      case "2": {
+        // Today
+        const cd = moment().add("day", 1).toDate().toDateString();
+        console.log(cd);
+        const entries = _.filter(this.entries, (e) => {
+          return e.timerStart.toDateString() === cd;
+        });
+        return entries;
+      }
+      case "7": {
+        // Start of Week
+        const cd = moment().startOf("week").toDate();
+        console.log(cd);
+        const entries = _.filter(this.entries, (e) => {
+          return e.timerStart.getTime() > cd.getTime();
+        });
+        return entries;
+      }
+      case "30": {
+        // Month
+        const cd = moment().startOf("month").toDate();
+        console.log(cd);
+        const entries = _.filter(this.entries, (e) => {
+          return e.timerStart.getTime() > cd.getTime();
+        });
+        return entries;
+      }
+    }
     return [...this.entries];
   }
 }

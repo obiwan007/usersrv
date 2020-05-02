@@ -66,6 +66,7 @@ interface IState {
   columns: any[];
   description: string;
   currentProject: string;
+  timefilter: string;
 }
 interface IProps {
   history?: any;
@@ -89,6 +90,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       elapsed: timer.getTimer().elapsed(),
       list: timer.Entries(),
       columns: [],
+      timefilter: "1",
     };
   }
 
@@ -119,6 +121,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       isRunning,
       list,
       columns,
+      timefilter,
     } = this.state;
     const { classes } = this.props;
     const seconds = timer.elapsed();
@@ -164,7 +167,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               >
                 <option aria-label="None" value="" />
                 {project.Entries().map((e) => (
-                  <option value={e.id}>{e.name}</option>
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
                 ))}
               </Select>
             </FormControl>
@@ -192,12 +197,14 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               >
                 <option aria-label="None" value="" />
                 {project.Entries().map((e) => (
-                  <option value={e.id}>{e.name}</option>
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
                 ))}
               </Select>
             </FormControl>
           </Box>
-          <Box flex alignItems="center">
+          <Box alignItems="center">
             <FormControl className={classes.topButtons}>
               <IconButton
                 onClick={() => this.startStopTimer()}
@@ -229,7 +236,43 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             </Typography>
           </Box>
         </Box>
-
+        {/* ----------------------- */}
+        <Box>
+          <FormControl
+            className={[classes.formControl, classes.selectEmpty].join(" ")}
+          >
+            <InputLabel>Filter</InputLabel>
+            <Select
+              className={classes.selectEmpty}
+              native
+              value={timefilter}
+              onChange={(event) => {
+                this.setState({
+                  list: timer.Entries(event.target.value! as string),
+                  timefilter: event.target.value! as string,
+                });
+              }}
+              // inputProps={{
+              //   name: "age",
+              //   id: "age-native-simple",
+              // }}
+            >
+              <option aria-label="None" value="0" key="0" />
+              <option aria-label="None" value="1" key="1">
+                Today
+              </option>
+              <option aria-label="None" value="2" key="2">
+                Yesterday
+              </option>
+              <option aria-label="None" value="7" key="7">
+                This week
+              </option>
+              <option aria-label="None" value="30" key="30">
+                This month
+              </option>
+            </Select>
+          </FormControl>
+        </Box>
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
             options={{
@@ -325,7 +368,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   startStopTimer() {
     this.state.isRunning ? timer.endTimer() : timer.startTimer();
     this.setState({
-      list: timer.Entries(),
+      list: timer.Entries(this.state.timefilter),
       currentProject: timer.getTimer().project,
       description: timer.getTimer().description,
     });
@@ -334,7 +377,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     timer.discardTimer();
     this.setState({
       description: timer.getTimer().description,
-      list: timer.Entries(),
+      list: timer.Entries(this.state.timefilter),
     });
     console.log("Dsicard timer:", timer.getTimer());
   }

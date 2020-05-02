@@ -123,7 +123,7 @@ kdashboard:
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
 
 okteto:
-	export KUBECONFIG=$HOME/Downloads/okteto-kube.config:${KUBECONFIG:-$HOME/.kube/config}
+	export KUBECONFIG="${HOME}/Downloads/okteto-kube.config:${KUBECONFIG:-$HOME/.kube/config}"
 #	k get deployment api-deployment -o yaml | sed "s/\(image: obiwan007\/gqlsrv\):.*$/\1:VERSION/" | grep image
 
 protobuf:
