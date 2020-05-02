@@ -4,7 +4,7 @@ export class ProjectEntry {
   team: string = "";
   status: string = "";
   client: string = "";
-  project: string = "Default Project";
+  name: string = "Default Project";
   elapsedSeconds: number = 0;
   description: string = "";
   constructor() {}
@@ -74,6 +74,11 @@ export class Project {
 
   Entries(): ProjectEntry[] {
     return [...this.entries];
+  }
+  EntriesDict(): any {
+    const dict: any = {};
+    this.entries.forEach((e) => (dict[+e.id] = e.name));
+    return dict;
   }
 }
 

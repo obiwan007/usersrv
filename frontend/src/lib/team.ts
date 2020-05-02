@@ -9,7 +9,7 @@ export class TeamEntry {
 export class MemberEntry {
   id: string = "0";
   name: string = "Default Team Name";
-  role: string;
+  role: string = "";
   constructor() {}
 }
 

@@ -25,7 +25,6 @@ import {
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
-import client from "../../lib/client";
 import project, { ProjectEntry } from "../../lib/project";
 // ----------------------------------------------------------------------------
 
@@ -69,32 +68,20 @@ interface IState {
   addOpen: boolean;
 
   currentProject: ProjectEntry;
-  columns: any[];
 }
 interface IProps {
   history?: any;
 }
 
 export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
-  getColumns = () => {
-    return [
-      { title: "Project", field: "project", editable: () => true },
-      {
-        title: "Client",
-        field: "client",
-        editable: () => true,
-        lookup: client.EntriesDict(),
-      },
-      { title: "Status", field: "status", editable: () => false },
-      { title: "Seconds", field: "elapsedSeconds", editable: () => false },
-      {
-        title: "Team",
-        field: "team",
-        editable: () => true,
-        lookup: client.EntriesDict(),
-      },
-    ];
-  };
+  columns = [
+    { title: "Project", field: "project" },
+    { title: "Client", field: "client" },
+    { title: "Status", field: "status" },
+    { title: "Seconds", field: "elapsedSeconds" },
+    { title: "Team", field: "team" },
+  ];
+  interval?: NodeJS.Timeout;
 
   /**
    *
@@ -103,26 +90,23 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
     this.state = {
-      columns: [],
       list: project.Entries(),
       addOpen: false,
       currentProject: new ProjectEntry(),
     };
   }
 
-  componentDidMount() {
-    this.setState({ columns: this.getColumns() });
-  }
+  componentDidMount() {}
   componentWillUnmount() {}
   render() {
     const { classes } = this.props;
-    const { currentProject, columns } = this.state;
+    const { currentProject } = this.state;
     console.log(this.props);
     const { list, addOpen } = this.state;
     return (
       <div>
         <h3>Projects</h3>
-        {/* <Button onClick={() => this.addProject()}>Add Project</Button> */}
+        <Button onClick={() => this.addProject()}>Add Project</Button>
 
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
@@ -131,48 +115,8 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               maxBodyHeight: "calc(100vh - 360px)",
             }}
             title="Projects"
-            columns={columns}
+            columns={this.columns}
             data={list?.map((u) => u) as any[]}
-            editable={{
-              isEditable: (rowData) => {
-                console.log("Rorwdata", rowData);
-                return true;
-              }, // only name(a) rows would be editable
-              isDeletable: (rowData) => true, // only name(a) rows would be deletable
-              onRowAdd: (newData) =>
-                new Promise((resolve, reject) => {
-                  setTimeout(() => {
-                    {
-                      const d = project.add(newData);
-                      console.log("New List", d);
-                      this.setState({ list: d }, () => resolve());
-                    }
-                    resolve();
-                  }, 1000);
-                }),
-              onRowUpdate: (newData, oldData) =>
-                new Promise((resolve, reject) => {
-                  setTimeout(() => {
-                    {
-                      const d = project.update(newData);
-                      console.log("New List", d);
-                      this.setState({ list: d }, () => resolve());
-                    }
-                    resolve();
-                  }, 1000);
-                }),
-              onRowDelete: (oldData) =>
-                new Promise((resolve, reject) => {
-                  setTimeout(() => {
-                    {
-                      const d = project.del(oldData);
-                      console.log("New List", d);
-                      this.setState({ list: d }, () => resolve());
-                    }
-                    resolve();
-                  }, 1000);
-                }),
-            }}
           />
           {/* {data!.allUsers!.map(data => (
     <ListItem button>

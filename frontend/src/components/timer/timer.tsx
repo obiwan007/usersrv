@@ -12,6 +12,8 @@ import { PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
+import client from "../../lib/client";
+import project from "../../lib/project";
 import timer, { TimeEntry } from "../../lib/timer";
 // ----------------------------------------------------------------------------
 
@@ -21,19 +23,13 @@ interface IState {
   isRunning: boolean;
   elapsed: number;
   list: TimeEntry[];
+  columns: any[];
 }
 interface IProps {
   history?: any;
 }
 
 export class Timer extends React.PureComponent<IProps, IState> {
-  columns = [
-    { title: "Customer", field: "customer" },
-    { title: "Project", field: "project" },
-    { title: "Start", field: "tStart" },
-    { title: "End", field: "tEnd" },
-    { title: "Seconds", field: "elapsedSeconds" },
-  ];
   interval?: NodeJS.Timeout;
 
   /**
@@ -47,11 +43,13 @@ export class Timer extends React.PureComponent<IProps, IState> {
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
       elapsed: timer.getTimer().elapsed(),
-      list: timer.entries,
+      list: timer.Entries(),
+      columns: [],
     };
   }
 
   componentDidMount() {
+    this.setState({ columns: this.getColumns() });
     this.interval = setInterval(() => {
       this.checkTimer();
     }, 500);
@@ -60,7 +58,7 @@ export class Timer extends React.PureComponent<IProps, IState> {
     clearInterval(this.interval!);
   }
   render() {
-    const { isRunning, list } = this.state;
+    const { isRunning, list, columns } = this.state;
     const seconds = timer.elapsed();
     return (
       <div>
@@ -88,8 +86,37 @@ export class Timer extends React.PureComponent<IProps, IState> {
               maxBodyHeight: "calc(100vh - 360px)",
             }}
             title="Timetable"
-            columns={this.columns}
+            columns={columns}
             data={list?.map((u) => u) as any[]}
+            editable={{
+              isEditable: (rowData) => {
+                console.log("Rorwdata", rowData);
+                return true;
+              }, // only name(a) rows would be editable
+              isDeletable: (rowData) => true, // only name(a) rows would be deletable
+              onRowUpdate: (newData, oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    {
+                      const d = timer.update(newData);
+                      console.log("New List", d);
+                      this.setState({ list: d }, () => resolve());
+                    }
+                    resolve();
+                  }, 1000);
+                }),
+              onRowDelete: (oldData) =>
+                new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    {
+                      const d = timer.del(oldData);
+                      console.log("New List", d);
+                      this.setState({ list: d }, () => resolve());
+                    }
+                    resolve();
+                  }, 1000);
+                }),
+            }}
           />
           {/* {data!.allUsers!.map(data => (
     <ListItem button>
@@ -104,10 +131,32 @@ export class Timer extends React.PureComponent<IProps, IState> {
     );
   }
 
+  getColumns = () => {
+    const columns = [
+      { title: "Title", field: "title" },
+      { title: "Description", field: "description" },
+      {
+        title: "Client",
+        field: "client",
+        editable: () => true,
+        lookup: client.EntriesDict(),
+      },
+      {
+        title: "Project",
+        field: "project",
+        editable: () => true,
+        lookup: project.EntriesDict(),
+      },
+      { title: "Start", field: "tStart" },
+      { title: "End", field: "tEnd" },
+      { title: "Seconds", field: "elapsedSeconds" },
+    ];
+    return columns;
+  };
   startStopTimer() {
     this.state.isRunning ? timer.endTimer() : timer.startTimer();
     this.setState({
-      list: timer.entries,
+      list: timer.Entries(),
     });
   }
 
