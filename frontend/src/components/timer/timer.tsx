@@ -7,7 +7,13 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { IconButton, List, Typography } from "@material-ui/core";
+import {
+  Box,
+  IconButton,
+  List,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 import { PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
@@ -61,29 +67,51 @@ export class Timer extends React.PureComponent<IProps, IState> {
     const { isRunning, list, columns } = this.state;
     const seconds = timer.elapsed();
     return (
-      <div>
+      <div style={{ margin: 10 }}>
         <h3>Timer</h3>
-        <IconButton
-          onClick={() => this.startStopTimer()}
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-        >
-          {!isRunning && <PlayArrow />}
-          {isRunning && <Stop />}
-        </IconButton>
-        <Typography variant="body2" color="textSecondary" align="center">
-          {seconds}
-        </Typography>
-
-        <h3>Completed workunits</h3>
-        {list.length}
+        <Box display="flex" flexDirection="row">
+          <Box flexGrow={1}>
+            <TextField
+              required
+              autoFocus
+              defaultValue={timer.currentTimer.description}
+              onChange={(data) => {
+                timer.currentTimer.description = data.target.value!;
+                timer.save();
+              }}
+              margin="dense"
+              id="name"
+              label="What are your working on"
+              type="text"
+              fullWidth
+            />
+          </Box>
+          <Box>
+            <IconButton
+              onClick={() => this.startStopTimer()}
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+            >
+              {!isRunning && <PlayArrow />}
+              {isRunning && <Stop />}
+            </IconButton>
+          </Box>
+          <Box>
+            <Typography variant="body2" color="textSecondary" align="center">
+              {timer.currentTimer.hms()}
+            </Typography>
+          </Box>
+        </Box>
 
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
             options={{
+              sorting: true,
               minBodyHeight: "calc(100vh - 360px)",
               maxBodyHeight: "calc(100vh - 360px)",
+              pageSize: 20,
+              pageSizeOptions: [10, 20, 100],
             }}
             title="Timetable"
             columns={columns}
@@ -133,7 +161,6 @@ export class Timer extends React.PureComponent<IProps, IState> {
 
   getColumns = () => {
     const columns = [
-      { title: "Title", field: "title" },
       { title: "Description", field: "description" },
       {
         title: "Client",
@@ -147,9 +174,27 @@ export class Timer extends React.PureComponent<IProps, IState> {
         editable: () => true,
         lookup: project.EntriesDict(),
       },
-      { title: "Start", field: "tStart" },
-      { title: "End", field: "tEnd" },
-      { title: "Seconds", field: "elapsedSeconds" },
+      {
+        title: "Start",
+        field: "tStart",
+        defaultSort: "desc",
+        render: (data: TimeEntry) => {
+          return (
+            <>
+              {data.tStart}-{data.tEnd}
+              <br></br>
+              {data.timerStart.toLocaleDateString()}
+            </>
+          );
+        },
+      },
+      {
+        title: "Seconds",
+        field: "elapsedSeconds",
+        render: (data: TimeEntry) => {
+          return <>{data.hms()}</>;
+        },
+      },
     ];
     return columns;
   };
