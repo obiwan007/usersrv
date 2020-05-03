@@ -1,23 +1,67 @@
 schema {
-		query: Query
-		mutation: Mutation
-	}
-	type Query {
-		hello(name: String!): String!
-		User(id: String): User
-		allUsers: [User]
-	}
-	
-	type Mutation {
-  		createUser(user: UserInput!):String
-	}
-	type User {
-		id: String
-		name: String
-		email: String
-	  }
-	input UserInput {
-		name: String
-		email: String
-		password: String
-	  }
+  query: Query
+  mutation: Mutation
+}
+type Query {
+  hello(name: String!): String!
+  User(id: String): User
+  allUsers: [User]
+
+  allTimer(): [Timer]
+#  runningTimer(): Timer
+#  Timer(id: String): Timer
+}
+
+type Mutation {
+  createUser(user: UserInput!): String
+#  createTimer(timer: CreateTimerInput!): Timer
+#  startTimer(timerId: String!): Timer
+#  stopTimer(timerId: String!): Timer
+#  deleteTimer(timerId: String!): Timer
+}
+
+type User {
+  id: String
+  name: String
+  email: String
+}
+input UserInput {
+  name: String
+  email: String
+  password: String
+}
+
+input CreateTimerInput {
+  description: String
+  project: String
+}
+
+type Timer {
+  id: String
+  description: String
+  teammember: String
+  # client: Client
+  # project: Project
+  tags: String
+  elapsedSeconds: Int
+  timerStart: String
+  timerEnd: String
+  isRunning: Boolean
+  isBilled: Boolean
+}
+
+type Project {
+  id: String
+  description: String
+  name: String
+  team: String
+  client: String
+  status: String
+}
+
+type Client {
+  id: String
+  description: String
+  name: String
+  address: String
+}
