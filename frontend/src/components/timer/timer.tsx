@@ -14,6 +14,7 @@ import {
   IconButton,
   InputLabel,
   List,
+  MenuItem,
   Select,
   TextField,
   Theme,
@@ -21,13 +22,13 @@ import {
   withStyles,
   WithStyles,
 } from "@material-ui/core";
+import { green, red } from "@material-ui/core/colors";
 import { Delete, PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
-import client from "../../lib/client";
 import project from "../../lib/project";
-import timer, { TimeEntry } from "../../lib/timer";
+import timer, { TimeEntry, Timer as TimerSrv } from "../../lib/timer";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -36,7 +37,7 @@ const styles = ({ palette, spacing }: Theme) =>
       display: "flex",
       width: "300px",
       flexDirection: "column",
-      padding: spacing,
+      padding: spacing(1),
       margin: spacing(1),
       backgroundColor: palette.background.default,
       color: palette.primary.main,
@@ -63,6 +64,7 @@ interface IState {
   isRunning: boolean;
   elapsed: number;
   list: TimeEntry[];
+  sum: number;
   columns: any[];
   description: string;
   currentProject: string;
@@ -75,12 +77,21 @@ export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
 export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   interval?: NodeJS.Timeout;
 
+  filterSelect: any = [
+    // { key: "0", value: "all" },
+    { key: "1", value: "Today" },
+    { key: "2", value: "Yesterday" },
+    { key: "7", value: "Week" },
+    { key: "30", value: "Month" },
+  ];
   /**
    *
    *
    */
   constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
+    const list = timer.Entries("1");
+    const sum = this.recalcSummary(list);
     this.state = {
       currentProject: timer.getTimer().project,
       description: timer.getTimer().description,
@@ -88,9 +99,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
       elapsed: timer.getTimer().elapsed(),
-      list: timer.Entries(),
+      list,
       columns: [],
       timefilter: "1",
+      sum,
     };
   }
 
@@ -122,12 +134,14 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       list,
       columns,
       timefilter,
+      sum,
     } = this.state;
     const { classes } = this.props;
     const seconds = timer.elapsed();
     return (
       <div>
         <h3>Timer</h3>
+
         <Box display="flex" flexDirection="row" alignItems="center">
           <Box flexGrow={1}>
             <FormControl className={classes.formControl}>
@@ -152,7 +166,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               <Select
                 className={classes.selectEmpty}
                 label="Project"
-                native
                 value={currentProject}
                 onChange={(event) => {
                   console.log("Projectselection:", event.target);
@@ -165,11 +178,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 //   id: "age-native-simple",
                 // }}
               >
-                <option aria-label="None" value="" />
+                <MenuItem aria-label="None" value="" />
                 {project.Entries().map((e) => (
-                  <option key={e.id} value={e.id}>
+                  <MenuItem key={e.id} value={e.id}>
                     {e.name}
-                  </option>
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -182,7 +195,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               <Select
                 className={classes.selectEmpty}
                 label="Tag"
-                native
                 value={timer.currentTimer.project}
                 onChange={(event) => {
                   console.log("Projectselection:", event.target);
@@ -195,11 +207,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 //   id: "age-native-simple",
                 // }}
               >
-                <option aria-label="None" value="" />
+                <MenuItem aria-label="None" value="" />
                 {project.Entries().map((e) => (
-                  <option key={e.id} value={e.id}>
+                  <MenuItem key={e.id} value={e.id}>
                     {e.name}
-                  </option>
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -209,11 +221,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               <IconButton
                 onClick={() => this.startStopTimer()}
                 edge="start"
-                color="inherit"
+                color="secondary"
                 aria-label="menu"
               >
-                {!isRunning && <PlayArrow />}
-                {isRunning && <Stop />}
+                {!isRunning && <PlayArrow style={{ color: green[500] }} />}
+                {isRunning && <Stop style={{ color: red[500] }} />}
               </IconButton>
             </FormControl>
           </Box>
@@ -237,48 +249,57 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           </Box>
         </Box>
         {/* ----------------------- */}
-        <Box>
-          <FormControl
-            className={[classes.formControl, classes.selectEmpty].join(" ")}
-          >
-            <InputLabel>Filter</InputLabel>
-            <Select
-              className={classes.selectEmpty}
-              native
-              value={timefilter}
-              onChange={(event) => {
-                this.setState({
-                  list: timer.Entries(event.target.value! as string),
-                  timefilter: event.target.value! as string,
-                });
-              }}
-              // inputProps={{
-              //   name: "age",
-              //   id: "age-native-simple",
-              // }}
+        <Box display="flex" flexDirection="row" alignItems="center">
+          <Box>
+            <FormControl
+              style={{ width: 250 }}
+              className={[classes.formControl, classes.selectEmpty].join(" ")}
             >
-              <option aria-label="None" value="0" key="0" />
-              <option aria-label="None" value="1" key="1">
-                Today
-              </option>
-              <option aria-label="None" value="2" key="2">
-                Yesterday
-              </option>
-              <option aria-label="None" value="7" key="7">
-                This week
-              </option>
-              <option aria-label="None" value="30" key="30">
-                This month
-              </option>
-            </Select>
-          </FormControl>
+              <InputLabel>Filter</InputLabel>
+              <Select
+                className={classes.selectEmpty}
+                value={timefilter}
+                renderValue={(value) =>
+                  `${
+                    this.filterSelect.find((f: any) => f.key === value).value
+                  }:  ${TimerSrv.hms(sum)}`
+                }
+                onChange={(event) => {
+                  const list = timer.Entries(event.target.value! as string);
+                  const sum = this.recalcSummary(list);
+                  this.setState({
+                    list,
+                    sum,
+                    timefilter: event.target.value! as string,
+                  });
+                }}
+                // inputProps={{
+                //   name: "age",
+                //   id: "age-native-simple",
+                // }}
+              >
+                {this.filterSelect.map((f: any) => (
+                  <MenuItem aria-label="None" value={f.key} key={f.key}>
+                    {f.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          {/* <Box>
+            <Typography variant="body2" color="textSecondary" align="center">
+              {TimerSrv.hms(sum)}
+            </Typography>
+          </Box> */}
         </Box>
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
             options={{
+              actionsColumnIndex: -1,
+              padding: "dense",
               sorting: true,
-              minBodyHeight: "calc(100vh - 380px)",
-              maxBodyHeight: "calc(100vh - 380px)",
+              minBodyHeight: "calc(100vh - 460px)",
+              maxBodyHeight: "calc(100vh - 460px)",
               pageSize: 20,
               pageSizeOptions: [10, 20, 100],
             }}
@@ -294,7 +315,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 new Promise((resolve, reject) => {
                   setTimeout(() => {
                     {
-                      const d = timer.update(newData);
+                      const d = timer.update(newData, timefilter);
                       console.log("New List", d);
                       this.setState({ list: d }, () => resolve());
                     }
@@ -305,7 +326,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 new Promise((resolve, reject) => {
                   setTimeout(() => {
                     {
-                      const d = timer.del(oldData);
+                      const d = timer.del(oldData, timefilter);
                       console.log("New List", d);
                       this.setState({ list: d }, () => resolve());
                     }
@@ -328,29 +349,40 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
   getColumns = () => {
     const columns = [
-      { title: "Description", field: "description" },
-      {
-        title: "Client",
-        field: "client",
-        editable: () => true,
-        lookup: client.EntriesDict(),
-      },
+      { width: "40%", title: "Description", field: "description" },
+      // {
+      //   title: "Client",
+      //   field: "client",
+      //   editable: () => true,
+      //   lookup: client.EntriesDict(),
+      // },
       {
         title: "Project",
         field: "project",
+        width: "350px",
         editable: () => true,
         lookup: project.EntriesDict(),
       },
       {
-        title: "Start",
+        title: "Date",
         field: "tStart",
+        width: "150px",
+        defaultSort: "desc",
+        editable: () => false,
+        render: (data: TimeEntry) => {
+          return <>{data.timerStart.toLocaleDateString()}</>;
+        },
+      },
+      {
+        title: "Time",
+        field: "tStart",
+        width: "280px",
+        editable: () => false,
         defaultSort: "desc",
         render: (data: TimeEntry) => {
           return (
             <>
-              {data.tStart}-{data.tEnd}
-              <br></br>
-              {data.timerStart.toLocaleDateString()}
+              {data.tStart} - {data.tEnd}
             </>
           );
         },
@@ -358,6 +390,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       {
         title: "Seconds",
         field: "elapsedSeconds",
+        width: "100px",
         render: (data: TimeEntry) => {
           return <>{data.hms()}</>;
         },
@@ -367,19 +400,24 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   };
   startStopTimer() {
     this.state.isRunning ? timer.endTimer() : timer.startTimer();
+    const list = timer.Entries(this.state.timefilter);
+    const sum = this.recalcSummary(list);
     this.setState({
-      list: timer.Entries(this.state.timefilter),
+      list,
+      sum,
       currentProject: timer.getTimer().project,
       description: timer.getTimer().description,
     });
   }
   discardTimer() {
     timer.discardTimer();
+    const list = timer.Entries(this.state.timefilter);
+    const sum = this.recalcSummary(list);
     this.setState({
       description: timer.getTimer().description,
-      list: timer.Entries(this.state.timefilter),
+      list,
+      sum,
     });
-    console.log("Dsicard timer:", timer.getTimer());
   }
 
   checkTimer = () => {
@@ -390,6 +428,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       elapsed: timer.getTimer().elapsed(),
     });
   };
+
+  recalcSummary(list: TimeEntry[]): number {
+    let sum = 0;
+    list.forEach((l) => (sum += l.elapsedSeconds));
+    return sum;
+  }
 }
 
 export default withStyles(styles as any)(withRouter(Timer as any));

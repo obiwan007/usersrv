@@ -78,7 +78,7 @@ interface IProps {
 export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   getColumns = () => {
     return [
-      { title: "Title", field: "name", editable: () => true },
+      { title: "Title", field: "name", editable: () => true, width: "40%" },
       {
         title: "Client",
         field: "client",
@@ -127,6 +127,7 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
             options={{
+              padding: "dense",
               minBodyHeight: "calc(100vh - 360px)",
               maxBodyHeight: "calc(100vh - 360px)",
             }}

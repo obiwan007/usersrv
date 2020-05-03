@@ -75,8 +75,8 @@ interface IProps {
 
 export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   columns = [
-    { title: "Name", field: "name" },
-    { title: "Description", field: "description" },
+    { title: "Name", field: "name", width: "60%" },
+    { title: "Description", field: "description", width: "40%" },
   ];
   interval?: NodeJS.Timeout;
 
@@ -111,6 +111,7 @@ export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         <List component="nav" aria-label="main mailbox folders">
           <MaterialTable
             options={{
+              padding: "dense",
               minBodyHeight: "calc(100vh - 360px)",
               maxBodyHeight: "calc(100vh - 360px)",
             }}

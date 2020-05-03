@@ -114,7 +114,7 @@ export class Timer {
   elapsed(): number {
     return this.currentTimer.elapsed();
   }
-  del(p: TimeEntry) {
+  del(p: TimeEntry, filter: string) {
     let data = this.entries;
     const entry = data.find((d) => d.id === p.id);
 
@@ -124,10 +124,10 @@ export class Timer {
       data.splice(index, 1);
     }
     this.save();
-    return this.Entries();
+    return this.Entries(filter);
   }
 
-  update(p: TimeEntry) {
+  update(p: TimeEntry, filter: string) {
     let data = this.entries;
     const entry = data.find((d) => d.id === p.id);
 
@@ -136,7 +136,7 @@ export class Timer {
       TimeEntry.fromRaw(p, entry);
     }
     this.save();
-    return this.Entries();
+    return this.Entries(filter);
   }
   Entries(filter = "0"): TimeEntry[] {
     this.entries.sort(function (a, b) {
@@ -161,8 +161,8 @@ export class Timer {
         return entries;
       }
       case "2": {
-        // Today
-        const cd = moment().add("day", 1).toDate().toDateString();
+        // Yesterday
+        const cd = moment().add("day", -1).toDate().toDateString();
         console.log(cd);
         const entries = _.filter(this.entries, (e) => {
           return e.timerStart.toDateString() === cd;
@@ -189,6 +189,20 @@ export class Timer {
       }
     }
     return [...this.entries];
+  }
+
+  static hms(d: number): string {
+    let h = Math.floor(d / 3600);
+    let m = Math.floor((d % 3600) / 60);
+    let s = Math.floor((d % 3600) % 60);
+
+    return (
+      ("0" + h).slice(-2) +
+      ":" +
+      ("0" + m).slice(-2) +
+      ":" +
+      ("0" + s).slice(-2)
+    );
   }
 }
 

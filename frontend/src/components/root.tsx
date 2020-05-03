@@ -32,8 +32,16 @@ import MailIcon from "@material-ui/icons/Mail";
 import MenuIcon from "@material-ui/icons/Menu";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import React from "react";
-import { Link as RouterLink, Route, Switch } from "react-router-dom";
+import {
+  Link as RouterLink,
+  Redirect,
+  Route,
+  Switch,
+  useLocation,
+  withRouter,
+} from "react-router-dom";
 import security from "../lib/security";
+import timer from "../lib/timer";
 import Clients from "./clients/clients";
 import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
@@ -154,11 +162,20 @@ export function ButtonAppBar(props: any) {
   );
 }
 
+function activeRoute(routeName: string, location: any) {
+  return location.pathname.indexOf(routeName) > -1 ? true : false;
+}
+
 export function MainMenu(props: any) {
   const classes = useStyles();
+  let location = useLocation();
   const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
-  console.log("MobileOpen", mobileOpen);
+  const isRunning = props.isRunning;
+  const timerText =
+    isRunning && !activeRoute("/timer", location)
+      ? timer.getTimer().hms()
+      : "Timer";
   const drawer = (
     <div>
       {/* <div className={classes.toolbar} /> */}
@@ -169,8 +186,14 @@ export function MainMenu(props: any) {
       </div> */}
       <Divider />
       <List>
-        {[{ txt: "Timer", link: "/timer" }].map((o, index) => (
-          <ListItem component={RouterLink} to={o.link} button key={o.txt}>
+        {[{ txt: timerText, link: "/timer" }].map((o, index) => (
+          <ListItem
+            selected={activeRoute(o.link, location)}
+            component={RouterLink}
+            to={o.link}
+            button
+            key={o.txt}
+          >
             <ListItemIcon>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListItemIcon>
@@ -181,10 +204,16 @@ export function MainMenu(props: any) {
       <Divider />
       <List>
         {[
-          { txt: "Home", link: "/" },
+          { txt: "Home", link: "/home" },
           { txt: "Reports", link: "/reports" },
         ].map((o, index) => (
-          <ListItem component={RouterLink} to={o.link} button key={o.txt}>
+          <ListItem
+            selected={activeRoute(o.link, location)}
+            component={RouterLink}
+            to={o.link}
+            button
+            key={o.txt}
+          >
             <ListItemIcon>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListItemIcon>
@@ -202,7 +231,13 @@ export function MainMenu(props: any) {
           { txt: "Settings", link: "/settings" },
           { txt: "User Admin", link: "/user" },
         ].map((o, index) => (
-          <ListItem button key={o.txt} component={RouterLink} to={o.link}>
+          <ListItem
+            button
+            selected={activeRoute(o.link, location)}
+            key={o.txt}
+            component={RouterLink}
+            to={o.link}
+          >
             <ListItemIcon>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListItemIcon>
@@ -254,6 +289,8 @@ interface IStateRoot {
   picture: string;
   name: string;
   menuVisible: boolean;
+  isRunning: boolean;
+  elapsed: number;
 }
 
 interface IPropsRoot {}
@@ -265,6 +302,8 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     picture: "",
     name: "",
     menuVisible: false,
+    isRunning: false,
+    elapsed: 0,
   };
   public componentDidMount = async () => {
     // Fetch the component dynamically
@@ -278,8 +317,16 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
       picture: security.picture,
       name: security.username,
     });
+    setInterval(() => {
+      this.checkTimer();
+    }, 500);
   };
-
+  checkTimer = () => {
+    this.setState({
+      isRunning: timer.getTimer().isRunning,
+      elapsed: timer.getTimer().elapsed(),
+    });
+  };
   public render() {
     const { menuVisible, isLoggedIn } = this.state;
     return (
@@ -300,6 +347,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           ></ButtonAppBar>
           {isLoggedIn && (
             <MainMenu
+              {...this.state}
               handleDrawerToggle={() =>
                 this.setState({ menuVisible: !menuVisible })
               }
@@ -310,7 +358,14 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           <div className="content" style={{ flexGrow: 1, padding: 10 }}>
             <ScrollTop>
               <Switch>
-                <Route path="/" exact component={Home} />
+                <Route path="/" exact component={Home}>
+                  <Redirect
+                    to={{
+                      pathname: "/home",
+                    }}
+                  />
+                </Route>
+                <Route path="/home" exact component={Home} />
                 <Route path="/timer" exact component={Timer} />
                 <Route path="/projects" exact component={Projects} />
                 <Route path="/clients" exact component={Clients} />
@@ -326,5 +381,5 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   }
 }
 
-export default Root;
+export default withRouter(Root as any);
 // export default hot(Root);
