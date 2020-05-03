@@ -7,17 +7,17 @@ type Query {
   User(id: String): User
   allUsers: [User]
 
-  allTimer(): [Timer]
-#  runningTimer(): Timer
-#  Timer(id: String): Timer
+  allTimer(filter: AllTimerFilter!): [Timer]
+  runningTimer: Timer
+  Timer(id: String): Timer
 }
 
 type Mutation {
   createUser(user: UserInput!): String
-#  createTimer(timer: CreateTimerInput!): Timer
-#  startTimer(timerId: String!): Timer
-#  stopTimer(timerId: String!): Timer
-#  deleteTimer(timerId: String!): Timer
+  createTimer(timer: CreateTimerInput!): Timer
+  startTimer(timerId: String!): Timer
+  stopTimer(timerId: String!): Timer
+  deleteTimer(timerId: String!): Timer
 }
 
 type User {
@@ -31,6 +31,10 @@ input UserInput {
   password: String
 }
 
+input AllTimerFilter {
+  dayrange: String
+}
+
 input CreateTimerInput {
   description: String
   project: String
@@ -40,8 +44,8 @@ type Timer {
   id: String
   description: String
   teammember: String
-  # client: Client
-  # project: Project
+  client: Client
+  project: Project
   tags: String
   elapsedSeconds: Int
   timerStart: String

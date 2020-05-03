@@ -28,7 +28,9 @@ buildorder:
 buildfrontend: 
 	cd frontend && npm i && npm run build
 
-
+codegen:
+	go get -u github.com/DealTap/graphql-gen-go
+	cd gqksrv && graphql-gen-go schema/schema.graphql --out_dir api --pkg api
 
 test: 
 	$(GOTEST) -v ./...
