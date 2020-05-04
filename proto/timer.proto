@@ -29,8 +29,8 @@ message Timer {
   string timerStart = 6;
   string timerEnd =7; 
   int32 elapsedSeconds = 8;
-  string isRunning = 9;
-  string isBilled = 10;
+  bool isRunning = 9;
+  bool isBilled = 10;
 
 }
 

@@ -1,46 +1,49 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "proto"
-		},
-		{
-			"path": "gqlsrv"
-		},
-		{
-			"path": "usersrv"
-		},
-		{
-			"path": "frontend"
-		},
-		{
-			"path": "eventstore"
-		},
-		{
-			"path": "ordersrv"
-		}
-	],
-	"settings": {
-		"go.buildOnSave": "off",
-		"go.vetOnSave": "off",
-		"editor.formatOnSave": true,
-		"editor.codeActionsOnSave": {
-			"source.organizeImports": true
-		},
-		"sqltools.connections": [
-			{
-				"askForPassword": true,
-				"database": "orderdb",
-				"dialect": "PostgreSQL",
-				"name": "Connection",
-				"port": 26257,
-				"server": "localhost",
-				"username": "markus"
-			}
-		],
-	},
-	"go.editorContextMenuCommands": {},
-	"go.gopath": ""
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "proto"
+    },
+    {
+      "path": "gqlsrv"
+    },
+    {
+      "path": "usersrv"
+    },
+    {
+      "path": "frontend"
+    },
+    {
+      "path": "eventstore"
+    },
+    {
+      "path": "ordersrv"
+    },
+    {
+      "path": "timersrv"
+    }
+  ],
+  "settings": {
+    "go.buildOnSave": "off",
+    "go.vetOnSave": "off",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "sqltools.connections": [
+      {
+        "askForPassword": true,
+        "database": "orderdb",
+        "dialect": "PostgreSQL",
+        "name": "Connection",
+        "port": 26257,
+        "server": "localhost",
+        "username": "markus"
+      }
+    ]
+  },
+  "go.editorContextMenuCommands": {},
+  "go.gopath": ""
 }

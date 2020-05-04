@@ -1,0 +1,126 @@
+//go:generate protoc -I ../proto/ ../proto/user.proto --go_out=plugins=grpc:../proto
+
+package api
+
+import (
+	"context"
+	"fmt"
+
+	pb "github.com/obiwan007/usersrv/proto"
+	storage "github.com/obiwan007/usersrv/timersrv/api/storage"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+var sto storage.FileStorage
+
+type routeGuideServer struct {
+	storage storage.FileStorage
+}
+
+func Init(storage storage.FileStorage) {
+	fmt.Println("Init User Service")
+	sto = storage
+}
+
+func (s *routeGuideServer) Add(ctx context.Context, timer *pb.Timer) (*pb.Timer, error) {
+	fmt.Println("ADDING TIMER", timer.Description)
+	// No feature was found, return an unnamed feature
+	newuser := s.storage.Add(*timer)
+	return &newuser, nil
+}
+func (s *routeGuideServer) Update(ctx context.Context, timer *pb.Timer) (*pb.Timer, error) {
+	fmt.Println("ADDING TIMER", timer.Description)
+	// No feature was found, return an unnamed feature
+	newuser := s.storage.Update(*timer)
+	return &newuser, nil
+}
+func (s *routeGuideServer) Del(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
+	fmt.Println("Deleting TIMER", timerId.GetId())
+	// No feature was found, return an unnamed feature
+	s.storage.Delete(timerId.GetId())
+	return nil, nil
+}
+
+func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
+	fmt.Println("Get TIMER", timerId.GetId())
+	// No feature was found, return an unnamed feature
+	newtimer, err := s.storage.Get(timerId.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "User not found")
+	}
+	return &newtimer, nil
+}
+
+func (s *routeGuideServer) Start(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
+	fmt.Println("Get TIMER", timerId.GetId())
+	// No feature was found, return an unnamed feature
+	t, err := s.storage.Start(timerId.GetId())
+	return &t, err
+}
+
+func (s *routeGuideServer) Stop(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
+	fmt.Println("Get TIMER", timerId.GetId())
+	// No feature was found, return an unnamed feature
+	t, err := s.storage.Stop(timerId.GetId())
+	return &t, err
+}
+
+// func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.Timer) (*pb.Timer, error) {
+// 	fmt.Println("Check for user with email", user.GetEmail(), user.GetId())
+// 	// No feature was found, return an unnamed feature
+// 	userExisting, err := s.storage.GetUserFromEmail(user.GetEmail())
+// 	fmt.Println("Existing User:", userExisting)
+// 	if err != nil {
+// 		// User is not existing, add it
+// 		fmt.Println("User Checked, not existing")
+// 		newuser := s.storage.AddUser(*fromAPITimer(*user))
+// 		return toAPITimer(newuser), nil
+// 	}
+
+// 	return nil, status.Error(codes.InvalidArgument, "User already existing")
+// }
+
+// func (s *routeGuideServer) CheckUser(ctx context.Context, mail *pb.Email) (*pb.User, error) {
+// 	fmt.Println("Check for user with email", mail.GetEmail())
+// 	// No feature was found, return an unnamed feature
+// 	newuser, err := s.storage.GetUserFromEmail(mail.GetEmail())
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return toAPITimer(newuser), nil
+// }
+
+func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.TimerResponse, error) {
+	fmt.Println("Get USERS")
+	timers := s.storage.GetAll()
+	u := new(pb.TimerResponse)
+
+	for _, timer := range timers {
+		conv := timer
+		u.Timers = append(u.Timers, conv)
+	}
+	return u, nil
+}
+
+// func AddUser(name string, password string) {
+// 	fmt.Println("Add User", name, password)
+// 	user := storage.User{Name: name, Password: password}
+// 	fmt.Println("Added User", user)
+// 	sto.AddUser(user)
+// }
+
+func NewServer() *routeGuideServer {
+	fs := storage.NewFileStorage()
+	s := &routeGuideServer{storage: *fs}
+	return s
+}
+
+// func toAPITimer(newtimer storage.Timer) *pb.Timer {
+// 	return &pb.Timer{Description: newtimer.Description, Id: newtimer.Id}
+// }
+
+// func fromAPITimer(newtimer pb.Timer) *storage.Timer {
+// 	return &storage.Timer{Description: newtimer.Description, Id: newtimer.Id}
+// }

@@ -9,15 +9,19 @@ BINARY_NAME_GQL=gqlsrv
 BINARY_NAME_USER=usersrv
 BINARY_NAME_ORDER=ordersrv
 BINARY_NAME_STORE=storesrv
+BINARY_NAME_TIMER=timersrv
 
 VERSION ?= latest
 
-all: test buildgql builduser buildorder buildstore buildfrontend docker
+all: test buildgql builduser buildorder buildstore buildfrontend buildtimer docker
 buildgql: 
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
 
 builduser: 
 	cd usersrv/cli && $(GOBUILD) -o $(BINARY_NAME_USER) -v 
+
+buildtimer: 
+	cd timersrv/cli && $(GOBUILD) -o $(BINARY_NAME_TIMER) -v 
 
 buildstore: 
 	cd eventstore/cli && $(GOBUILD) -o $(BINARY_NAME_STORE) -v 
@@ -39,23 +43,22 @@ clean:
 	rm -f $(BINARY_NAME_GQL)
 	rm -f $(BINARY_NAME_USER)
 rungql:
-	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
-	cd gqlsrv/cli && ./$(BINARY_NAME_GQL) -config config.conf --server_addr localhost:10000 --zipkin http://localhost:9411/api/v1/spans
+	cd gqlsrv/cli && go run main.go -config config.conf --usersrv localhost:10000 --timersrv localhost:10001 --zipkin http://localhost:9411/api/v1/spans
 
 runuser:
-	cd usersrv/cli && $(GOBUILD) -o $(BINARY_NAME_USER) -v 
-	cd usersrv/cli && ./$(BINARY_NAME_USER) --port 10000 --zipkin http://localhost:9411/api/v1/spans
+	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans
+
+runtimer:
+	cd timersrv/cli && go run main.go --port 10001 --zipkin http://localhost:9411/api/v1/spans
 
 runfrontend:
 	cd frontend && GRAPHQL="http://localhost:8090" && npm run start
 
 runorder:
-	cd ordersrv/cli && $(GOBUILD) -o $(BINARY_NAME_ORDER) -v 
-	cd ordersrv/cli && ./$(BINARY_NAME_ORDER) -config config.conf --port 10001 --zipkin http://localhost:9411/api/v1/spans
+	cd ordersrv/cli && go run main.go -config config.conf --port 10001 --zipkin http://localhost:9411/api/v1/spans
 
 runstore:
-	cd eventstore/cli && $(GOBUILD) -o $(BINARY_NAME_STORE) -v 
-	cd eventstore/cli && ./$(BINARY_NAME_STORE) --port 10002 --zipkin http://localhost:9411/api/v1/spans
+	cd eventstore/cli && go run main.go --port 10002 --zipkin http://localhost:9411/api/v1/spans
 
 docker: docker-build docker-push
 
