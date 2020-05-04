@@ -1,22 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Launch",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/cli/main.go",
-            "env": {},
-            "args": [
-                "--zipkin",
-                "http://localhost:9411/api/v1/spans",
-                "--config",
-                "config.conf"
-            ]
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cli/main.go",
+      "env": {},
+      "args": [
+        "--usersrv",
+        "localhost:10000",
+        "--timersrv",
+        "localhost:10001",
+        "--zipkin",
+        "http://localhost:9411/api/v1/spans",
+        "--config",
+        "config.conf"
+      ]
+    }
+  ]
 }
