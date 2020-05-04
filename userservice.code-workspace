@@ -23,6 +23,9 @@
     },
     {
       "path": "timersrv"
+    },
+    {
+      "path": "projectsrv"
     }
   ],
   "settings": {

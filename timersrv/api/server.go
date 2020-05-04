@@ -33,7 +33,7 @@ func (s *routeGuideServer) Update(ctx context.Context, timer *pb.Timer) (*pb.Tim
 	fmt.Println("ADDING TIMER", timer.Description)
 	// No feature was found, return an unnamed feature
 	newuser := s.storage.Update(*timer)
-	return &newuser, nil
+	return newuser, nil
 }
 func (s *routeGuideServer) Del(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
 	fmt.Println("Deleting TIMER", timerId.GetId())
@@ -49,7 +49,7 @@ func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Timer, 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "User not found")
 	}
-	return &newtimer, nil
+	return newtimer, nil
 }
 
 func (s *routeGuideServer) Start(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {

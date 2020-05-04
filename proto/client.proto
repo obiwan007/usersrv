@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "UserServiceProto";
+
+import "global.proto";
+
+package pb;
+
+service ClientService {
+  rpc Add(Client) returns (Client) {}
+  rpc Get(Id) returns (Client) {}
+  rpc Del(Id) returns (Client) {}
+  rpc Update(Client) returns (Client) {}
+  rpc GetAll(ListClient) returns (ClientResponse) {}
+}
+
+message Client {
+  string id = 1;
+  string description = 2;
+  string name = 3;
+  string address = 5;
+}
+
+message ListClient {
+}
+
+message ClientResponse {
+    repeated Client Clients = 1;
+}

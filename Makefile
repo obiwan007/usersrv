@@ -51,6 +51,13 @@ runuser:
 runtimer:
 	cd timersrv/cli && go run main.go --port 10001 --zipkin http://localhost:9411/api/v1/spans
 
+runproject:
+	cd projectsrv/cli && go run main.go --port 10002 --zipkin http://localhost:9411/api/v1/spans
+
+runclient:
+	cd clientsrv/cli && go run main.go --port 10003 --zipkin http://localhost:9411/api/v1/spans
+
+
 runfrontend:
 	cd frontend && GRAPHQL="http://localhost:8090" && npm run start
 
