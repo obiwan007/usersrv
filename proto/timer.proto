@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "UserServiceProto";
+
+import "global.proto";
+
+package pb;
+
+service TimerService {
+  rpc Add(Timer) returns (Timer) {}
+  rpc Get(Id) returns (Timer) {}
+  rpc Start(Id) returns (Timer) {}
+  rpc Stop(Id) returns (Timer) {}
+  rpc Del(Id) returns (Timer) {}
+  rpc Update(Timer) returns (Timer) {}
+  rpc GetAll(ListTimer) returns (TimerResponse) {}
+}
+// A feature names something at a given point.
+//
+// If a feature could not be named, the name is empty.
+message Timer {
+  string id = 1;
+  string description = 2;
+  string client = 3;
+  string project = 4;
+  string tags = 5;
+  string timerStart = 6;
+  string timerEnd =7; 
+  int32 elapsedSeconds = 8;
+  string isRunning = 9;
+  string isBilled = 10;
+
+}
+
+// message Id {
+//   string id = 1;
+// }
+
+message ListTimer {
+}
+
+message TimerResponse {
+    repeated Timer Timers = 1;
+}

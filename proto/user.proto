@@ -4,6 +4,8 @@ option java_multiple_files = true;
 option java_package = "io.grpc.examples.routeguide";
 option java_outer_classname = "UserServiceProto";
 
+import "global.proto";
+
 package pb;
 
 service UserService {
@@ -32,11 +34,7 @@ message User {
   string token = 5;
 }
 
-message Id {
-  // The name of the feature.
-  string id = 1;
-  // The point where the feature is detected.
-}
+
 
 message Email {
   // The name of the feature.

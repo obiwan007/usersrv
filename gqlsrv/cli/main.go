@@ -28,6 +28,8 @@ var (
 	redirect           = flag.String("redirect", "http://localhost:3000/auth/callback", "OAuth2 client redirect callback")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
 	serverAddr         = flag.String("server_addr", "usersrv:10000", "The server address in the format of host:port")
+	userSrv            = flag.String("usersrv", "usersrv:10000", "The server address in the format of host:port")
+	timerSrv           = flag.String("timersrv", "timersrv:10001", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
 	zipkin             = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 )
@@ -94,11 +96,15 @@ func main() {
 	}
 	defer cli.Close()
 
-	conn, tracer, err := pkg.CreateClient(p, *serverAddr)
-	defer conn.Close()
-	gqlClient := pb.NewUserServiceClient(conn)
+	connUserSrv, tracer, err := pkg.CreateClient(p, *userSrv)
+	defer connUserSrv.Close()
+	gqlUserSrvClient := pb.NewUserServiceClient(connUserSrv)
 
-	resolver := gql.NewResolver(gqlClient)
+	connTimerSrv, tracer, err := pkg.CreateClient(p, *timerSrv)
+	defer connTimerSrv.Close()
+	gqlTimerSrvClient := pb.NewTimerServiceClient(connTimerSrv)
+
+	resolver := gql.NewResolver(gqlUserSrvClient, gqlTimerSrvClient)
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
