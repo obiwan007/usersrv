@@ -4,35 +4,34 @@ import (
 	"context"
 	"log"
 
-	"github.com/obiwan007/usersrv/gqlsrv/api/types"
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
-func (r *Resolver) AllProjects(ctx context.Context) (*[]*types.ProjectResolver, error) {
+func (r *Resolver) AllProjects(ctx context.Context) (*[]*ProjectResolver, error) {
 
 	query := &pb.ListProject{}
 	result, err := r.projectSvc.GetAll(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	var userRxs []*types.ProjectResolver
+	var userRxs []*ProjectResolver
 	for _, res := range result.Projects {
 		t := project2Gql(res)
-		userRxs = append(userRxs, &types.ProjectResolver{R: t})
+		userRxs = append(userRxs, &ProjectResolver{R: t, Root: r})
 	}
 
 	return &userRxs, nil
 }
 
-// func (r *Resolver) RunningTimer(ctx context.Context) (*types.TimerResolver, error) {
+// func (r *Resolver) RunningTimer(ctx context.Context) (*TimerResolver, error) {
 
-// 	test := &types.Timer{Description: "Hallo Leute", ID: "1"}
-// 	s := types.TimerResolver{R: test}
+// 	test := &Timer{Description: "Hallo Leute", ID: "1"}
+// 	s := TimerResolver{R: test}
 
 // 	return &s, nil
 // }
 
-func (r *Resolver) CreateProject(ctx context.Context, arg *types.CreateProjectRequest) (*types.ProjectResolver, error) {
+func (r *Resolver) CreateProject(ctx context.Context, arg *CreateProjectRequest) (*ProjectResolver, error) {
 	log.Println("Create", arg.P.Description)
 	t := projectGql2pb(&arg.P)
 	result, err := r.projectSvc.Add(ctx, t)
@@ -41,12 +40,12 @@ func (r *Resolver) CreateProject(ctx context.Context, arg *types.CreateProjectRe
 		return nil, err
 	}
 
-	s := types.ProjectResolver{R: project2Gql(result)}
+	s := ProjectResolver{R: project2Gql(result), Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) UpdateProject(ctx context.Context, arg *types.UpdateProjectRequest) (*types.ProjectResolver, error) {
+func (r *Resolver) UpdateProject(ctx context.Context, arg *UpdateProjectRequest) (*ProjectResolver, error) {
 	log.Println("Update", arg.P.ID)
 
 	t := projectGql2pb(&arg.P)
@@ -57,12 +56,12 @@ func (r *Resolver) UpdateProject(ctx context.Context, arg *types.UpdateProjectRe
 		return nil, err
 	}
 
-	s := types.ProjectResolver{R: project2Gql(result)}
+	s := ProjectResolver{R: project2Gql(result), Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) GetProject(ctx context.Context, arg *types.GetProjectRequest) (*types.ProjectResolver, error) {
+func (r *Resolver) GetProject(ctx context.Context, arg *GetProjectRequest) (*ProjectResolver, error) {
 	log.Println("ID", *arg.ID)
 
 	t := &pb.Id{Id: *arg.ID}
@@ -72,12 +71,12 @@ func (r *Resolver) GetProject(ctx context.Context, arg *types.GetProjectRequest)
 		return nil, err
 	}
 
-	s := types.ProjectResolver{R: project2Gql(result)}
+	s := ProjectResolver{R: project2Gql(result), Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) DeleteProject(ctx context.Context, arg *types.DeleteProjectRequest) (*types.ProjectResolver, error) {
+func (r *Resolver) DeleteProject(ctx context.Context, arg *DeleteProjectRequest) (*ProjectResolver, error) {
 	log.Println("ID", *&arg.ProjectId)
 
 	t := &pb.Id{Id: arg.ProjectId}
@@ -87,23 +86,24 @@ func (r *Resolver) DeleteProject(ctx context.Context, arg *types.DeleteProjectRe
 		return nil, err
 	}
 
-	s := types.ProjectResolver{R: project2Gql(result)}
+	s := ProjectResolver{R: project2Gql(result), Root: r}
 
 	return &s, nil
 }
 
-func project2Gql(result *pb.Project) *types.Project {
-	test := &types.Project{
+func project2Gql(result *pb.Project) *Project {
+	test := &Project{
 		Description: result.Description,
 		ID:          result.Id,
 		Team:        result.Team,
 		Name:        result.Name,
 		Status:      result.Status,
+		Client:      &Client{ID: result.Client},
 	}
 	return test
 }
 
-func projectGql2pb(arg *types.ProjectInput) *pb.Project {
+func projectGql2pb(arg *ProjectInput) *pb.Project {
 	t := &pb.Project{
 		Id:          checkNil(arg.ID, ""),
 		Description: checkNil(arg.Description, ""),

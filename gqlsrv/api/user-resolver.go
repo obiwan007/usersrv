@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/obiwan007/usersrv/gqlsrv/api/types"
 	api "github.com/obiwan007/usersrv/proto"
 	// "github.com/pkg/errors"
 )
 
-func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*types.UserResolver, error) {
+func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserResolver, error) {
 
 	request := &api.Id{Id: *args.Id}
 
@@ -18,14 +17,14 @@ func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*types.
 		return nil, err
 	}
 	fmt.Println(res)
-	s := types.UserResolver{
-		R: &types.User{Name: res.Name, Email: res.Email, ID: res.Id},
+	s := UserResolver{
+		R: &User{Name: res.Name, Email: res.Email, ID: res.Id},
 	}
 
 	return &s, nil
 
 }
-func (r *Resolver) AllUsers(ctx context.Context) (*[]*types.UserResolver, error) {
+func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 	// t := ctx.Value("jwt")
 
 	// token, ok := t.(*jwt.Token)
@@ -40,10 +39,10 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*types.UserResolver, error)
 	if err != nil {
 		return nil, err
 	}
-	var userRxs []*types.UserResolver
+	var userRxs []*UserResolver
 	for _, res := range users.Users {
-		user := &types.User{Name: res.Name, Email: res.Email, ID: res.Id}
-		s := types.UserResolver{R: user}
+		user := &User{Name: res.Name, Email: res.Email, ID: res.Id}
+		s := UserResolver{R: user}
 		userRxs = append(userRxs, &s)
 
 	}
@@ -58,7 +57,7 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*types.UserResolver, error)
 // 	Email    *string
 // }
 
-func (r *Resolver) CreateUser(ctx context.Context, args struct{ User types.UserInput }) (*string, error) {
+func (r *Resolver) CreateUser(ctx context.Context, args struct{ User UserInput }) (*string, error) {
 
 	request := &api.User{Name: *args.User.Name, Password: *args.User.Password, Email: *args.User.Email}
 

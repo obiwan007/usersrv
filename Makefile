@@ -34,7 +34,9 @@ buildfrontend:
 
 codegen:
 	go get -u github.com/DealTap/graphql-gen-go
-	cd gqlsrv && graphql-gen-go schema/schema.graphql --out_dir api --pkg types
+	# cd gqlsrv && graphql-gen-go schema/schema.graphql --out_dir api --pkg types
+	cd gqlsrv && graphql-gen-go schema/schema.graphql --out_dir api --pkg gql
+	
 
 test: 
 	$(GOTEST) -v ./...

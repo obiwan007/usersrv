@@ -3,13 +3,12 @@ package gql
 import (
 	"context"
 
-	"github.com/obiwan007/usersrv/gqlsrv/api/types"
 	api "github.com/obiwan007/usersrv/proto"
 	// "github.com/pkg/errors"
 )
 
 type Resolver struct {
-	types.GqlResolver
+	GqlResolver
 	userSvc    api.UserServiceClient
 	timerSvc   api.TimerServiceClient
 	projectSvc api.ProjectServiceClient

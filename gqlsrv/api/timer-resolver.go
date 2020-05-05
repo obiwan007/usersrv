@@ -4,39 +4,34 @@ import (
 	"context"
 	"log"
 
-	"github.com/obiwan007/usersrv/gqlsrv/api/types"
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
-func (r *Resolver) AllTimer(ctx context.Context, args *types.AllTimerRequest) (*[]*types.TimerResolver, error) {
+func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*TimerResolver, error) {
 	log.Println(*args.Filter.Dayrange)
 	query := &pb.ListTimer{}
 	result, err := r.timerSvc.GetAll(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	var userRxs []*types.TimerResolver
+	var userRxs []*TimerResolver
 	for _, res := range result.Timers {
 		t := timerToGql(res)
-		userRxs = append(userRxs, &types.TimerResolver{R: t})
+		userRxs = append(userRxs, &TimerResolver{R: t, Root: r})
 	}
-
-	test := &types.Timer{Description: "Hallo Leute", ID: "1"}
-	s := types.TimerResolver{R: test}
-	userRxs = append(userRxs, &s)
 
 	return &userRxs, nil
 }
 
-func (r *Resolver) RunningTimer(ctx context.Context) (*types.TimerResolver, error) {
+func (r *Resolver) RunningTimer(ctx context.Context) (*TimerResolver, error) {
 
-	test := &types.Timer{Description: "Hallo Leute", ID: "1"}
-	s := types.TimerResolver{R: test}
+	test := &Timer{Description: "Hallo Leute", ID: "1"}
+	s := TimerResolver{R: test, Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) GetTimer(ctx context.Context, arg *types.GetTimerRequest) (*types.TimerResolver, error) {
+func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerResolver, error) {
 	log.Println("ID", *arg.ID)
 
 	t := &pb.Id{Id: *arg.ID}
@@ -46,12 +41,12 @@ func (r *Resolver) GetTimer(ctx context.Context, arg *types.GetTimerRequest) (*t
 		return nil, err
 	}
 
-	s := types.TimerResolver{R: timerToGql(result)}
+	s := TimerResolver{R: timerToGql(result), Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) StartTimer(ctx context.Context, arg *types.StartTimerRequest) (*types.TimerResolver, error) {
+func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*TimerResolver, error) {
 	log.Println("startTimer ID", arg.TimerId)
 
 	t := &pb.Id{Id: *&arg.TimerId}
@@ -59,26 +54,27 @@ func (r *Resolver) StartTimer(ctx context.Context, arg *types.StartTimerRequest)
 	if err != nil {
 		return nil, err
 	}
-	s := types.TimerResolver{R: timerToGql(result)}
+	s := TimerResolver{R: timerToGql(result), Root: r}
 
 	return &s, nil
 }
 
-func (r *Resolver) StopTimer(ctx context.Context, arg *types.StopTimerRequest) (*types.TimerResolver, error) {
+func (r *Resolver) StopTimer(ctx context.Context, arg *StopTimerRequest) (*TimerResolver, error) {
 	log.Println("stopTimer ID", arg.TimerId)
 	t := &pb.Id{Id: *&arg.TimerId}
 	result, err := r.timerSvc.Stop(ctx, t)
 	if err != nil {
 		return nil, err
 	}
-	s := types.TimerResolver{R: timerToGql(result)}
+	s := TimerResolver{R: timerToGql(result), Root: r}
 	return &s, nil
 }
 
-func timerToGql(result *pb.Timer) *types.Timer {
-	test := &types.Timer{
-		Description: result.Description,
-		// Client:         result.Client,
+func timerToGql(result *pb.Timer) *Timer {
+	test := &Timer{
+		Description:    result.Description,
+		Client:         &Client{ID: result.Client},
+		Project:        &Project{ID: result.Project},
 		ElapsedSeconds: result.ElapsedSeconds,
 		ID:             result.Id,
 		TimerStart:     result.TimerStart,
