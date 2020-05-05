@@ -10,10 +10,12 @@ BINARY_NAME_USER=usersrv
 BINARY_NAME_ORDER=ordersrv
 BINARY_NAME_STORE=storesrv
 BINARY_NAME_TIMER=timersrv
+BINARY_NAME_PROJECT=projectsrv
+BINARY_NAME_CLIENT=clientsrv
 
 VERSION ?= latest
 
-all: test buildgql builduser buildorder buildstore buildfrontend buildtimer docker
+all: test buildgql builduser buildorder buildstore buildfrontend buildtimer buildproject buildclient docker
 buildgql: 
 	cd gqlsrv/cli && $(GOBUILD) -o $(BINARY_NAME_GQL) -v 
 
@@ -22,6 +24,12 @@ builduser:
 
 buildtimer: 
 	cd timersrv/cli && $(GOBUILD) -o $(BINARY_NAME_TIMER) -v 
+
+buildproject: 
+	cd projectsrv/cli && $(GOBUILD) -o $(BINARY_NAME_PROJECT) -v 
+
+buildclient: 
+	cd clientsrv/cli && $(GOBUILD) -o $(BINARY_NAME_CLIENT) -v 
 
 buildstore: 
 	cd eventstore/cli && $(GOBUILD) -o $(BINARY_NAME_STORE) -v 
@@ -76,12 +84,12 @@ runstore:
 
 docker: docker-build docker-push
 
-docker-build: builddockerfrontend builddockergqlsrv builddockerusersrv
+docker-build: builddockerfrontend builddockergqlsrv builddockerusersrv builddockertimersrv builddockerprojectsrv builddockerclientsrv
 	# docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
 	# docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
 	# cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./nginxDockerfile .
 	
-docker-push: pushdockerusersrv 	pushdockergqlsrv pushdockerfrontend
+docker-push: pushdockerusersrv 	pushdockergqlsrv pushdockerfrontend pushdockertimersrv pushdockerprojectsrv pushdockerclientsrv
 	# docker push obiwan007/frontend:${VERSION}	
 	# docker push obiwan007/gqlsrv:${VERSION}
 	# docker push obiwan007/usersrv:${VERSION}
@@ -91,6 +99,12 @@ dockerfrontend: builddockerfrontend pushdockerfrontend
 dockergqlsrv: builddockergqlsrv pushdockergqlsrv
 
 dockerusersrv: builddockerusersrv pushdockerusersrv
+
+dockertimersrv: builddockertimersrv pushdockertimersrv
+
+dockerprojectsrv: builddockerprojectsrv pushdockerprojectsrv
+
+dockerclientsrv: builddockerclientsrv pushdockerclientsrv
 
 builddockerfrontend:
 	cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./nginxDockerfile .
@@ -110,6 +124,23 @@ builddockerusersrv:
 pushdockerusersrv:
 	docker push obiwan007/usersrv:${VERSION}
 
+builddockertimersrv:
+	docker build -t obiwan007/timersrv:${VERSION} -f ./Dockerfile_timer . 
+
+pushdockertimersrv:
+	docker push obiwan007/timersrv:${VERSION}
+
+builddockerprojectsrv:
+	docker build -t obiwan007/projectsrv:${VERSION} -f ./Dockerfile_project . 
+
+pushdockerprojectsrv:
+	docker push obiwan007/projectsrv:${VERSION}
+
+builddockerclientsrv:
+	docker build -t obiwan007/clientsrv:${VERSION} -f ./Dockerfile_client . 
+
+pushdockerclientsrv:
+	docker push obiwan007/clientsrv:${VERSION}
 
 
 compose-build:

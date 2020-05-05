@@ -1,0 +1,26 @@
+FROM golang:1.14 as builder
+
+ENV GO111MODULE=on
+ENV CGO_ENABLED 0
+ENV GOOS linux
+ENV GOARCH=amd64 
+
+RUN mkdir /build 
+WORKDIR /build 
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+
+RUN git version
+RUN cd projectsrv/cli && go build -v -o projectsrv
+
+
+FROM alpine
+
+COPY --from=builder /build/projectsrv/ /app/
+WORKDIR /app/cli
+CMD ["./projectsrv"]

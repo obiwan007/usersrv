@@ -51,6 +51,39 @@ services:
     depends_on:
       - zipkin
 
+  timersrv:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_timer
+    ports:
+      - 10001:10001
+    networks:
+      - app-tier
+    depends_on:
+      - zipkin
+
+  projectsrv:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_project
+    ports:
+      - 10002:10002
+    networks:
+      - app-tier
+    depends_on:
+      - zipkin
+
+  clientsrv:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_client
+    ports:
+      - 10003:10003
+    networks:
+      - app-tier
+    depends_on:
+      - zipkin
+
   gqlsrv:
     build:
       context: .
@@ -61,6 +94,9 @@ services:
       - app-tier
     depends_on:
       - usersrv
+      - timersrv
+      - projectsrv
+      - clientsrv
       - zipkin
     environment:
       - CLIENTID=${CLIENTID}
