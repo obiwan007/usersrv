@@ -9,15 +9,30 @@ type Query {
 
   allTimer(filter: AllTimerFilter!): [Timer]
   runningTimer: Timer
-  Timer(id: String): Timer
+  getTimer(id: String): Timer
+
+  getProject(id: String): Project
+  allProjects: [Project]
+
+  getClient(id: String): Project
+  allClients: [Client]
 }
 
 type Mutation {
   createUser(user: UserInput!): String
-  createTimer(timer: CreateTimerInput!): Timer
+  createTimer(t: CreateTimerInput!): Timer
   startTimer(timerId: String!): Timer
   stopTimer(timerId: String!): Timer
   deleteTimer(timerId: String!): Timer
+  updateTimer(t: TimerInput!): Timer
+
+  createProject(p: ProjectInput!): Project
+  updateProject(p: ProjectInput!): Project
+  deleteProject(projectId: String!): Project
+
+  createClient(c: ClientInput!): Client
+  updateClient(c: ClientInput!): Client
+  deleteClient(clientId: String!): Client
 }
 
 type User {
@@ -39,9 +54,24 @@ input CreateTimerInput {
   description: String
   project: String
 }
+input TimerInput {
+  id: String
+  name: String
+  description: String
+  teammember: String
+  client: String
+  project: String
+  tags: String
+  elapsedSeconds: Int
+  timerStart: String
+  timerEnd: String
+  isRunning: Boolean
+  isBilled: Boolean
+}
 
 type Timer {
   id: String
+  name: String
   description: String
   teammember: String
   client: Client
@@ -54,13 +84,28 @@ type Timer {
   isBilled: Boolean
 }
 
-type Project {
+input ProjectInput {
   id: String
-  description: String
   name: String
+  description: String
   team: String
   client: String
   status: String
+}
+type Project {
+  id: String
+  name: String
+  description: String
+  team: String
+  client: Client
+  status: String
+}
+
+input ClientInput {
+  id: String
+  description: String
+  name: String
+  address: String
 }
 
 type Client {

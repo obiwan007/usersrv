@@ -31,6 +31,7 @@ message Timer {
   int32 elapsedSeconds = 8;
   bool isRunning = 9;
   bool isBilled = 10;
+  string name = 11;
 
 }
 

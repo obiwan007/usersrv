@@ -10,14 +10,21 @@ import (
 
 type Resolver struct {
 	types.GqlResolver
-	userSvc  api.UserServiceClient
-	timerSvc api.TimerServiceClient
+	userSvc    api.UserServiceClient
+	timerSvc   api.TimerServiceClient
+	projectSvc api.ProjectServiceClient
+	clientSvc  api.ClientServiceClient
 }
 
-func NewResolver(userSrvClient api.UserServiceClient, timerSrvClient api.TimerServiceClient) *Resolver {
+func NewResolver(userSrvClient api.UserServiceClient,
+	timerSrvClient api.TimerServiceClient,
+	projectSrvClient api.ProjectServiceClient,
+	clientSrvClient api.ClientServiceClient) *Resolver {
 	return &Resolver{
-		userSvc:  userSrvClient,
-		timerSvc: timerSrvClient,
+		userSvc:    userSrvClient,
+		timerSvc:   timerSrvClient,
+		projectSvc: projectSrvClient,
+		clientSvc:  clientSrvClient,
 	}
 }
 

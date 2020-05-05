@@ -36,7 +36,7 @@ func (r *Resolver) RunningTimer(ctx context.Context) (*types.TimerResolver, erro
 	return &s, nil
 }
 
-func (r *Resolver) Timer(ctx context.Context, arg *types.TimerRequest) (*types.TimerResolver, error) {
+func (r *Resolver) GetTimer(ctx context.Context, arg *types.GetTimerRequest) (*types.TimerResolver, error) {
 	log.Println("ID", *arg.ID)
 
 	t := &pb.Id{Id: *arg.ID}

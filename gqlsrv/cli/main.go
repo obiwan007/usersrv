@@ -30,6 +30,8 @@ var (
 	serverAddr         = flag.String("server_addr", "usersrv:10000", "The server address in the format of host:port")
 	userSrv            = flag.String("usersrv", "usersrv:10000", "The server address in the format of host:port")
 	timerSrv           = flag.String("timersrv", "timersrv:10001", "The server address in the format of host:port")
+	projectSrv         = flag.String("projectsrv", "projectsrv:10002", "The server address in the format of host:port")
+	clientSrv          = flag.String("clientsrv", "clientsrv:10003", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
 	zipkin             = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 )
@@ -104,7 +106,19 @@ func main() {
 	defer connTimerSrv.Close()
 	gqlTimerSrvClient := pb.NewTimerServiceClient(connTimerSrv)
 
-	resolver := gql.NewResolver(gqlUserSrvClient, gqlTimerSrvClient)
+	connProjectSrv, tracer, err := pkg.CreateClient(p, *projectSrv)
+	defer connProjectSrv.Close()
+	gqlProjectSrvClient := pb.NewProjectServiceClient(connProjectSrv)
+
+	connClientSrv, tracer, err := pkg.CreateClient(p, *clientSrv)
+	defer connClientSrv.Close()
+	gqlClientSrvClient := pb.NewClientServiceClient(connClientSrv)
+
+	resolver := gql.NewResolver(
+		gqlUserSrvClient,
+		gqlTimerSrvClient,
+		gqlProjectSrvClient,
+		gqlClientSrvClient)
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())

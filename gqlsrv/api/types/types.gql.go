@@ -5,10 +5,10 @@ type AllTimerFilter struct {
 }
 
 type Client struct {
-	ID          string
 	Description string
 	Name        string
 	Address     string
+	ID          string
 }
 
 type ClientResolver struct {
@@ -31,26 +31,33 @@ func (r ClientResolver) Address() *string {
 	return &r.R.Address
 }
 
-type CreateTimerInput struct {
-	Project     *string
+type ClientInput struct {
+	ID          *string
 	Description *string
+	Name        *string
+	Address     *string
+}
+
+type CreateTimerInput struct {
+	Description *string
+	Project     *string
 }
 
 type Project struct {
+	Client      *Client
 	Status      string
 	ID          string
-	Description string
 	Name        string
+	Description string
 	Team        string
-	Client      string
 }
 
 type ProjectResolver struct {
 	R *Project
 }
 
-func (r ProjectResolver) Client() *string {
-	return &r.R.Client
+func (r ProjectResolver) Client() *ClientResolver {
+	return &ClientResolver{r.R.Client}
 }
 
 func (r ProjectResolver) Status() *string {
@@ -61,50 +68,52 @@ func (r ProjectResolver) ID() *string {
 	return &r.R.ID
 }
 
-func (r ProjectResolver) Description() *string {
-	return &r.R.Description
-}
-
 func (r ProjectResolver) Name() *string {
 	return &r.R.Name
+}
+
+func (r ProjectResolver) Description() *string {
+	return &r.R.Description
 }
 
 func (r ProjectResolver) Team() *string {
 	return &r.R.Team
 }
 
+type ProjectInput struct {
+	Status      *string
+	ID          *string
+	Name        *string
+	Description *string
+	Team        *string
+	Client      *string
+}
+
 type Timer struct {
-	ID             string
+	Name           string
 	Description    string
 	Client         *Client
-	Project        *Project
 	Tags           string
 	TimerStart     string
 	TimerEnd       string
+	IsBilled       bool
+	ID             string
 	Teammember     string
+	Project        *Project
 	ElapsedSeconds int32
 	IsRunning      bool
-	IsBilled       bool
 }
 
 type TimerResolver struct {
 	R *Timer
 }
 
-func (r TimerResolver) ElapsedSeconds() *int32 {
-	return &r.R.ElapsedSeconds
-}
-
-func (r TimerResolver) IsRunning() *bool {
-	return &r.R.IsRunning
-}
-
 func (r TimerResolver) IsBilled() *bool {
 	return &r.R.IsBilled
 }
 
-func (r TimerResolver) Teammember() *string {
-	return &r.R.Teammember
+func (r TimerResolver) Name() *string {
+	return &r.R.Name
 }
 
 func (r TimerResolver) Description() *string {
@@ -113,10 +122,6 @@ func (r TimerResolver) Description() *string {
 
 func (r TimerResolver) Client() *ClientResolver {
 	return &ClientResolver{r.R.Client}
-}
-
-func (r TimerResolver) Project() *ProjectResolver {
-	return &ProjectResolver{r.R.Project}
 }
 
 func (r TimerResolver) Tags() *string {
@@ -135,10 +140,41 @@ func (r TimerResolver) ID() *string {
 	return &r.R.ID
 }
 
+func (r TimerResolver) Teammember() *string {
+	return &r.R.Teammember
+}
+
+func (r TimerResolver) Project() *ProjectResolver {
+	return &ProjectResolver{r.R.Project}
+}
+
+func (r TimerResolver) ElapsedSeconds() *int32 {
+	return &r.R.ElapsedSeconds
+}
+
+func (r TimerResolver) IsRunning() *bool {
+	return &r.R.IsRunning
+}
+
+type TimerInput struct {
+	Project        *string
+	Tags           *string
+	TimerStart     *string
+	TimerEnd       *string
+	IsBilled       *bool
+	Teammember     *string
+	Name           *string
+	Description    *string
+	Client         *string
+	ElapsedSeconds *int32
+	IsRunning      *bool
+	ID             *string
+}
+
 type User struct {
+	Email string
 	ID    string
 	Name  string
-	Email string
 }
 
 type UserResolver struct {
@@ -158,9 +194,9 @@ func (r UserResolver) Email() *string {
 }
 
 type UserInput struct {
+	Password *string
 	Name     *string
 	Email    *string
-	Password *string
 }
 
 type CreateUserRequest struct {
@@ -168,7 +204,7 @@ type CreateUserRequest struct {
 }
 
 type CreateTimerRequest struct {
-	Timer CreateTimerInput
+	T CreateTimerInput
 }
 
 type StartTimerRequest struct {
@@ -183,6 +219,34 @@ type DeleteTimerRequest struct {
 	TimerId string
 }
 
+type UpdateProjectRequest struct {
+	P ProjectInput
+}
+
+type CreateClientRequest struct {
+	C ClientInput
+}
+
+type UpdateClientRequest struct {
+	C ClientInput
+}
+
+type UpdateTimerRequest struct {
+	T TimerInput
+}
+
+type CreateProjectRequest struct {
+	P ProjectInput
+}
+
+type DeleteProjectRequest struct {
+	ProjectId string
+}
+
+type DeleteClientRequest struct {
+	ClientId string
+}
+
 type HelloRequest struct {
 	Name string
 }
@@ -195,22 +259,41 @@ type AllTimerRequest struct {
 	Filter AllTimerFilter
 }
 
-type TimerRequest struct {
+type GetTimerRequest struct {
+	ID *string
+}
+
+type GetProjectRequest struct {
+	ID *string
+}
+
+type GetClientRequest struct {
 	ID *string
 }
 
 type GqlResolver interface {
-	DeleteTimer(DeleteTimerRequest) *TimerResolver
-	CreateTimer(CreateTimerRequest) *TimerResolver
-	StopTimer(StopTimerRequest) *TimerResolver
-	AllTimer(AllTimerRequest) *[]*TimerResolver
-	Timer(TimerRequest) *TimerResolver
+	DeleteProject(DeleteProjectRequest) *ProjectResolver
+	CreateClient(CreateClientRequest) *ClientResolver
 	CreateUser(CreateUserRequest) *string
+	CreateTimer(CreateTimerRequest) *TimerResolver
+	UpdateProject(UpdateProjectRequest) *ProjectResolver
+	AllProjects() *[]*ProjectResolver
+	GetClient(GetClientRequest) *ProjectResolver
+	DeleteClient(DeleteClientRequest) *ClientResolver
 	StartTimer(StartTimerRequest) *TimerResolver
-	RunningTimer() *TimerResolver
+	GetTimer(GetTimerRequest) *TimerResolver
+	StopTimer(StopTimerRequest) *TimerResolver
+	DeleteTimer(DeleteTimerRequest) *TimerResolver
 	Hello(HelloRequest) string
 	User(UserRequest) *UserResolver
+	RunningTimer() *TimerResolver
+	AllClients() *[]*ClientResolver
 	AllUsers() *[]*UserResolver
+	UpdateTimer(UpdateTimerRequest) *TimerResolver
+	CreateProject(CreateProjectRequest) *ProjectResolver
+	UpdateClient(UpdateClientRequest) *ClientResolver
+	AllTimer(AllTimerRequest) *[]*TimerResolver
+	GetProject(GetProjectRequest) *ProjectResolver
 }
 
 var Schema = `
@@ -226,15 +309,30 @@ type Query {
 
   allTimer(filter: AllTimerFilter!): [Timer]
   runningTimer: Timer
-  Timer(id: String): Timer
+  getTimer(id: String): Timer
+
+  getProject(id: String): Project
+  allProjects: [Project]
+
+  getClient(id: String): Project
+  allClients: [Client]
 }
 
 type Mutation {
   createUser(user: UserInput!): String
-  createTimer(timer: CreateTimerInput!): Timer
+  createTimer(t: CreateTimerInput!): Timer
   startTimer(timerId: String!): Timer
   stopTimer(timerId: String!): Timer
   deleteTimer(timerId: String!): Timer
+  updateTimer(t: TimerInput!): Timer
+
+  createProject(p: ProjectInput!): Project
+  updateProject(p: ProjectInput!): Project
+  deleteProject(projectId: String!): Project
+
+  createClient(c: ClientInput!): Client
+  updateClient(c: ClientInput!): Client
+  deleteClient(clientId: String!): Client
 }
 
 type User {
@@ -256,9 +354,24 @@ input CreateTimerInput {
   description: String
   project: String
 }
+input TimerInput {
+  id: String
+  name: String
+  description: String
+  teammember: String
+  client: String
+  project: String
+  tags: String
+  elapsedSeconds: Int
+  timerStart: String
+  timerEnd: String
+  isRunning: Boolean
+  isBilled: Boolean
+}
 
 type Timer {
   id: String
+  name: String
   description: String
   teammember: String
   client: Client
@@ -271,13 +384,28 @@ type Timer {
   isBilled: Boolean
 }
 
-type Project {
+input ProjectInput {
   id: String
-  description: String
   name: String
+  description: String
   team: String
   client: String
   status: String
+}
+type Project {
+  id: String
+  name: String
+  description: String
+  team: String
+  client: Client
+  status: String
+}
+
+input ClientInput {
+  id: String
+  description: String
+  name: String
+  address: String
 }
 
 type Client {
