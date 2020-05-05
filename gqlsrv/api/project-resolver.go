@@ -31,22 +31,10 @@ func (r *Resolver) AllProjects(ctx context.Context) (*[]*types.ProjectResolver, 
 
 // 	return &s, nil
 // }
-func checkNil(ptr *string, def string) string {
-	if ptr == nil {
-		return def
-	}
-	return *ptr
-}
+
 func (r *Resolver) CreateProject(ctx context.Context, arg *types.CreateProjectRequest) (*types.ProjectResolver, error) {
 	log.Println("Create", arg.P.Description)
-
-	t := &pb.Project{
-		Description: checkNil(arg.P.Description, ""),
-		Name:        checkNil(arg.P.Name, ""),
-		Team:        checkNil(arg.P.Team, ""),
-		Status:      checkNil(arg.P.Status, "new"),
-		Client:      checkNil(arg.P.Client, ""),
-	}
+	t := projectGql2pb(&arg.P)
 	result, err := r.projectSvc.Add(ctx, t)
 
 	if err != nil {
@@ -59,16 +47,10 @@ func (r *Resolver) CreateProject(ctx context.Context, arg *types.CreateProjectRe
 }
 
 func (r *Resolver) UpdateProject(ctx context.Context, arg *types.UpdateProjectRequest) (*types.ProjectResolver, error) {
-	log.Println("Update", arg.P.Description)
+	log.Println("Update", arg.P.ID)
 
-	t := &pb.Project{
-		Id:          checkNil(arg.P.ID, ""),
-		Description: checkNil(arg.P.Description, ""),
-		Name:        checkNil(arg.P.Name, ""),
-		Team:        checkNil(arg.P.Team, ""),
-		Status:      checkNil(arg.P.Status, "new"),
-		Client:      checkNil(arg.P.Client, ""),
-	}
+	t := projectGql2pb(&arg.P)
+
 	result, err := r.projectSvc.Update(ctx, t)
 
 	if err != nil {
@@ -95,18 +77,20 @@ func (r *Resolver) GetProject(ctx context.Context, arg *types.GetProjectRequest)
 	return &s, nil
 }
 
-// func (r *Resolver) StartTimer(ctx context.Context, arg *types.StartTimerRequest) (*types.TimerResolver, error) {
-// 	log.Println("startTimer ID", arg.TimerId)
+func (r *Resolver) DeleteProject(ctx context.Context, arg *types.DeleteProjectRequest) (*types.ProjectResolver, error) {
+	log.Println("ID", *&arg.ProjectId)
 
-// 	t := &pb.Id{Id: *&arg.TimerId}
-// 	result, err := r.timerSvc.Start(ctx, t)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	s := types.TimerResolver{R: toGql(result)}
+	t := &pb.Id{Id: arg.ProjectId}
+	result, err := r.projectSvc.Del(ctx, t)
 
-// 	return &s, nil
-// }
+	if err != nil {
+		return nil, err
+	}
+
+	s := types.ProjectResolver{R: project2Gql(result)}
+
+	return &s, nil
+}
 
 func project2Gql(result *pb.Project) *types.Project {
 	test := &types.Project{
@@ -117,4 +101,23 @@ func project2Gql(result *pb.Project) *types.Project {
 		Status:      result.Status,
 	}
 	return test
+}
+
+func projectGql2pb(arg *types.ProjectInput) *pb.Project {
+	t := &pb.Project{
+		Id:          checkNil(arg.ID, ""),
+		Description: checkNil(arg.Description, ""),
+		Name:        checkNil(arg.Name, ""),
+		Team:        checkNil(arg.Team, ""),
+		Status:      checkNil(arg.Status, ""),
+		Client:      checkNil(arg.Client, ""),
+	}
+	return t
+}
+
+func checkNil(ptr *string, def string) string {
+	if ptr == nil {
+		return def
+	}
+	return *ptr
 }

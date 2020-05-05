@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"io/ioutil"
 	"log"
@@ -149,6 +150,20 @@ func main() {
 	log.Println("Listening on port 8090")
 	log.Fatal(srv.ListenAndServe())
 	// log.Fatal(srv.ListenAndServeTLS("server.rsa.crt", "server.rsa.key"))
+}
+
+func AddContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, "-", r.RequestURI)
+		cookie, _ := r.Cookie("username")
+		if cookie != nil {
+			//Add data to context
+			ctx := context.WithValue(r.Context(), "Username", cookie.Value)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
 }
 
 func getSchema(path string) (string, error) {

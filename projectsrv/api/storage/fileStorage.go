@@ -26,7 +26,7 @@ func NewFileStorage() *FileStorage {
 		log.Println(err)
 	}
 	maxId = len(timers)
-	fmt.Println("Timers:", maxId)
+	log.Println("Timers:", maxId)
 	return t
 
 }
@@ -36,9 +36,9 @@ func (t *FileStorage) Add(timer pb.Project) *pb.Project {
 	maxId = maxId + 1
 
 	timers = append(timers, &timer)
-	fmt.Println("Adding to File:", timer)
+	log.Println("Adding to File:", timer)
 	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
+		log.Println("Err", err)
 	}
 	return &timer
 }
@@ -46,6 +46,7 @@ func (t *FileStorage) Add(timer pb.Project) *pb.Project {
 func (t *FileStorage) Update(timer pb.Project) *pb.Project {
 	old, _ := t.Get(timer.Id)
 
+	old.Name = timer.Name
 	old.Description = timer.Description
 	old.Tags = timer.Tags
 	old.Status = timer.Status
@@ -53,10 +54,10 @@ func (t *FileStorage) Update(timer pb.Project) *pb.Project {
 	old.Client = timer.Client
 
 	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
+		log.Println("Err", err)
 	}
 	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
+		log.Println("Err", err)
 	}
 	return old
 }

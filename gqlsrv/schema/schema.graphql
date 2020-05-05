@@ -14,7 +14,7 @@ type Query {
   getProject(id: String): Project
   allProjects: [Project]
 
-  getClient(id: String): Project
+  getClient(id: String): Client
   allClients: [Client]
 }
 

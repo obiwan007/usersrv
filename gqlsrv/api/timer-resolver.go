@@ -17,7 +17,7 @@ func (r *Resolver) AllTimer(ctx context.Context, args *types.AllTimerRequest) (*
 	}
 	var userRxs []*types.TimerResolver
 	for _, res := range result.Timers {
-		t := toGql(res)
+		t := timerToGql(res)
 		userRxs = append(userRxs, &types.TimerResolver{R: t})
 	}
 
@@ -46,7 +46,7 @@ func (r *Resolver) GetTimer(ctx context.Context, arg *types.GetTimerRequest) (*t
 		return nil, err
 	}
 
-	s := types.TimerResolver{R: toGql(result)}
+	s := types.TimerResolver{R: timerToGql(result)}
 
 	return &s, nil
 }
@@ -59,7 +59,7 @@ func (r *Resolver) StartTimer(ctx context.Context, arg *types.StartTimerRequest)
 	if err != nil {
 		return nil, err
 	}
-	s := types.TimerResolver{R: toGql(result)}
+	s := types.TimerResolver{R: timerToGql(result)}
 
 	return &s, nil
 }
@@ -71,11 +71,11 @@ func (r *Resolver) StopTimer(ctx context.Context, arg *types.StopTimerRequest) (
 	if err != nil {
 		return nil, err
 	}
-	s := types.TimerResolver{R: toGql(result)}
+	s := types.TimerResolver{R: timerToGql(result)}
 	return &s, nil
 }
 
-func toGql(result *pb.Timer) *types.Timer {
+func timerToGql(result *pb.Timer) *types.Timer {
 	test := &types.Timer{
 		Description: result.Description,
 		// Client:         result.Client,
