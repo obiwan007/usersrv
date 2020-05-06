@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timer-deployment
+  labels:
+    app: timer
+spec:
+  selector:
+    matchLabels:
+      app: timer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: timer
+    spec:
+      containers:
+        - name: user
+          image: obiwan007/timersrv:latest
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              memory: 256Mi
+          ports:
+            - name: timersrv
+              containerPort: 10001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timersrv
+spec:
+  selector:
+    app: timer
+  ports:
+    - name: grpc
+      port: 10001
+  type: ClusterIP

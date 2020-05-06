@@ -156,6 +156,9 @@ kapply:
 	kubectl apply -f config/frontendservice.yaml
 	kubectl apply -f config/gqlservice.yaml
 	kubectl apply -f config/userservice.yaml
+	kubectl apply -f config/timerservice.yaml
+	kubectl apply -f config/projectservice.yaml
+	kubectl apply -f config/clientservice.yaml
 	kubectl apply -f config/zipkin.yaml
 
 kfrontend:
@@ -167,6 +170,9 @@ kgql:
 kredeploy:
 	kubectl rollout restart deployment api-deployment
 	kubectl rollout restart deployment user-deployment
+	kubectl rollout restart deployment timer-deployment
+	kubectl rollout restart deployment project-deployment
+	kubectl rollout restart deployment client-deployment
 	kubectl rollout restart deployment frontend-deployment
 
 kdashboard:
