@@ -12,3 +12,39 @@ query AllProjects {
     }
   }
 }
+
+mutation createProject($d: ProjectInput!) {
+  createProject(p: $d) {
+    name
+    description
+    id
+    team
+    status
+    client {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation updateProject($d: ProjectInput!) {
+  updateProject(p: $d) {
+    name
+    description
+    id
+    team
+    status
+    client {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation deleteProject($d: String!) {
+  deleteProject(projectId: $d) {
+    id
+  }
+}
