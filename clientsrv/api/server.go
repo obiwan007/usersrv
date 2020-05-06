@@ -38,8 +38,8 @@ func (s *routeGuideServer) Update(ctx context.Context, timer *pb.Client) (*pb.Cl
 func (s *routeGuideServer) Del(ctx context.Context, timerId *pb.Id) (*pb.Client, error) {
 	fmt.Println("Deleting Client", timerId.GetId())
 	// No feature was found, return an unnamed feature
-	s.storage.Delete(timerId.GetId())
-	return nil, nil
+	deleted, err := s.storage.Delete(timerId.GetId())
+	return deleted, err
 }
 
 func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Client, error) {

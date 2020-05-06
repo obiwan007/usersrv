@@ -24,3 +24,9 @@ mutation updateClient($d: ClientInput!) {
     address
   }
 }
+
+mutation deleteClient($d: String!) {
+  deleteClient(clientId: $d) {
+    id
+  }
+}

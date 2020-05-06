@@ -53,14 +53,39 @@ func (t *FileStorage) Update(timer pb.Client) pb.Client {
 	if err := t.Save("file.json", timers); err != nil {
 		fmt.Println("Err", err)
 	}
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
-	}
 	return *old
 }
 
-func (t *FileStorage) Delete(id string) error {
-	return nil
+func (t *FileStorage) Delete(id string) (*pb.Client, error) {
+	log.Println("Delete", id)
+	index, err := t.GetIndex(id)
+	if err != nil {
+		return nil, err
+	}
+	res, _ := t.Get(id)
+	timers = append(timers[:index], timers[index+1:]...)
+	if err := t.Save("file.json", timers); err != nil {
+		fmt.Println("Err", err)
+	}
+	return res, nil
+}
+
+func (t *FileStorage) GetIndex(id string) (int, error) {
+	// idx := sort.Search(len(users), func(i int) bool {
+	// 	return users[i].Id == id
+	// })
+	var index int = -1
+	for i, u := range timers {
+		if u.Id == id {
+			index = i
+			break
+		}
+	}
+	fmt.Println("Found index", index)
+	if index != -1 {
+		return index, nil
+	}
+	return -1, errors.New("No such id found")
 }
 
 // GetUser will return a user with a given Id
@@ -77,7 +102,6 @@ func (t *FileStorage) Get(id string) (*pb.Client, error) {
 	}
 	fmt.Println("Found index", res)
 	if res != nil {
-
 		return res, nil
 	}
 	return &pb.Client{}, errors.New("No such id found")
