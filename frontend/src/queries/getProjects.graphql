@@ -1,0 +1,14 @@
+query AllProjects {
+  allProjects {
+    name
+    description
+    id
+    team
+    status
+    client {
+      id
+      name
+      description
+    }
+  }
+}

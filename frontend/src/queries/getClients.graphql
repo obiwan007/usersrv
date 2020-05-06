@@ -1,0 +1,26 @@
+query AllClients {
+  allClients {
+    description
+    id
+    name
+    address
+  }
+}
+
+mutation createClient($d: ClientInput!) {
+  createClient(c: $d) {
+    id
+    name
+    description
+    address
+  }
+}
+
+mutation updateClient($d: ClientInput!) {
+  updateClient(c: $d) {
+    id
+    name
+    description
+    address
+  }
+}

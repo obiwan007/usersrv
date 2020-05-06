@@ -54,11 +54,11 @@ clean:
 	rm -f $(BINARY_NAME_USER)
 rungql:
 	cd gqlsrv/cli && go run main.go -config config.conf \ 
-	--usersrv localhost:10000 \
-	--timersrv localhost:10001 \	
-	--projectsrv localhost:10002 \
-	--clientsrv localhost:10003 \
-	--zipkin http://localhost:9411/api/v1/spans
+		-usersrv localhost:10000 \
+		-timersrv localhost:10001 \	
+		-projectsrv localhost:10002 \
+		-clientsrv localhost:10003 \
+		-zipkin http://localhost:9411/api/v1/spans
 
 runuser:
 	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans
