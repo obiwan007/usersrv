@@ -1,8 +1,8 @@
 query AllClients {
   allClients {
-    description
     id
     name
+    description
     address
   }
 }

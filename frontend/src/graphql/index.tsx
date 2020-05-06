@@ -211,7 +211,7 @@ export type AllClientsQuery = { __typename?: "Query" } & {
       Maybe<
         { __typename?: "Client" } & Pick<
           Client,
-          "description" | "id" | "name" | "address"
+          "id" | "name" | "description" | "address"
         >
       >
     >
@@ -277,9 +277,9 @@ export type AllProjectsQuery = { __typename?: "Query" } & {
 export const AllClientsDocument = gql`
   query AllClients {
     allClients {
-      description
       id
       name
+      description
       address
     }
   }

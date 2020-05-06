@@ -5,7 +5,11 @@
 
 /* NPM */
 /* Local */
-import { InMemoryCache, IntrospectionFragmentMatcher, NormalizedCacheObject } from "apollo-cache-inmemory";
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+  NormalizedCacheObject,
+} from "apollo-cache-inmemory";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink, split } from "apollo-link";
 import { onError } from "apollo-link-error";
@@ -18,18 +22,22 @@ import Security from "./security";
 import { zipkinFetch } from "./tracing";
 
 // ----------------------------------------------------------------------------
-console.log('Using GraphQL Backend:', process.env.REACT_APP_GRAPHQL, process.env.REACT_APP_WS_SUBSCRIPTIONS)
+console.log(
+  "Using GraphQL Backend:",
+  process.env.REACT_APP_GRAPHQL,
+  process.env.REACT_APP_WS_SUBSCRIPTIONS
+);
 // Match up fragments
 const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData
+  introspectionQueryResultData,
 });
 
 const authMiddleware = new ApolloLink((operation: any, forward: any) => {
   if (Security.inMemoryToken) {
     operation.setContext({
       headers: {
-        Authorization: `${Security.inMemoryToken}`
-      }
+        Authorization: `${Security.inMemoryToken}`,
+      },
     });
   }
 
@@ -50,7 +58,7 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
   const httpLink = new HttpLink({
     credentials: "include",
     uri: window.location.origin + "/query",
-    fetch: zipkinFetch
+    fetch: zipkinFetch,
   });
 
   // // If we're in the browser, we'd have received initial state from the
@@ -87,26 +95,29 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
       // Split on HTTP and WebSockets
       process.env.REACT_APP_WS_SUBSCRIPTIONS === "1"
         ? split(
-          ({ query }) => {
-            const definition = getMainDefinition(query);
-            return (
-              definition.kind === "OperationDefinition" &&
-              definition.operation === "subscription"
-            );
-          },
-          // Use WebSockets for subscriptions
-          new WebSocketLink(
-            // Replace http(s) with `ws` for connecting via WebSockts
-            new SubscriptionClient(process.env.REACT_APP_GRAPHQL!.replace(/^https?/, "ws"), {
-              reconnect: true // <-- automatically redirect as needed
-            })
-          ),
-          // ... fall-back to HTTP for everything else
-          httpLink
-        )
-        : httpLink // <-- just use HTTP on the server
+            ({ query }) => {
+              const definition = getMainDefinition(query);
+              return (
+                definition.kind === "OperationDefinition" &&
+                definition.operation === "subscription"
+              );
+            },
+            // Use WebSockets for subscriptions
+            new WebSocketLink(
+              // Replace http(s) with `ws` for connecting via WebSockts
+              new SubscriptionClient(
+                process.env.REACT_APP_GRAPHQL!.replace(/^https?/, "ws"),
+                {
+                  reconnect: true, // <-- automatically redirect as needed
+                }
+              )
+            ),
+            // ... fall-back to HTTP for everything else
+            httpLink
+          )
+        : httpLink, // <-- just use HTTP on the server
     ]),
     // On the server, enable SSR mode
-    ssrMode: false
+    ssrMode: false,
   });
 }
