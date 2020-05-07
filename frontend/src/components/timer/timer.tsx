@@ -7,6 +7,7 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
+import { MutationFunction } from "@apollo/react-common";
 import {
   Box,
   Button,
@@ -31,11 +32,20 @@ import { withRouter } from "react-router-dom";
 import {
   AllProjectsComponent,
   AllTimerComponent,
-  CreateProjectComponent,
-  DeleteProjectComponent,
+  CreateTimerComponent,
+  CreateTimerMutation,
+  CreateTimerMutationVariables,
+  DeleteTimerComponent,
   Project,
+  refetchAllTimerQuery,
+  StartTimerComponent,
+  StartTimerMutation,
+  StartTimerMutationVariables,
+  StopTimerComponent,
+  StopTimerMutation,
+  StopTimerMutationVariables,
   Timer as TimerEntry,
-  UpdateProjectComponent,
+  UpdateTimerComponent,
 } from "../../graphql";
 import project from "../../lib/project";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
@@ -101,7 +111,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     super(props, state);
     this.state = {
       currentProject: timer.getTimer().project,
-      description: timer.getTimer().description,
+      description: "",
       isRunning: timer.getTimer().isRunning,
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
@@ -116,7 +126,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     this.setState({
       columns: this.getColumns(),
       description: timer.getTimer().description,
-      currentProject: timer.getTimer().project,
+      currentProject: "",
     });
     this.interval = setInterval(() => {
       this.checkTimer();
@@ -136,13 +146,15 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     const {
       description,
       currentProject,
-      isRunning,
       columns,
       timefilter,
       sum,
     } = this.state;
     const { classes } = this.props;
     const seconds = timer.elapsed();
+    let currentTimer: TimerEntry | null = null;
+
+    const isRunning = false;
     return (
       <div>
         <h3>Timer</h3>
@@ -155,30 +167,35 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 f.lookup = this.projectsDict(
                   allProjects?.allProjects as Project[]
                 );
-                console.log("PROJECTS");
               }
             }
-            console.log("AllProjects", allProjects);
             return (
-              <UpdateProjectComponent>
-                {(updateProject, { data }) => {
-                  console.log("Updateclient MutationData", data);
+              <UpdateTimerComponent>
+                {(updateTimer, { data }) => {
                   return (
-                    <DeleteProjectComponent>
-                      {(deleteProject, { data }) => {
+                    <DeleteTimerComponent>
+                      {(deleteTimer, { data }) => {
                         return (
-                          <CreateProjectComponent>
-                            {(createProject, { data }) => {
-                              console.log("MutationData", data);
+                          <CreateTimerComponent>
+                            {(createTimer, { data }) => {
                               return (
                                 <AllTimerComponent>
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
+                                    currentTimer = null;
                                     data?.allTimer?.forEach((d) => {
-                                      d &&
-                                        ((d as any).projectId = d?.project?.id);
+                                      if (d) {
+                                        (d as any).projectId = d?.project?.id;
+                                        if (d.isRunning === true) {
+                                          currentTimer = d;
+                                        }
+                                      }
                                     });
-                                    console.log("Returned data", data);
+                                    console.log(
+                                      "currentTimer",
+                                      currentTimer,
+                                      data?.allTimer
+                                    );
                                     if (error) {
                                       return (
                                         <div>
@@ -283,27 +300,51 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                             <FormControl
                                               className={classes.topButtons}
                                             >
-                                              <IconButton
-                                                onClick={() =>
-                                                  this.startStopTimer()
-                                                }
-                                                edge="start"
-                                                color="secondary"
-                                                aria-label="menu"
-                                              >
-                                                {!isRunning && (
-                                                  <PlayArrow
-                                                    style={{
-                                                      color: green[500],
-                                                    }}
-                                                  />
-                                                )}
-                                                {isRunning && (
-                                                  <Stop
-                                                    style={{ color: red[500] }}
-                                                  />
-                                                )}
-                                              </IconButton>
+                                              <StopTimerComponent>
+                                                {(stopTimer, { data }) => {
+                                                  return (
+                                                    <StartTimerComponent>
+                                                      {(
+                                                        startTimer,
+                                                        { data }
+                                                      ) => {
+                                                        return (
+                                                          <IconButton
+                                                            onClick={() =>
+                                                              this.startStopTimer(
+                                                                createTimer,
+                                                                startTimer,
+                                                                stopTimer,
+                                                                currentTimer
+                                                              )
+                                                            }
+                                                            edge="start"
+                                                            color="secondary"
+                                                            aria-label="menu"
+                                                          >
+                                                            {!currentTimer && (
+                                                              <PlayArrow
+                                                                style={{
+                                                                  color:
+                                                                    green[500],
+                                                                }}
+                                                              />
+                                                            )}
+                                                            {currentTimer && (
+                                                              <Stop
+                                                                style={{
+                                                                  color:
+                                                                    red[500],
+                                                                }}
+                                                              />
+                                                            )}
+                                                          </IconButton>
+                                                        );
+                                                      }}
+                                                    </StartTimerComponent>
+                                                  );
+                                                }}
+                                              </StopTimerComponent>
                                             </FormControl>
                                           </Box>
                                           <Box>
@@ -329,7 +370,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               color="textSecondary"
                                               align="center"
                                             >
-                                              xxxxx
+                                              {this.showElapsed(currentTimer)}
                                               {/* {isRunning
                                                 ? timer.currentTimer.hms()
                                                 : "00:00:00"} */}
@@ -427,41 +468,41 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               }, // only name(a) rows would be editable
                                               isDeletable: (rowData) => true, // only name(a) rows would be deletable
                                               onRowUpdate: (newData, oldData) =>
-                                                new Promise(
-                                                  (resolve, reject) => {
-                                                    setTimeout(() => {
-                                                      {
-                                                        const d = timer.update(
-                                                          newData,
-                                                          timefilter
-                                                        );
-                                                        console.log(
-                                                          "New List",
-                                                          d
-                                                        );
-                                                      }
-                                                      resolve();
-                                                    }, 1000);
-                                                  }
-                                                ),
+                                                updateTimer({
+                                                  refetchQueries: [
+                                                    refetchAllTimerQuery(),
+                                                  ],
+                                                  fetchPolicy: "no-cache",
+                                                  variables: {
+                                                    d: {
+                                                      id: newData.id,
+                                                      description:
+                                                        newData.description,
+                                                      project:
+                                                        newData.projectId,
+                                                    },
+                                                  },
+                                                }).catch((ex) => {
+                                                  console.log(
+                                                    "Error in mutation",
+                                                    ex
+                                                  );
+                                                }),
                                               onRowDelete: (oldData) =>
-                                                new Promise(
-                                                  (resolve, reject) => {
-                                                    setTimeout(() => {
-                                                      {
-                                                        const d = timer.del(
-                                                          oldData,
-                                                          timefilter
-                                                        );
-                                                        console.log(
-                                                          "New List",
-                                                          d
-                                                        );
-                                                      }
-                                                      resolve();
-                                                    }, 1000);
-                                                  }
-                                                ),
+                                                deleteTimer({
+                                                  refetchQueries: [
+                                                    refetchAllTimerQuery(),
+                                                  ],
+                                                  fetchPolicy: "no-cache",
+                                                  variables: {
+                                                    timerId: oldData.id,
+                                                  },
+                                                }).catch((ex) => {
+                                                  console.log(
+                                                    "Error in mutation",
+                                                    ex
+                                                  );
+                                                }),
                                             }}
                                           />
                                         </List>
@@ -471,13 +512,13 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                 </AllTimerComponent>
                               );
                             }}
-                          </CreateProjectComponent>
+                          </CreateTimerComponent>
                         );
                       }}
-                    </DeleteProjectComponent>
+                    </DeleteTimerComponent>
                   );
                 }}
-              </UpdateProjectComponent>
+              </UpdateTimerComponent>
             );
           }}
         </AllProjectsComponent>
@@ -528,6 +569,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         title: "Seconds",
         field: "elapsedSeconds",
         width: "100px",
+        editable: () => false,
         render: (data: TimerEntry) => {
           return <>{TimerSrv.hms(data.elapsedSeconds)}</>;
         },
@@ -556,13 +598,69 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     data.forEach((e) => e.id && (dict[+e.id] = e.name));
     return dict;
   }
+  showElapsed(t: TimerEntry | null): string {
+    if (t) {
+      const time1 = new Date(t.timerStart!);
+      const time2 = new Date();
+      return TimerSrv.hms((time2.getTime() - time1.getTime()) / 1000);
+    }
+    return "00:00:00";
+  }
+  async startStopTimer(
+    createTimer: MutationFunction<
+      CreateTimerMutation,
+      CreateTimerMutationVariables
+    >,
+    startTimer: MutationFunction<
+      StartTimerMutation,
+      StartTimerMutationVariables
+    >,
+    stopTimer: MutationFunction<StopTimerMutation, StopTimerMutationVariables>,
+    currentTimer: TimerEntry | null
+  ) {
+    console.log("CurrentTimer:", currentTimer);
+    if (!currentTimer) {
+      const newTimer = await createTimer({
+        refetchQueries: [refetchAllTimerQuery()],
+        fetchPolicy: "no-cache",
+        variables: {
+          d: {
+            description: "test", // newData.description,
+            project: "0", // newData.projectId,
+          },
+        },
+      }).catch((ex) => {
+        console.log("Error in mutation", ex);
+      });
+      console.log("NewTimer", newTimer);
+      if (newTimer) {
+        startTimer({
+          refetchQueries: [refetchAllTimerQuery()],
+          fetchPolicy: "no-cache",
+          variables: {
+            timerId: newTimer.data!.createTimer!.id!,
+          },
+        }).catch((ex) => {
+          console.log("Error in mutation", ex);
+        });
+      }
+    } else {
+      stopTimer({
+        refetchQueries: [refetchAllTimerQuery()],
+        fetchPolicy: "no-cache",
+        variables: {
+          timerId: currentTimer.id!,
+        },
+      }).catch((ex) => {
+        console.log("Error in mutation", ex);
+      });
+    }
 
-  startStopTimer() {
-    this.state.isRunning ? timer.endTimer() : timer.startTimer();
-    this.setState({
-      currentProject: timer.getTimer().project,
-      description: timer.getTimer().description,
-    });
+    // this.state.isRunning ? timer.endTimer() : timer.startTimer();
+    // this.setState({
+    //   currentProject: timer.getTimer().project,
+    //   description: timer.getTimer().description,
+    // });
   }
   discardTimer() {
     timer.discardTimer();
@@ -573,14 +671,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
   checkTimer = () => {
     this.setState({
-      isRunning: timer.getTimer().isRunning,
-      startTime: timer.getTimer().timerStart,
-      endTime: timer.getTimer().timerEnd,
-      elapsed: timer.getTimer().elapsed(),
+      elapsed: new Date().getTime(),
     });
   };
 
-  // recalcSummary(list: TimeEntry[]): number {
+  // recalcSummary( TimeEntry[]): number {
   //   let sum = 0;
   //   list.forEach((l) => (sum += l.elapsedSeconds));
   //   return sum;

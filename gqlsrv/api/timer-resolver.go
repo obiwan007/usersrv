@@ -70,6 +70,39 @@ func (r *Resolver) StopTimer(ctx context.Context, arg *StopTimerRequest) (*Timer
 	return &s, nil
 }
 
+func (r *Resolver) CreateTimer(ctx context.Context, arg *CreateTimerRequest) (*TimerResolver, error) {
+
+	t := &pb.Timer{
+		Description: checkNil(arg.T.Description, ""),
+		Project:     checkNil(arg.T.Project, ""),
+	}
+
+	result, err := r.timerSvc.Add(ctx, t)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s := TimerResolver{R: timerToGql(result), Root: r}
+
+	return &s, nil
+}
+func (r *Resolver) UpdateTimer(ctx context.Context, arg *UpdateTimerRequest) (*TimerResolver, error) {
+	log.Println("Update", arg.T.ID)
+
+	t := timerGql2pb(&arg.T)
+
+	result, err := r.timerSvc.Update(ctx, t)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s := TimerResolver{R: timerToGql(result), Root: r}
+
+	return &s, nil
+}
+
 func timerToGql(result *pb.Timer) *Timer {
 	test := &Timer{
 		Description:    result.Description,
@@ -83,4 +116,14 @@ func timerToGql(result *pb.Timer) *Timer {
 		IsRunning:      result.IsRunning}
 
 	return test
+}
+
+func timerGql2pb(arg *TimerInput) *pb.Timer {
+	t := &pb.Timer{
+		Id:          checkNil(arg.ID, ""),
+		Description: checkNil(arg.Description, ""),
+		Name:        checkNil(arg.Name, ""),
+		Project:     checkNil(arg.Project, ""),
+	}
+	return t
 }

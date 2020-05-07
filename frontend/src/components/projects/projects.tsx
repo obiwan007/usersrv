@@ -260,17 +260,19 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 );
                                               }),
                                             onRowDelete: (oldData) =>
-                                              new Promise((resolve, reject) => {
-                                                setTimeout(() => {
-                                                  {
-                                                    const d = project.del(
-                                                      oldData
-                                                    );
-                                                    console.log("New List", d);
-                                                    // this.setState({ list: d }, () => resolve());
-                                                  }
-                                                  resolve();
-                                                }, 1000);
+                                              deleteProject({
+                                                refetchQueries: [
+                                                  refetchAllProjectsQuery(),
+                                                ],
+                                                fetchPolicy: "no-cache",
+                                                variables: {
+                                                  d: oldData.id,
+                                                },
+                                              }).catch((ex) => {
+                                                console.log(
+                                                  "Error in mutation",
+                                                  ex
+                                                );
                                               }),
                                           }}
                                         />
