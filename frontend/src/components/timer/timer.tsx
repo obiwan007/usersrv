@@ -20,7 +20,6 @@ import {
   Select,
   TextField,
   Theme,
-  Typography,
   WithStyles,
   withStyles,
 } from "@material-ui/core";
@@ -49,6 +48,7 @@ import {
 } from "../../graphql";
 import project from "../../lib/project";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
+import { RunningClock } from "./runningClock";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -128,12 +128,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       description: timer.getTimer().description,
       currentProject: "",
     });
-    this.interval = setInterval(() => {
-      this.checkTimer();
-    }, 500);
+    // this.interval = setInterval(() => {
+    //   this.checkTimer();
+    // }, 500);
   }
   componentWillUnmount() {
-    clearInterval(this.interval!);
+    //clearInterval(this.interval!);
   }
   handleDescriptionField = (event: any) => {
     timer.currentTimer.description = event.target.value!;
@@ -152,7 +152,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     } = this.state;
     const { classes } = this.props;
     const seconds = timer.elapsed();
-    let currentTimer: TimerEntry | null = null;
+    let currentTimer: TimerEntry | undefined = undefined;
 
     const isRunning = false;
     return (
@@ -182,7 +182,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                 <AllTimerComponent>
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
-                                    currentTimer = null;
+                                    currentTimer = undefined;
                                     data?.allTimer?.forEach((d) => {
                                       if (d) {
                                         (d as any).projectId = d?.project?.id;
@@ -365,16 +365,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                             </FormControl>
                                           </Box>
                                           <Box>
-                                            <Typography
-                                              variant="body2"
-                                              color="textSecondary"
-                                              align="center"
-                                            >
-                                              {this.showElapsed(currentTimer)}
-                                              {/* {isRunning
-                                                ? timer.currentTimer.hms()
-                                                : "00:00:00"} */}
-                                            </Typography>
+                                            <RunningClock
+                                              currentTimer={currentTimer}
+                                            ></RunningClock>
                                           </Box>
                                         </Box>
                                         {/* ----------------------- */}
@@ -598,14 +591,14 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     data.forEach((e) => e.id && (dict[+e.id] = e.name));
     return dict;
   }
-  showElapsed(t: TimerEntry | null): string {
-    if (t) {
-      const time1 = new Date(t.timerStart!);
-      const time2 = new Date();
-      return TimerSrv.hms((time2.getTime() - time1.getTime()) / 1000);
-    }
-    return "00:00:00";
-  }
+  // showElapsed(t: TimerEntry | null | unknown): string {
+  //   if (t) {
+  //     const time1 = new Date(t.timerStart!);
+  //     const time2 = new Date();
+  //     return TimerSrv.hms((time2.getTime() - time1.getTime()) / 1000);
+  //   }
+  //   return "00:00:00";
+  // }
   async startStopTimer(
     createTimer: MutationFunction<
       CreateTimerMutation,
@@ -616,7 +609,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       StartTimerMutationVariables
     >,
     stopTimer: MutationFunction<StopTimerMutation, StopTimerMutationVariables>,
-    currentTimer: TimerEntry | null
+    currentTimer?: TimerEntry
   ) {
     console.log("CurrentTimer:", currentTimer);
     if (!currentTimer) {
