@@ -183,7 +183,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                       return (
                                         <div>
                                           <h1>
-                                            Error retrieving users list &mdash;{" "}
+                                            Error retrieving Timer list &mdash;{" "}
                                             {error.message}
                                           </h1>
                                           <Button
@@ -264,61 +264,21 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                   aria-label="None"
                                                   value=""
                                                 />
-                                                {project.Entries().map((e) => (
-                                                  <MenuItem
-                                                    key={e.id}
-                                                    value={e.id}
-                                                  >
-                                                    {e.name}
-                                                  </MenuItem>
-                                                ))}
+                                                {allProjects &&
+                                                  allProjects.allProjects?.map(
+                                                    (e: any) => (
+                                                      <MenuItem
+                                                        key={e.id!}
+                                                        value={e.id!}
+                                                      >
+                                                        {e.name}
+                                                      </MenuItem>
+                                                    )
+                                                  )}
                                               </Select>
                                             </FormControl>
                                           </Box>
-                                          <Box>
-                                            <FormControl
-                                              className={[
-                                                classes.formControl,
-                                                classes.selectEmpty,
-                                              ].join(" ")}
-                                            >
-                                              <InputLabel>Project</InputLabel>
-                                              <Select
-                                                className={classes.selectEmpty}
-                                                label="Tag"
-                                                value={
-                                                  timer.currentTimer.project
-                                                }
-                                                onChange={(event) => {
-                                                  console.log(
-                                                    "Projectselection:",
-                                                    event.target
-                                                  );
-                                                  timer.currentTimer.project = event
-                                                    .target.value as string;
 
-                                                  timer.save();
-                                                }}
-                                                // inputProps={{
-                                                //   name: "age",
-                                                //   id: "age-native-simple",
-                                                // }}
-                                              >
-                                                <MenuItem
-                                                  aria-label="None"
-                                                  value=""
-                                                />
-                                                {project.Entries().map((e) => (
-                                                  <MenuItem
-                                                    key={e.id}
-                                                    value={e.id}
-                                                  >
-                                                    {e.name}
-                                                  </MenuItem>
-                                                ))}
-                                              </Select>
-                                            </FormControl>
-                                          </Box>
                                           <Box alignItems="center">
                                             <FormControl
                                               className={classes.topButtons}
@@ -442,6 +402,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                           aria-label="main mailbox folders"
                                         >
                                           <MaterialTable
+                                            isLoading={loading}
                                             options={{
                                               actionsColumnIndex: -1,
                                               padding: "dense",
