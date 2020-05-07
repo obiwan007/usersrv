@@ -52,11 +52,15 @@ clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME_GQL)
 	rm -f $(BINARY_NAME_USER)
+
+runall:
+	make rungql & make runuser & make runtimer & make runproject & make runclient & wait
+
 rungql:
-	cd gqlsrv/cli && go run main.go -config config.conf -usersrv localhost:10000 -timersrv localhost:10001 -projectsrv localhost:10002 -clientsrv localhost:10003 -zipkin http://localhost:9411/api/v1/spans
+	cd gqlsrv/cli && go run main.go -config config.conf -usersrv localhost:10000 -timersrv localhost:10001 -projectsrv localhost:10002 -clientsrv localhost:10003 -zipkin http://localhost:9411/api/v1/spans | sed -e 's/^/[Command1] /'
 
 runuser:
-	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans
+	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans | sed -e 's/^/[Command2] /'
 
 runtimer:
 	cd timersrv/cli && go run main.go --port 10001 --zipkin http://localhost:9411/api/v1/spans

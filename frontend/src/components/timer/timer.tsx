@@ -9,6 +9,7 @@
 // Emotion styled component
 import {
   Box,
+  Button,
   createStyles,
   FormControl,
   IconButton,
@@ -19,16 +20,25 @@ import {
   TextField,
   Theme,
   Typography,
-  withStyles,
   WithStyles,
+  withStyles,
 } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
 import { Delete, PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
+import {
+  AllProjectsComponent,
+  AllTimerComponent,
+  CreateProjectComponent,
+  DeleteProjectComponent,
+  Project,
+  Timer as TimerEntry,
+  UpdateProjectComponent,
+} from "../../graphql";
 import project from "../../lib/project";
-import timer, { TimeEntry, Timer as TimerSrv } from "../../lib/timer";
+import timer, { Timer as TimerSrv } from "../../lib/timer";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -63,7 +73,6 @@ interface IState {
   endTime: Date;
   isRunning: boolean;
   elapsed: number;
-  list: TimeEntry[];
   sum: number;
   columns: any[];
   description: string;
@@ -90,8 +99,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
    */
   constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
-    const list = timer.Entries("1");
-    const sum = this.recalcSummary(list);
     this.state = {
       currentProject: timer.getTimer().project,
       description: timer.getTimer().description,
@@ -99,10 +106,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
       elapsed: timer.getTimer().elapsed(),
-      list,
       columns: [],
       timefilter: "1",
-      sum,
+      sum: 0,
     };
   }
 
@@ -131,7 +137,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       description,
       currentProject,
       isRunning,
-      list,
       columns,
       timefilter,
       sum,
@@ -141,209 +146,380 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     return (
       <div>
         <h3>Timer</h3>
+        <AllProjectsComponent>
+          {({ data, loading, error }) => {
+            const allProjects = data;
+            if (columns) {
+              const f = columns.find((c) => c.title === "Project");
+              if (f) {
+                f.lookup = this.projectsDict(
+                  allProjects?.allProjects as Project[]
+                );
+                console.log("PROJECTS");
+              }
+            }
+            console.log("AllProjects", allProjects);
+            return (
+              <UpdateProjectComponent>
+                {(updateProject, { data }) => {
+                  console.log("Updateclient MutationData", data);
+                  return (
+                    <DeleteProjectComponent>
+                      {(deleteProject, { data }) => {
+                        return (
+                          <CreateProjectComponent>
+                            {(createProject, { data }) => {
+                              console.log("MutationData", data);
+                              return (
+                                <AllTimerComponent>
+                                  {({ data, loading, error }) => {
+                                    // Any errors? Say so!
+                                    data?.allTimer?.forEach((d) => {
+                                      d &&
+                                        ((d as any).projectId = d?.project?.id);
+                                    });
+                                    console.log("Returned data", data);
+                                    if (error) {
+                                      return (
+                                        <div>
+                                          <h1>
+                                            Error retrieving users list &mdash;{" "}
+                                            {error.message}
+                                          </h1>
+                                          <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() =>
+                                              this.props.history.push("/login")
+                                            }
+                                          >
+                                            Login
+                                          </Button>
+                                          {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
+                                        </div>
+                                      );
+                                    }
 
-        <Box display="flex" flexDirection="row" alignItems="center">
-          <Box flexGrow={1}>
-            <FormControl className={classes.formControl}>
-              <TextField
-                required
-                autoFocus
-                value={description}
-                onChange={this.handleDescriptionField}
-                margin="dense"
-                id="name"
-                label="What are your working on"
-                type="text"
-                fullWidth
-              />
-            </FormControl>
-          </Box>
-          <Box>
-            <FormControl
-              className={[classes.formControl, classes.selectEmpty].join(" ")}
-            >
-              <InputLabel>Project</InputLabel>
-              <Select
-                className={classes.selectEmpty}
-                label="Project"
-                value={currentProject}
-                onChange={(event) => {
-                  console.log("Projectselection:", event.target);
-                  timer.currentTimer.project = event.target.value as string;
-                  timer.save();
-                  this.setState({ currentProject: timer.currentTimer.project });
-                }}
-                // inputProps={{
-                //   name: "age",
-                //   id: "age-native-simple",
-                // }}
-              >
-                <MenuItem aria-label="None" value="" />
-                {project.Entries().map((e) => (
-                  <MenuItem key={e.id} value={e.id}>
-                    {e.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Box>
-            <FormControl
-              className={[classes.formControl, classes.selectEmpty].join(" ")}
-            >
-              <InputLabel>Project</InputLabel>
-              <Select
-                className={classes.selectEmpty}
-                label="Tag"
-                value={timer.currentTimer.project}
-                onChange={(event) => {
-                  console.log("Projectselection:", event.target);
-                  timer.currentTimer.project = event.target.value as string;
+                                    // If the data is still loading, return with a basic
+                                    // message to alert the user
 
-                  timer.save();
-                }}
-                // inputProps={{
-                //   name: "age",
-                //   id: "age-native-simple",
-                // }}
-              >
-                <MenuItem aria-label="None" value="" />
-                {project.Entries().map((e) => (
-                  <MenuItem key={e.id} value={e.id}>
-                    {e.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Box alignItems="center">
-            <FormControl className={classes.topButtons}>
-              <IconButton
-                onClick={() => this.startStopTimer()}
-                edge="start"
-                color="secondary"
-                aria-label="menu"
-              >
-                {!isRunning && <PlayArrow style={{ color: green[500] }} />}
-                {isRunning && <Stop style={{ color: red[500] }} />}
-              </IconButton>
-            </FormControl>
-          </Box>
-          <Box>
-            <FormControl className={classes.topButtons}>
-              <IconButton
-                disabled={!isRunning}
-                onClick={() => this.discardTimer()}
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-              >
-                <Delete />
-              </IconButton>
-            </FormControl>
-          </Box>
-          <Box>
-            <Typography variant="body2" color="textSecondary" align="center">
-              {isRunning ? timer.currentTimer.hms() : "00:00:00"}
-            </Typography>
-          </Box>
-        </Box>
-        {/* ----------------------- */}
-        <Box display="flex" flexDirection="row" alignItems="center">
-          <Box>
-            <FormControl
-              style={{ width: 250 }}
-              className={[classes.formControl, classes.selectEmpty].join(" ")}
-            >
-              <InputLabel>Filter</InputLabel>
-              <Select
-                className={classes.selectEmpty}
-                value={timefilter}
-                renderValue={(value) =>
-                  `${
-                    this.filterSelect.find((f: any) => f.key === value).value
-                  }:  ${TimerSrv.hms(sum)}`
-                }
-                onChange={(event) => {
-                  const list = timer.Entries(event.target.value! as string);
-                  const sum = this.recalcSummary(list);
-                  this.setState({
-                    list,
-                    sum,
-                    timefilter: event.target.value! as string,
-                  });
-                }}
-                // inputProps={{
-                //   name: "age",
-                //   id: "age-native-simple",
-                // }}
-              >
-                {this.filterSelect.map((f: any) => (
-                  <MenuItem aria-label="None" value={f.key} key={f.key}>
-                    {f.value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          {/* <Box>
+                                    return (
+                                      <>
+                                        <Box
+                                          display="flex"
+                                          flexDirection="row"
+                                          alignItems="center"
+                                        >
+                                          <Box flexGrow={1}>
+                                            <FormControl
+                                              className={classes.formControl}
+                                            >
+                                              <TextField
+                                                required
+                                                autoFocus
+                                                value={description}
+                                                onChange={
+                                                  this.handleDescriptionField
+                                                }
+                                                margin="dense"
+                                                id="name"
+                                                label="What are your working on"
+                                                type="text"
+                                                fullWidth
+                                              />
+                                            </FormControl>
+                                          </Box>
+                                          <Box>
+                                            <FormControl
+                                              className={[
+                                                classes.formControl,
+                                                classes.selectEmpty,
+                                              ].join(" ")}
+                                            >
+                                              <InputLabel>Project</InputLabel>
+                                              <Select
+                                                className={classes.selectEmpty}
+                                                label="Project"
+                                                value={currentProject}
+                                                onChange={(event) => {
+                                                  console.log(
+                                                    "Projectselection:",
+                                                    event.target
+                                                  );
+                                                  timer.currentTimer.project = event
+                                                    .target.value as string;
+                                                  timer.save();
+                                                  this.setState({
+                                                    currentProject:
+                                                      timer.currentTimer
+                                                        .project,
+                                                  });
+                                                }}
+                                                // inputProps={{
+                                                //   name: "age",
+                                                //   id: "age-native-simple",
+                                                // }}
+                                              >
+                                                <MenuItem
+                                                  aria-label="None"
+                                                  value=""
+                                                />
+                                                {project.Entries().map((e) => (
+                                                  <MenuItem
+                                                    key={e.id}
+                                                    value={e.id}
+                                                  >
+                                                    {e.name}
+                                                  </MenuItem>
+                                                ))}
+                                              </Select>
+                                            </FormControl>
+                                          </Box>
+                                          <Box>
+                                            <FormControl
+                                              className={[
+                                                classes.formControl,
+                                                classes.selectEmpty,
+                                              ].join(" ")}
+                                            >
+                                              <InputLabel>Project</InputLabel>
+                                              <Select
+                                                className={classes.selectEmpty}
+                                                label="Tag"
+                                                value={
+                                                  timer.currentTimer.project
+                                                }
+                                                onChange={(event) => {
+                                                  console.log(
+                                                    "Projectselection:",
+                                                    event.target
+                                                  );
+                                                  timer.currentTimer.project = event
+                                                    .target.value as string;
+
+                                                  timer.save();
+                                                }}
+                                                // inputProps={{
+                                                //   name: "age",
+                                                //   id: "age-native-simple",
+                                                // }}
+                                              >
+                                                <MenuItem
+                                                  aria-label="None"
+                                                  value=""
+                                                />
+                                                {project.Entries().map((e) => (
+                                                  <MenuItem
+                                                    key={e.id}
+                                                    value={e.id}
+                                                  >
+                                                    {e.name}
+                                                  </MenuItem>
+                                                ))}
+                                              </Select>
+                                            </FormControl>
+                                          </Box>
+                                          <Box alignItems="center">
+                                            <FormControl
+                                              className={classes.topButtons}
+                                            >
+                                              <IconButton
+                                                onClick={() =>
+                                                  this.startStopTimer()
+                                                }
+                                                edge="start"
+                                                color="secondary"
+                                                aria-label="menu"
+                                              >
+                                                {!isRunning && (
+                                                  <PlayArrow
+                                                    style={{
+                                                      color: green[500],
+                                                    }}
+                                                  />
+                                                )}
+                                                {isRunning && (
+                                                  <Stop
+                                                    style={{ color: red[500] }}
+                                                  />
+                                                )}
+                                              </IconButton>
+                                            </FormControl>
+                                          </Box>
+                                          <Box>
+                                            <FormControl
+                                              className={classes.topButtons}
+                                            >
+                                              <IconButton
+                                                disabled={!isRunning}
+                                                onClick={() =>
+                                                  this.discardTimer()
+                                                }
+                                                edge="start"
+                                                color="inherit"
+                                                aria-label="menu"
+                                              >
+                                                <Delete />
+                                              </IconButton>
+                                            </FormControl>
+                                          </Box>
+                                          <Box>
+                                            <Typography
+                                              variant="body2"
+                                              color="textSecondary"
+                                              align="center"
+                                            >
+                                              xxxxx
+                                              {/* {isRunning
+                                                ? timer.currentTimer.hms()
+                                                : "00:00:00"} */}
+                                            </Typography>
+                                          </Box>
+                                        </Box>
+                                        {/* ----------------------- */}
+                                        <Box
+                                          display="flex"
+                                          flexDirection="row"
+                                          alignItems="center"
+                                        >
+                                          <Box>
+                                            <FormControl
+                                              style={{ width: 250 }}
+                                              className={[
+                                                classes.formControl,
+                                                classes.selectEmpty,
+                                              ].join(" ")}
+                                            >
+                                              <InputLabel>Filter</InputLabel>
+                                              <Select
+                                                className={classes.selectEmpty}
+                                                value={timefilter}
+                                                // renderValue={(value) =>
+                                                //   `${
+                                                //     this.filterSelect.find(
+                                                //       (f: any) =>
+                                                //         f.key === value
+                                                //     ).value
+                                                //   }:  ${TimerSrv.hms(sum)}`
+                                                // }
+                                                onChange={(event) => {
+                                                  const list = timer.Entries(
+                                                    event.target
+                                                      .value! as string
+                                                  );
+                                                  this.setState({
+                                                    timefilter: event.target
+                                                      .value! as string,
+                                                  });
+                                                }}
+                                                // inputProps={{
+                                                //   name: "age",
+                                                //   id: "age-native-simple",
+                                                // }}
+                                              >
+                                                {this.filterSelect.map(
+                                                  (f: any) => (
+                                                    <MenuItem
+                                                      aria-label="None"
+                                                      value={f.key}
+                                                      key={f.key}
+                                                    >
+                                                      {f.value}
+                                                    </MenuItem>
+                                                  )
+                                                )}
+                                              </Select>
+                                            </FormControl>
+                                          </Box>
+                                          {/* <Box>
             <Typography variant="body2" color="textSecondary" align="center">
               {TimerSrv.hms(sum)}
             </Typography>
           </Box> */}
-        </Box>
-        <List component="nav" aria-label="main mailbox folders">
-          <MaterialTable
-            options={{
-              actionsColumnIndex: -1,
-              padding: "dense",
-              sorting: true,
-              minBodyHeight: "calc(100vh - 460px)",
-              maxBodyHeight: "calc(100vh - 460px)",
-              pageSize: 20,
-              pageSizeOptions: [10, 20, 100],
-            }}
-            title="Timetable"
-            columns={columns}
-            data={list?.map((u) => u) as any[]}
-            editable={{
-              isEditable: (rowData) => {
-                return true;
-              }, // only name(a) rows would be editable
-              isDeletable: (rowData) => true, // only name(a) rows would be deletable
-              onRowUpdate: (newData, oldData) =>
-                new Promise((resolve, reject) => {
-                  setTimeout(() => {
-                    {
-                      const d = timer.update(newData, timefilter);
-                      console.log("New List", d);
-                      this.setState({ list: d }, () => resolve());
-                    }
-                    resolve();
-                  }, 1000);
-                }),
-              onRowDelete: (oldData) =>
-                new Promise((resolve, reject) => {
-                  setTimeout(() => {
-                    {
-                      const d = timer.del(oldData, timefilter);
-                      console.log("New List", d);
-                      this.setState({ list: d }, () => resolve());
-                    }
-                    resolve();
-                  }, 1000);
-                }),
-            }}
-          />
-          {/* {data!.allUsers!.map(data => (
-    <ListItem button>
-      <ListItemIcon>
-        <Person />
-      </ListItemIcon>
-      <ListItemText primary={data!.name} secondary={data!.email} />
-    </ListItem>
-  ))} */}
-        </List>
+                                        </Box>
+                                        <List
+                                          component="nav"
+                                          aria-label="main mailbox folders"
+                                        >
+                                          <MaterialTable
+                                            options={{
+                                              actionsColumnIndex: -1,
+                                              padding: "dense",
+                                              sorting: true,
+                                              minBodyHeight:
+                                                "calc(100vh - 460px)",
+                                              maxBodyHeight:
+                                                "calc(100vh - 460px)",
+                                              pageSize: 20,
+                                              pageSizeOptions: [10, 20, 100],
+                                            }}
+                                            title="Timetable"
+                                            columns={columns}
+                                            data={
+                                              data?.allTimer?.map(
+                                                (u) => u
+                                              ) as any[]
+                                            }
+                                            editable={{
+                                              isEditable: (rowData) => {
+                                                return true;
+                                              }, // only name(a) rows would be editable
+                                              isDeletable: (rowData) => true, // only name(a) rows would be deletable
+                                              onRowUpdate: (newData, oldData) =>
+                                                new Promise(
+                                                  (resolve, reject) => {
+                                                    setTimeout(() => {
+                                                      {
+                                                        const d = timer.update(
+                                                          newData,
+                                                          timefilter
+                                                        );
+                                                        console.log(
+                                                          "New List",
+                                                          d
+                                                        );
+                                                      }
+                                                      resolve();
+                                                    }, 1000);
+                                                  }
+                                                ),
+                                              onRowDelete: (oldData) =>
+                                                new Promise(
+                                                  (resolve, reject) => {
+                                                    setTimeout(() => {
+                                                      {
+                                                        const d = timer.del(
+                                                          oldData,
+                                                          timefilter
+                                                        );
+                                                        console.log(
+                                                          "New List",
+                                                          d
+                                                        );
+                                                      }
+                                                      resolve();
+                                                    }, 1000);
+                                                  }
+                                                ),
+                                            }}
+                                          />
+                                        </List>
+                                      </>
+                                    );
+                                  }}
+                                </AllTimerComponent>
+                              );
+                            }}
+                          </CreateProjectComponent>
+                        );
+                      }}
+                    </DeleteProjectComponent>
+                  );
+                }}
+              </UpdateProjectComponent>
+            );
+          }}
+        </AllProjectsComponent>
       </div>
     );
   }
@@ -358,7 +534,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       // },
       {
         title: "Project",
-        field: "project",
+        field: "projectId",
         width: "350px",
         editable: () => true,
         lookup: project.EntriesDict(),
@@ -369,8 +545,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         width: "150px",
         defaultSort: "desc",
         editable: () => false,
-        render: (data: TimeEntry) => {
-          return <>{data.timerStart.toLocaleDateString()}</>;
+        render: (data: TimerEntry) => {
+          return <>{this.toLocaleDate(data.timerStart)}</>;
         },
       },
       {
@@ -379,10 +555,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         width: "280px",
         editable: () => false,
         defaultSort: "desc",
-        render: (data: TimeEntry) => {
+        render: (data: TimerEntry) => {
           return (
             <>
-              {data.tStart} - {data.tEnd}
+              {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
             </>
           );
         },
@@ -391,32 +567,46 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         title: "Seconds",
         field: "elapsedSeconds",
         width: "100px",
-        render: (data: TimeEntry) => {
-          return <>{data.hms()}</>;
+        render: (data: TimerEntry) => {
+          return <>{TimerSrv.hms(data.elapsedSeconds)}</>;
         },
       },
     ];
     return columns;
   };
+  toTime(d: string | null | undefined): string {
+    if (!d) {
+      return "";
+    }
+    return new Date(d).toLocaleTimeString();
+  }
+
+  toLocaleDate(d: string | null | undefined): string {
+    if (!d) {
+      return "";
+    }
+    return new Date(d).toLocaleDateString();
+  }
+  projectsDict(data: Project[] | null | undefined): any {
+    if (!data) {
+      return {};
+    }
+    const dict: any = {};
+    data.forEach((e) => e.id && (dict[+e.id] = e.name));
+    return dict;
+  }
+
   startStopTimer() {
     this.state.isRunning ? timer.endTimer() : timer.startTimer();
-    const list = timer.Entries(this.state.timefilter);
-    const sum = this.recalcSummary(list);
     this.setState({
-      list,
-      sum,
       currentProject: timer.getTimer().project,
       description: timer.getTimer().description,
     });
   }
   discardTimer() {
     timer.discardTimer();
-    const list = timer.Entries(this.state.timefilter);
-    const sum = this.recalcSummary(list);
     this.setState({
       description: timer.getTimer().description,
-      list,
-      sum,
     });
   }
 
@@ -429,11 +619,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     });
   };
 
-  recalcSummary(list: TimeEntry[]): number {
-    let sum = 0;
-    list.forEach((l) => (sum += l.elapsedSeconds));
-    return sum;
-  }
+  // recalcSummary(list: TimeEntry[]): number {
+  //   let sum = 0;
+  //   list.forEach((l) => (sum += l.elapsedSeconds));
+  //   return sum;
+  // }
 }
 
 export default withStyles(styles as any)(withRouter(Timer as any));

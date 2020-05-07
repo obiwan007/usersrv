@@ -1,0 +1,90 @@
+query AllTimer {
+  allTimer(filter: { dayrange: "1" }) {
+    description
+    id
+    timerStart
+    timerEnd
+    isRunning
+    isBilled
+    tags
+    elapsedSeconds
+    project {
+      id
+      name
+    }
+  }
+}
+
+mutation createTimer($d: CreateTimerInput!) {
+  createTimer(t: $d) {
+    description
+    id
+    timerStart
+    timerEnd
+    isRunning
+    isBilled
+    tags
+    elapsedSeconds
+    project {
+      id
+      name
+    }
+  }
+}
+
+mutation updateTimer($d: TimerInput!) {
+  updateTimer(t: $d) {
+    description
+    id
+    timerStart
+    timerEnd
+    isRunning
+    isBilled
+    tags
+    elapsedSeconds
+    project {
+      id
+      name
+    }
+  }
+}
+
+mutation deleteTimer($timerId: String!) {
+  deleteTimer(timerId: $timerId) {
+    id
+  }
+}
+
+mutation startTimer($timerId: String!) {
+  startTimer(timerId: $timerId) {
+    id
+    description
+    timerStart
+    timerEnd
+    isRunning
+    isBilled
+    tags
+    elapsedSeconds
+    project {
+      id
+      name
+    }
+  }
+}
+
+mutation stopTimer($timerId: String!) {
+  stopTimer(timerId: $timerId) {
+    id
+    description
+    timerStart
+    timerEnd
+    isRunning
+    isBilled
+    tags
+    elapsedSeconds
+    project {
+      id
+      name
+    }
+  }
+}

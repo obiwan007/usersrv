@@ -191,7 +191,10 @@ export class Timer {
     return [...this.entries];
   }
 
-  static hms(d: number): string {
+  static hms(d: number | null | undefined): string {
+    if (!d) {
+      return "00:00:00";
+    }
     let h = Math.floor(d / 3600);
     let m = Math.floor((d % 3600) / 60);
     let s = Math.floor((d % 3600) % 60);
