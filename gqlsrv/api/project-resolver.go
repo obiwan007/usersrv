@@ -8,8 +8,11 @@ import (
 )
 
 func (r *Resolver) AllProjects(ctx context.Context) (*[]*ProjectResolver, error) {
-
-	query := &pb.ListProject{}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	query := &pb.ListProject{Jwt: token.Raw}
 	result, err := r.projectSvc.GetAll(ctx, query)
 	if err != nil {
 		return nil, err
@@ -32,8 +35,14 @@ func (r *Resolver) AllProjects(ctx context.Context) (*[]*ProjectResolver, error)
 // }
 
 func (r *Resolver) CreateProject(ctx context.Context, arg *CreateProjectRequest) (*ProjectResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("Create", arg.P.Description)
 	t := projectGql2pb(&arg.P)
+	t.Jwt = token.Raw
+
 	result, err := r.projectSvc.Add(ctx, t)
 
 	if err != nil {
@@ -46,10 +55,14 @@ func (r *Resolver) CreateProject(ctx context.Context, arg *CreateProjectRequest)
 }
 
 func (r *Resolver) UpdateProject(ctx context.Context, arg *UpdateProjectRequest) (*ProjectResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("Update", arg.P.ID)
 
 	t := projectGql2pb(&arg.P)
-
+	t.Jwt = token.Raw
 	result, err := r.projectSvc.Update(ctx, t)
 
 	if err != nil {
@@ -62,9 +75,13 @@ func (r *Resolver) UpdateProject(ctx context.Context, arg *UpdateProjectRequest)
 }
 
 func (r *Resolver) GetProject(ctx context.Context, arg *GetProjectRequest) (*ProjectResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("ID", *arg.ID)
 
-	t := &pb.Id{Id: *arg.ID}
+	t := &pb.Id{Id: *arg.ID, Jwt: token.Raw}
 	result, err := r.projectSvc.Get(ctx, t)
 
 	if err != nil {
@@ -77,9 +94,13 @@ func (r *Resolver) GetProject(ctx context.Context, arg *GetProjectRequest) (*Pro
 }
 
 func (r *Resolver) DeleteProject(ctx context.Context, arg *DeleteProjectRequest) (*ProjectResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("ID", *&arg.ProjectId)
 
-	t := &pb.Id{Id: arg.ProjectId}
+	t := &pb.Id{Id: arg.ProjectId, Jwt: token.Raw}
 	result, err := r.projectSvc.Del(ctx, t)
 
 	if err != nil {
