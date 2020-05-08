@@ -75,7 +75,7 @@ var page = []byte(`
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(graphQLParams),
-            credentials: 'omit',
+            credentials: 'include',
           },
         ).then(function (response) {
           return response.json().catch(function () {
