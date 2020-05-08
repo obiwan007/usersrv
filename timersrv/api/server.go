@@ -8,7 +8,7 @@ import (
 	"log"
 
 	"github.com/dgrijalva/jwt-go"
-
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 	pb "github.com/obiwan007/usersrv/proto"
 	storage "github.com/obiwan007/usersrv/timersrv/api/storage"
 	"google.golang.org/grpc/codes"
@@ -18,7 +18,8 @@ import (
 var sto storage.FileStorage
 
 type routeGuideServer struct {
-	storage storage.FileStorage
+	storage    storage.FileStorage
+	signingKey []byte
 }
 
 func Init(storage storage.FileStorage) {
@@ -98,9 +99,18 @@ func (s *routeGuideServer) Stop(ctx context.Context, timerId *pb.Id) (*pb.Timer,
 func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.TimerResponse, error) {
 	log.Println("Get Timers")
 
-	t := ctx.Value("jwt")
-	token, ok := t.(*jwt.Token)
-	log.Println("Token", token, ok)
+	t := l.Jwt
+
+	token, _ := jwt.ParseWithClaims(t, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("There was an error")
+		}
+		return s.signingKey, nil
+	})
+
+	// token, ok := t.(*jwt.Token)
+	log.Println("Token", token.Valid, token)
+	log.Println("Claims", token.Claims)
 	timers := s.storage.GetAll()
 	u := new(pb.TimerResponse)
 
@@ -118,9 +128,9 @@ func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.Tim
 // 	sto.AddUser(user)
 // }
 
-func NewServer() *routeGuideServer {
+func NewServer(signingKey []byte) *routeGuideServer {
 	fs := storage.NewFileStorage()
-	s := &routeGuideServer{storage: *fs}
+	s := &routeGuideServer{storage: *fs, signingKey: signingKey}
 	return s
 }
 

@@ -40,7 +40,6 @@ type TracedServeMux struct {
 
 // Handle implements http.ServeMux#Handle
 func (tm *TracedServeMux) Handle(pattern string, handler http.Handler) {
-
 	// handlerWithAuth := auth(handler)
 	handlerWithAuth := isAuthorized(handler)
 	middleware := nethttp.Middleware(
@@ -66,7 +65,7 @@ func auth(next http.Handler) http.Handler {
 		// if err != nil {
 		// 	fmt.Println(err)
 		// }
-		fmt.Println("Token found", token)
+		fmt.Println("Token found", token, jwt)
 		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwt)))
 	})
 }

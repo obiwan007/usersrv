@@ -11,6 +11,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -121,7 +122,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := existingToken.Claims.(*MyCustomClaims)
+	claims := existingToken.Claims.(*claims.MyCustomClaims)
 	log.Println("Refresh Subject:", claims.Subject)
 	token, err := getToken(claims.Name, claims.Picture, claims.Subject)
 	if err != nil {

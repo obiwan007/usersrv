@@ -63,18 +63,18 @@ func PrepareOptsTracing(p *CommandParams) ([]grpc.ServerOption, zipkintracer.Col
 func CreateClient(p *CommandParams, destURL string) (*grpc.ClientConn, opentracing.Tracer, error) {
 	var opts []grpc.DialOption
 
-	log.Println("Perpare grpc client")
+	log.Println("Perpare grpc client", destURL)
 	_, collector, err := tracing.NewTracer(p.Tracename, destURL, *p.Zipkin)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Client Logging to Zipkin:", *p.Zipkin)
 	defer collector.Close()
-	t := opentracing.GlobalTracer()
+	tracer := opentracing.GlobalTracer()
 	opts = append(opts, grpc.WithUnaryInterceptor(
-		otgrpc.OpenTracingClientInterceptor(t, otgrpc.LogPayloads())))
+		otgrpc.OpenTracingClientInterceptor(tracer, otgrpc.LogPayloads())))
 	opts = append(opts, grpc.WithStreamInterceptor(
-		otgrpc.OpenTracingStreamClientInterceptor(t)))
+		otgrpc.OpenTracingStreamClientInterceptor(tracer)))
 
 	if *p.TlsForGrpc {
 		if *p.CertFile == "" {
@@ -106,6 +106,6 @@ func CreateClient(p *CommandParams, destURL string) (*grpc.ClientConn, opentraci
 		log.Fatalf("fail to dial: %v", err)
 		return nil, nil, err
 	}
-	return conn, t, nil
+	return conn, tracer, nil
 
 }

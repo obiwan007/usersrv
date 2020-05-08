@@ -15,6 +15,7 @@ import (
 
 	"github.com/common-nighthawk/go-figure"
 	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/trace"
 	gql "github.com/obiwan007/usersrv/gqlsrv/api"
 	"github.com/obiwan007/usersrv/pkg"
 	pb "github.com/obiwan007/usersrv/proto"
@@ -70,7 +71,7 @@ func main() {
 	myFigure.Print()
 	flag.Parse()
 
-	p := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "gqpservice"}
+	params := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "gqpservice"}
 
 	s, err := getSchema("../schema/schema.graphql")
 	if err != nil {
@@ -99,19 +100,19 @@ func main() {
 	}
 	defer cli.Close()
 
-	connUserSrv, tracer, err := pkg.CreateClient(p, *userSrv)
+	connUserSrv, tracer, err := pkg.CreateClient(params, *userSrv)
 	defer connUserSrv.Close()
 	gqlUserSrvClient := pb.NewUserServiceClient(connUserSrv)
 
-	connTimerSrv, tracer, err := pkg.CreateClient(p, *timerSrv)
+	connTimerSrv, tracer, err := pkg.CreateClient(params, *timerSrv)
 	defer connTimerSrv.Close()
 	gqlTimerSrvClient := pb.NewTimerServiceClient(connTimerSrv)
 
-	connProjectSrv, tracer, err := pkg.CreateClient(p, *projectSrv)
+	connProjectSrv, tracer, err := pkg.CreateClient(params, *projectSrv)
 	defer connProjectSrv.Close()
 	gqlProjectSrvClient := pb.NewProjectServiceClient(connProjectSrv)
 
-	connClientSrv, tracer, err := pkg.CreateClient(p, *clientSrv)
+	connClientSrv, tracer, err := pkg.CreateClient(params, *clientSrv)
 	defer connClientSrv.Close()
 	gqlClientSrvClient := pb.NewClientServiceClient(connClientSrv)
 
@@ -122,7 +123,7 @@ func main() {
 		gqlClientSrvClient)
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
-	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions())
+	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	mux := gql.NewRouter(schema, tracer, gClientID, gClientSecr, redirect)
 
 	// cors.Default() setup the middleware with default options being

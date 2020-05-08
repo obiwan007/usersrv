@@ -9,5 +9,6 @@ package pb;
 message Id {
   // The name of the feature.
   string id = 1;
+  string jwt = 2;
   // The point where the feature is detected.
 }

@@ -24,9 +24,11 @@ message Project {
   string status = 6;
   string team = 11;
   string name = 7;
+  string jwt = 10;
 }
 
 message ListProject {
+  string jwt = 1;
 }
 
 message ProjectResponse {

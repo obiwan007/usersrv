@@ -26,6 +26,8 @@ var (
 	zipkin     = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 )
 
+var mySigningKey = []byte("captainjacksparrowsayshi")
+
 func main() {
 	flag.Parse()
 
@@ -38,7 +40,7 @@ func main() {
 	defer collector.Close()
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterTimerServiceServer(grpcServer, api.NewServer())
+	pb.RegisterTimerServiceServer(grpcServer, api.NewServer(mySigningKey))
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

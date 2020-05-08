@@ -40,4 +40,4 @@ spec:
       port: 16686
     - name: zipkin
       port: 9411
-  type: ClusterIP
+  type: nodeport

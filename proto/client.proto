@@ -21,9 +21,11 @@ message Client {
   string description = 2;
   string name = 3;
   string address = 5;
+  string jwt = 10;
 }
 
 message ListClient {
+  string jwt = 1;
 }
 
 message ClientResponse {

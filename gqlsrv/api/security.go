@@ -8,6 +8,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 )
 
 var mySigningKey = []byte("captainjacksparrowsayshi")
@@ -18,15 +19,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 
-type MyCustomClaims struct {
-	Name    string `json:"name"`
-	Picture string `json:"picture"`
-	jwt.StandardClaims
-}
-
 func getToken(username, picture, email string) (string, error) {
 	// Create the Claims
-	claims := MyCustomClaims{
+	claims := claims.MyCustomClaims{
 		username,
 		picture,
 		jwt.StandardClaims{
@@ -65,7 +60,7 @@ func isAuthorized(next http.Handler) http.Handler {
 
 		if foundAuth != nil {
 			log.Println("Auth", *foundAuth)
-			token, err := jwt.ParseWithClaims(*foundAuth, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.ParseWithClaims(*foundAuth, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}

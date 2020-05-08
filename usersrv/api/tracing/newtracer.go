@@ -18,8 +18,7 @@ func NewTracer(servicename string, grpcurl, zipkinurl string) (opentracing.Trace
 	}
 	recorder := openzipkin.NewRecorder(collector, true, grpcurl, servicename)
 	tracer, err := openzipkin.NewTracer(
-		recorder,
-		openzipkin.ClientServerSameSpan(true))
+		recorder, openzipkin.ClientServerSameSpan(true))
 
 	if err != nil {
 		return nil, nil, err

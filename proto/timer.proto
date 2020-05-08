@@ -32,7 +32,6 @@ message Timer {
   bool isRunning = 9;
   bool isBilled = 10;
   string name = 11;
-
 }
 
 // message Id {
@@ -40,6 +39,7 @@ message Timer {
 // }
 
 message ListTimer {
+  string jwt = 1;
 }
 
 message TimerResponse {

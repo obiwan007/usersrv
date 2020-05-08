@@ -13,9 +13,9 @@ func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*Tim
 
 	t := ctx.Value("jwt")
 	token, ok := t.(*jwt.Token)
-	log.Println("AllTimer Token", token, ok)
+	log.Println("AllTimer Token", ok, token.Raw)
 
-	query := &pb.ListTimer{}
+	query := &pb.ListTimer{Jwt: token.Raw}
 	result, err := r.timerSvc.GetAll(ctx, query)
 
 	if err != nil {
