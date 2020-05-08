@@ -11,6 +11,7 @@ import (
 	claims "github.com/obiwan007/usersrv/pkg/claims"
 	pb "github.com/obiwan007/usersrv/proto"
 	storage "github.com/obiwan007/usersrv/timersrv/api/storage"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -101,16 +102,23 @@ func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.Tim
 
 	t := l.Jwt
 
-	token, _ := jwt.ParseWithClaims(t, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(t, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("There was an error")
 		}
 		return s.signingKey, nil
 	})
+	// c, ok := token.Claims.(*claims.MyCustomClaims)
 
+	if c, ok := token.Claims.(*claims.MyCustomClaims); ok && token.Valid {
+		log.Printf("CLAIMS: %v %v", c.StandardClaims.Subject, c.Mandant)
+	} else {
+		log.Println(err)
+		return nil, grpc.Errorf(grpc.Code(jwt.ValidationError{}), "Error %v", err)
+	}
 	// token, ok := t.(*jwt.Token)
-	log.Println("Token", token.Valid, token)
-	log.Println("Claims", token.Claims)
+	// log.Println("Token", token.Valid, token)
+	// log.Println("Claims", token.Claims)
 	timers := s.storage.GetAll()
 	u := new(pb.TimerResponse)
 

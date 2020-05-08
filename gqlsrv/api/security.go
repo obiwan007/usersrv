@@ -9,9 +9,10 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	claims "github.com/obiwan007/usersrv/pkg/claims"
+	"github.com/pkg/errors"
 )
 
-var mySigningKey = []byte("captainjacksparrowsayshi")
+var SigningKey = []byte("thiswillbeoverwrittenlater")
 
 func homePage(w http.ResponseWriter, r *http.Request) {
 	log.Println("Endpoint Hit: homePage")
@@ -19,12 +20,13 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getToken(username, picture, email string) (string, error) {
+func getToken(username, picture, mandant, email string) (string, error) {
 	// Create the Claims
 	claims := claims.MyCustomClaims{
-		username,
-		picture,
-		jwt.StandardClaims{
+		Name:    username,
+		Picture: picture,
+		Mandant: mandant,
+		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 			Issuer:    "gqlsrv",
 			Subject:   email,
@@ -36,14 +38,14 @@ func getToken(username, picture, email string) (string, error) {
 	// }
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString(mySigningKey)
-	log.Println("Generated Token", ss)
+	ss, err := token.SignedString(SigningKey)
+	log.Println("Generated Token")
 	return ss, err
 }
 
 func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Handling AUthorization", r.URL.String())
+		log.Println("Handling Authorization", r.URL.String())
 		ctx := r.Context()
 		var foundAuth *string = nil
 		for _, cookie := range r.Cookies() {
@@ -59,12 +61,12 @@ func isAuthorized(next http.Handler) http.Handler {
 		}
 
 		if foundAuth != nil {
-			log.Println("Auth", *foundAuth)
+			// log.Println("Auth", *foundAuth)
 			token, err := jwt.ParseWithClaims(*foundAuth, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("There was an error")
 				}
-				return mySigningKey, nil
+				return SigningKey, nil
 			})
 
 			if err != nil {
@@ -98,4 +100,14 @@ func isAuthorized(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
+}
+
+func validateToken(ctx context.Context) (*jwt.Token, error) {
+	t := ctx.Value("jwt")
+
+	token, ok := t.(*jwt.Token)
+	if !ok || !token.Valid {
+		return nil, errors.Errorf("Unauthorized")
+	}
+	return token, nil
 }

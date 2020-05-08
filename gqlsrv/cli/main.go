@@ -36,6 +36,7 @@ var (
 	clientSrv          = flag.String("clientsrv", "clientsrv:10003", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
 	zipkin             = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
+	signingKey         = flag.String("signingkey", "captainjacksparrowsayshi", "JWT Key")
 )
 
 // const (
@@ -70,6 +71,8 @@ func main() {
 	myFigure := figure.NewFigure("GQLSRV", "", true)
 	myFigure.Print()
 	flag.Parse()
+
+	gql.SigningKey = []byte(*signingKey)
 
 	params := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "gqpservice"}
 
@@ -136,7 +139,7 @@ func main() {
 		AllowedOrigins:   []string{"http://localhost:3000", "https://frontend-obiwan007.cloud.okteto.net"},
 		// Enable Debugging for testing, consider disabling in production
 		AllowedHeaders: []string{"Authorization", "Content-Type", "X-B3-Sampled", "X-B3-Spanid", "X-B3-Traceid"},
-		Debug:          true,
+		Debug:          false,
 	}).Handler(mux)
 
 	srv := &http.Server{

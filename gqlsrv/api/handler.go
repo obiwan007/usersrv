@@ -112,10 +112,7 @@ type loginResponse struct {
 }
 
 func handleRefresh(w http.ResponseWriter, r *http.Request) {
-	log.Println("Refresh HIT")
-
 	t := r.Context().Value("jwt")
-
 	existingToken, ok := t.(*jwt.Token)
 	if !ok || !existingToken.Valid {
 		http.Error(w, "Unauthorized, no valid token provided", 401)
@@ -124,7 +121,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 
 	claims := existingToken.Claims.(*claims.MyCustomClaims)
 	log.Println("Refresh Subject:", claims.Subject)
-	token, err := getToken(claims.Name, claims.Picture, claims.Subject)
+	token, err := getToken(claims.Name, claims.Picture, claims.Mandant, claims.Subject)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
@@ -178,7 +175,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Content", content)
 	log.Println("Name", content.Name)
-	token, err := getToken(content.Name, content.Picture, content.Email)
+	token, err := getToken(content.Name, content.Picture, "0", content.Email)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}

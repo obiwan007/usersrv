@@ -4,16 +4,16 @@ import (
 	"context"
 	"log"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
 func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*TimerResolver, error) {
 	log.Println(*args.Filter.Dayrange)
 
-	t := ctx.Value("jwt")
-	token, ok := t.(*jwt.Token)
-	log.Println("AllTimer Token", ok, token.Raw)
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	query := &pb.ListTimer{Jwt: token.Raw}
 	result, err := r.timerSvc.GetAll(ctx, query)
@@ -32,6 +32,11 @@ func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*Tim
 
 func (r *Resolver) RunningTimer(ctx context.Context) (*TimerResolver, error) {
 
+	_, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	test := &Timer{Description: "Hallo Leute", ID: "1"}
 	s := TimerResolver{R: test, Root: r}
 
@@ -41,7 +46,12 @@ func (r *Resolver) RunningTimer(ctx context.Context) (*TimerResolver, error) {
 func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerResolver, error) {
 	log.Println("ID", *arg.ID)
 
-	t := &pb.Id{Id: *arg.ID}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	t := &pb.Id{Id: *arg.ID, Jwt: token.Raw}
 	result, err := r.timerSvc.Get(ctx, t)
 
 	if err != nil {
@@ -55,8 +65,12 @@ func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerRe
 
 func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*TimerResolver, error) {
 	log.Println("startTimer ID", arg.TimerId)
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	t := &pb.Id{Id: *&arg.TimerId}
+	t := &pb.Id{Id: *&arg.TimerId, Jwt: token.Raw}
 	result, err := r.timerSvc.Start(ctx, t)
 	if err != nil {
 		return nil, err
@@ -68,7 +82,11 @@ func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*Tim
 
 func (r *Resolver) StopTimer(ctx context.Context, arg *StopTimerRequest) (*TimerResolver, error) {
 	log.Println("stopTimer ID", arg.TimerId)
-	t := &pb.Id{Id: *&arg.TimerId}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	t := &pb.Id{Id: *&arg.TimerId, Jwt: token.Raw}
 	result, err := r.timerSvc.Stop(ctx, t)
 	if err != nil {
 		return nil, err
@@ -78,8 +96,12 @@ func (r *Resolver) StopTimer(ctx context.Context, arg *StopTimerRequest) (*Timer
 }
 
 func (r *Resolver) CreateTimer(ctx context.Context, arg *CreateTimerRequest) (*TimerResolver, error) {
-
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	t := &pb.Timer{
+		Jwt:         token.Raw,
 		Description: checkNil(arg.T.Description, ""),
 		Project:     checkNil(arg.T.Project, ""),
 	}
@@ -96,8 +118,12 @@ func (r *Resolver) CreateTimer(ctx context.Context, arg *CreateTimerRequest) (*T
 }
 func (r *Resolver) UpdateTimer(ctx context.Context, arg *UpdateTimerRequest) (*TimerResolver, error) {
 	log.Println("Update", arg.T.ID)
-
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	t := timerGql2pb(&arg.T)
+	t.Jwt = token.Raw
 
 	result, err := r.timerSvc.Update(ctx, t)
 

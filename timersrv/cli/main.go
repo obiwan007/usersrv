@@ -24,9 +24,8 @@ var (
 	jsonDBFile = flag.String("json_db_file", "", "A json file containing a list of features")
 	port       = flag.Int("port", 10001, "The server port")
 	zipkin     = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
+	signingKey = flag.String("signingkey", "captainjacksparrowsayshi", "JWT Key")
 )
-
-var mySigningKey = []byte("captainjacksparrowsayshi")
 
 func main() {
 	flag.Parse()
@@ -40,7 +39,7 @@ func main() {
 	defer collector.Close()
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterTimerServiceServer(grpcServer, api.NewServer(mySigningKey))
+	pb.RegisterTimerServiceServer(grpcServer, api.NewServer([]byte(*signingKey)))
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
