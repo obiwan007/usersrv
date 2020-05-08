@@ -8,8 +8,11 @@ import (
 )
 
 func (r *Resolver) AllClients(ctx context.Context) (*[]*ClientResolver, error) {
-
-	query := &pb.ListClient{}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	query := &pb.ListClient{Jwt: token.Raw}
 	result, err := r.clientSvc.GetAll(ctx, query)
 	if err != nil {
 		return nil, err
@@ -32,8 +35,13 @@ func (r *Resolver) AllClients(ctx context.Context) (*[]*ClientResolver, error) {
 // }
 
 func (r *Resolver) CreateClient(ctx context.Context, arg *CreateClientRequest) (*ClientResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("Create", arg.C.Description)
 	t := clientGql2pb(&arg.C)
+	t.Jwt = token.Raw
 	result, err := r.clientSvc.Add(ctx, t)
 
 	if err != nil {
@@ -46,10 +54,14 @@ func (r *Resolver) CreateClient(ctx context.Context, arg *CreateClientRequest) (
 }
 
 func (r *Resolver) UpdateClient(ctx context.Context, arg *UpdateClientRequest) (*ClientResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("Update", arg.C.ID)
 
 	t := clientGql2pb(&arg.C)
-
+	t.Jwt = token.Raw
 	result, err := r.clientSvc.Update(ctx, t)
 
 	if err != nil {
@@ -62,9 +74,13 @@ func (r *Resolver) UpdateClient(ctx context.Context, arg *UpdateClientRequest) (
 }
 
 func (r *Resolver) GetClient(ctx context.Context, arg *GetClientRequest) (*ClientResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("ID", *arg.ID)
 
-	t := &pb.Id{Id: *arg.ID}
+	t := &pb.Id{Id: *arg.ID, Jwt: token.Raw}
 	result, err := r.clientSvc.Get(ctx, t)
 
 	if err != nil {
@@ -77,9 +93,13 @@ func (r *Resolver) GetClient(ctx context.Context, arg *GetClientRequest) (*Clien
 }
 
 func (r *Resolver) DeleteClient(ctx context.Context, arg *DeleteClientRequest) (*ClientResolver, error) {
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
 	log.Println("ID", *&arg.ClientId)
 
-	t := &pb.Id{Id: arg.ClientId}
+	t := &pb.Id{Id: arg.ClientId, Jwt: token.Raw}
 	result, err := r.clientSvc.Del(ctx, t)
 
 	if err != nil {
