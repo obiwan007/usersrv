@@ -5,6 +5,9 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
+
+	"github.com/dgrijalva/jwt-go"
 
 	pb "github.com/obiwan007/usersrv/proto"
 	storage "github.com/obiwan007/usersrv/timersrv/api/storage"
@@ -93,7 +96,11 @@ func (s *routeGuideServer) Stop(ctx context.Context, timerId *pb.Id) (*pb.Timer,
 // }
 
 func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.TimerResponse, error) {
-	fmt.Println("Get USERS")
+	log.Println("Get Timers")
+
+	t := ctx.Value("jwt")
+	token, ok := t.(*jwt.Token)
+	log.Println("Token", token, ok)
 	timers := s.storage.GetAll()
 	u := new(pb.TimerResponse)
 

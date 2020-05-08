@@ -4,13 +4,20 @@ import (
 	"context"
 	"log"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
 func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*TimerResolver, error) {
 	log.Println(*args.Filter.Dayrange)
+
+	t := ctx.Value("jwt")
+	token, ok := t.(*jwt.Token)
+	log.Println("AllTimer Token", token, ok)
+
 	query := &pb.ListTimer{}
 	result, err := r.timerSvc.GetAll(ctx, query)
+
 	if err != nil {
 		return nil, err
 	}
