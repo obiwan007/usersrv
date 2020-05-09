@@ -40,21 +40,33 @@ func (s *routeGuideServer) Add(ctx context.Context, timer *pb.Timer) (*pb.Timer,
 }
 func (s *routeGuideServer) Update(ctx context.Context, timer *pb.Timer) (*pb.Timer, error) {
 	fmt.Println("ADDING TIMER", timer.Description)
-	// No feature was found, return an unnamed feature
-	newuser := s.Storage.Update(*timer)
-	return newuser, nil
+	c, err := s.getClaims(timer.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	newuser, err := s.Storage.Update(ctx, timer, c)
+	return newuser, err
 }
 func (s *routeGuideServer) Del(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
 	fmt.Println("Deleting TIMER", timerId.GetId())
+	c, err := s.getClaims(timerId.Jwt)
+	if err != nil {
+		return nil, err
+	}
 	// No feature was found, return an unnamed feature
-	s.Storage.Delete(timerId.GetId())
-	return nil, nil
+	_, err = s.Storage.Delete(ctx, timerId.GetId(), c)
+	res := &pb.Timer{Id: timerId.Id}
+	return res, err
 }
 
 func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
 	fmt.Println("Get TIMER", timerId.GetId())
 	// No feature was found, return an unnamed feature
-	newtimer, err := s.Storage.Get(timerId.GetId())
+	c, err := s.getClaims(timerId.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	newtimer, err := s.Storage.Get(ctx, timerId.GetId(), c)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "User not found")
 	}
@@ -62,17 +74,26 @@ func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Timer, 
 }
 
 func (s *routeGuideServer) Start(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
-	fmt.Println("Get TIMER", timerId.GetId())
+	fmt.Println("Start TIMER", timerId.GetId())
+
+	c, err := s.getClaims(timerId.Jwt)
+	if err != nil {
+		return nil, err
+	}
 	// No feature was found, return an unnamed feature
-	t, err := s.Storage.Start(timerId.GetId())
-	return &t, err
+	t, err := s.Storage.Start(ctx, timerId.GetId(), c)
+	return t, err
 }
 
 func (s *routeGuideServer) Stop(ctx context.Context, timerId *pb.Id) (*pb.Timer, error) {
-	fmt.Println("Get TIMER", timerId.GetId())
+	fmt.Println("Stop TIMER", timerId.GetId())
+	c, err := s.getClaims(timerId.Jwt)
+	if err != nil {
+		return nil, err
+	}
 	// No feature was found, return an unnamed feature
-	t, err := s.Storage.Stop(timerId.GetId())
-	return &t, err
+	t, err := s.Storage.Stop(ctx, timerId.GetId(), c)
+	return t, err
 }
 
 // func (s *routeGuideServer) RegisterUser(ctx context.Context, user *pb.Timer) (*pb.Timer, error) {
@@ -103,32 +124,21 @@ func (s *routeGuideServer) Stop(ctx context.Context, timerId *pb.Id) (*pb.Timer,
 
 func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.TimerResponse, error) {
 	log.Println("Get Timers")
-
-	token, err := jwt.ParseWithClaims(l.Jwt, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error")
-		}
-		return s.signingKey, nil
-	})
-	// c, ok := token.Claims.(*claims.MyCustomClaims)
-
-	if c, ok := token.Claims.(*claims.MyCustomClaims); ok && token.Valid {
-		log.Printf("CLAIMS: %v %v", c.StandardClaims.Subject, c.Mandant)
-	} else {
-		log.Println(err)
-		return nil, grpc.Errorf(grpc.Code(jwt.ValidationError{}), "Error %v", err)
+	c, err := s.getClaims(l.Jwt)
+	if err != nil {
+		return nil, err
 	}
 	// token, ok := t.(*jwt.Token)
 	// log.Println("Token", token.Valid, token)
 	// log.Println("Claims", token.Claims)
-	timers := s.Storage.GetAll()
-	u := new(pb.TimerResponse)
+	timers, err := s.Storage.GetAll(ctx, c)
+	u := &pb.TimerResponse{Timers: timers}
 
-	for _, timer := range timers {
-		conv := timer
-		u.Timers = append(u.Timers, conv)
-	}
-	return u, nil
+	// for _, timer := range timers {
+	// 	conv := timer
+	// 	u.Timers = timers
+	// }
+	return u, err
 }
 
 // func AddUser(name string, password string) {

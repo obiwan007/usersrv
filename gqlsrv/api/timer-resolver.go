@@ -63,6 +63,26 @@ func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerRe
 	return &s, nil
 }
 
+func (r *Resolver) DeleteTimer(ctx context.Context, arg *DeleteTimerRequest) (*TimerResolver, error) {
+	log.Println("ID", arg.TimerId)
+
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	t := &pb.Id{Id: arg.TimerId, Jwt: token.Raw}
+	result, err := r.timerSvc.Del(ctx, t)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s := TimerResolver{R: timerToGql(result), Root: r}
+
+	return &s, nil
+}
+
 func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*TimerResolver, error) {
 	log.Println("startTimer ID", arg.TimerId)
 	token, err := validateToken(ctx)
@@ -143,6 +163,7 @@ func timerToGql(result *pb.Timer) *Timer {
 		Project:        &Project{ID: result.Project},
 		ElapsedSeconds: result.ElapsedSeconds,
 		ID:             result.Id,
+		Tags:           result.Tags,
 		TimerStart:     result.TimerStart,
 		TimerEnd:       result.TimerEnd,
 		IsBilled:       result.IsBilled,
@@ -156,6 +177,7 @@ func timerGql2pb(arg *TimerInput) *pb.Timer {
 		Id:          checkNil(arg.ID, ""),
 		Description: checkNil(arg.Description, ""),
 		Name:        checkNil(arg.Name, ""),
+		Tags:        checkNil(arg.Tags, ""),
 		Project:     checkNil(arg.Project, ""),
 	}
 	return t

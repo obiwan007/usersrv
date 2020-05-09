@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -13,10 +12,10 @@ import (
 	"sync"
 	"time"
 
+	_ "github.com/lib/pq"
 	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/obiwan007/usersrv/timersrv/api/storage/ent"
-
-	_ "github.com/lib/pq"
+	"github.com/obiwan007/usersrv/timersrv/api/storage/ent/timer"
 
 	claims "github.com/obiwan007/usersrv/pkg/claims"
 )
@@ -91,95 +90,108 @@ func (t *FileStorage) Add(ctx context.Context, timer *pb.Timer, c *claims.MyCust
 	return response, nil
 }
 
-func (t *FileStorage) Update(timer pb.Timer) *pb.Timer {
-	old, _ := t.Get(timer.Id)
+func (t *FileStorage) Update(ctx context.Context, timerEntity *pb.Timer, c *claims.MyCustomClaims) (*pb.Timer, error) {
+	id, _ := strconv.Atoi(timerEntity.Id)
 
-	old.Description = timer.Description
-	old.Project = timer.Project
-	old.Client = timer.Client
-	old.IsBilled = timer.IsBilled
-	old.Tags = timer.Tags
+	existingTimer, err := t.Db.Timer.
+		Query().
+		Where(timer.And(timer.ID(id), timer.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	newtimer, err := existingTimer.
+		Update().
+		SetNillableDescription(checkNil(timerEntity.Description)).
+		SetNillableProjectid(checkNil(timerEntity.Project)).
+		SetNillableTags(checkNil(timerEntity.Tags)).
+		SetNillableIsBilled(&timerEntity.IsBilled).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
-	}
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
-	}
-	return old
+	response := toPb(newtimer)
+	return response, nil
 }
 
-func (t *FileStorage) Delete(id string) error {
-	return nil
+func (t *FileStorage) Delete(ctx context.Context, timerid string, c *claims.MyCustomClaims) (*pb.Timer, error) {
+	id, _ := strconv.Atoi(timerid)
+	existingTimer, err := t.Db.Timer.
+		Query().
+		Where(timer.And(timer.ID(id), timer.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	t.Db.Timer.DeleteOne(existingTimer).Exec(ctx)
+
+	return nil, err
 }
 
 // GetUser will return a user with a given Id
-func (t *FileStorage) Get(id string) (*pb.Timer, error) {
+func (t *FileStorage) Get(ctx context.Context, timerid string, c *claims.MyCustomClaims) (*pb.Timer, error) {
 	// idx := sort.Search(len(users), func(i int) bool {
 	// 	return users[i].Id == id
 	// })
-	var res *pb.Timer = nil
-	for _, u := range timers {
-		if u.Id == id {
-			res = u
-			break
-		}
-	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		if res.IsRunning {
-			res.ElapsedSeconds = int32(t.Elapsed(res))
-			log.Println("Elapsed", res.ElapsedSeconds, t.Elapsed(res))
-		}
 
-		return res, nil
+	id, _ := strconv.Atoi(timerid)
+	newtimer, err := t.Db.Timer.
+		Query().
+		Where(timer.And(timer.ID(id), timer.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
 	}
-	return &pb.Timer{}, errors.New("No such id found")
+	response := toPb(newtimer)
+	return response, nil
 }
 
 // Start will return a user with a given Id
-func (t *FileStorage) Start(id string) (pb.Timer, error) {
-	var res *pb.Timer
-	for _, u := range timers {
-		if u.Id == id {
-			res = u
-			break
-		}
-	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		res.IsRunning = true
-		now := time.Now()
-		res.TimerStart = now.Format(time.RFC3339)
-		if err := t.Save("file.json", timers); err != nil {
-			fmt.Println("Err", err)
-		}
-		return *res, nil
-	}
+func (t *FileStorage) Start(ctx context.Context, timerid string, c *claims.MyCustomClaims) (*pb.Timer, error) {
+	id, _ := strconv.Atoi(timerid)
 
-	return pb.Timer{}, errors.New("No such id found")
+	existingTimer, err := t.Db.Timer.
+		Query().
+		Where(timer.And(timer.ID(id), timer.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	newtimer, err := existingTimer.
+		Update().
+		SetTimerStart(time.Now()).
+		SetIsRunning(true).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := toPb(newtimer)
+	return response, nil
 }
-func (t *FileStorage) Stop(id string) (pb.Timer, error) {
-	var res *pb.Timer = nil
-	for _, u := range timers {
-		if u.Id == id {
-			res = u
-			break
-		}
+func (t *FileStorage) Stop(ctx context.Context, timerid string, c *claims.MyCustomClaims) (*pb.Timer, error) {
+	id, _ := strconv.Atoi(timerid)
+	tEnd := time.Now()
+	existingTimer, err := t.Db.Timer.
+		Query().
+		Where(timer.And(timer.ID(id), timer.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
 	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		res.IsRunning = false
-		now := time.Now()
-		res.TimerEnd = now.Format(time.RFC3339)
-		res.ElapsedSeconds = int32(t.Elapsed(res))
-		if err := t.Save("file.json", timers); err != nil {
-			fmt.Println("Err", err)
-		}
-		return *res, nil
+	log.Println("Elapsed", tEnd.Sub(existingTimer.TimerStart).Seconds())
+	log.Println("Elapsed", int(tEnd.Sub(existingTimer.TimerStart).Seconds()))
+	newtimer, err := existingTimer.
+		Update().
+		SetElapsedSeconds(int(tEnd.Sub(existingTimer.TimerStart).Seconds())).
+		SetTimerEnd(tEnd).
+		SetIsRunning(false).
+		Save(ctx)
+	if err != nil {
+		return nil, err
 	}
-
-	return pb.Timer{}, errors.New("No such id found")
+	response := toPb(newtimer)
+	return response, nil
 }
 func (t *FileStorage) Elapsed(timer *pb.Timer) float64 {
 	if timer.IsRunning {
@@ -195,11 +207,22 @@ func (t *FileStorage) Elapsed(timer *pb.Timer) float64 {
 	end, _ := time.Parse(time.RFC3339, timer.TimerEnd)
 	return end.Sub(start).Seconds()
 }
-func (t *FileStorage) GetAll() []*pb.Timer {
+func (t *FileStorage) GetAll(ctx context.Context, c *claims.MyCustomClaims) ([]*pb.Timer, error) {
 	// for _, u := range users {
 	// 	fmt.Println(u)
 	// }
-	return timers
+	existingTimer, err := t.Db.Timer.
+		Query().Where(timer.Userid(c.Subject)).All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	var list []*pb.Timer
+	for _, res := range existingTimer {
+		t := toPb(res)
+		list = append(list, t)
+	}
+	return list, err
 }
 
 // Save saves a representation of v to the file at path.
@@ -249,4 +272,24 @@ var Marshal = func(v interface{}) (io.Reader, error) {
 // By default, it uses the JSON unmarshaller.
 var Unmarshal = func(r io.Reader, v interface{}) error {
 	return json.NewDecoder(r).Decode(v)
+}
+
+func toPb(newtimer *ent.Timer) *pb.Timer {
+	response := &pb.Timer{Id: strconv.Itoa(newtimer.ID),
+		Description:    newtimer.Description,
+		Project:        newtimer.Projectid,
+		Tags:           newtimer.Tags,
+		TimerStart:     newtimer.TimerStart.Format(time.RFC3339),
+		TimerEnd:       newtimer.TimerEnd.Format(time.RFC3339),
+		IsRunning:      newtimer.IsRunning,
+		IsBilled:       newtimer.IsBilled,
+		ElapsedSeconds: int32(newtimer.ElapsedSeconds),
+	}
+	return response
+}
+func checkNil(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return &v
 }
