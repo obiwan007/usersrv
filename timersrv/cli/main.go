@@ -17,14 +17,16 @@ import (
 )
 
 var (
-	tlsForGrpc = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
-	balancer   = flag.Bool("ectd", false, "Using etcd")
-	certFile   = flag.String("cert_file", "", "The TLS cert file")
-	keyFile    = flag.String("key_file", "", "The TLS key file")
-	jsonDBFile = flag.String("json_db_file", "", "A json file containing a list of features")
-	port       = flag.Int("port", 10001, "The server port")
-	zipkin     = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
-	signingKey = flag.String("signingkey", "captainjacksparrowsayshi", "JWT Key")
+	config       = flag.String("config", "", "Using configfile")
+	tlsForGrpc   = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
+	balancer     = flag.Bool("ectd", false, "Using etcd")
+	certFile     = flag.String("cert_file", "", "The TLS cert file")
+	keyFile      = flag.String("key_file", "", "The TLS key file")
+	jsonDBFile   = flag.String("json_db_file", "", "A json file containing a list of features")
+	port         = flag.Int("port", 10001, "The server port")
+	zipkin       = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
+	signingKey   = flag.String("signingkey", "captainjacksparrowsayshi", "JWT Key")
+	dbconnection = flag.String("dbconnection", "postgres://localhost:5432/timer?sslmode=disable", "DB Connectiostring")
 )
 
 func main() {
@@ -39,7 +41,14 @@ func main() {
 	defer collector.Close()
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterTimerServiceServer(grpcServer, api.NewServer([]byte(*signingKey)))
+	server := api.NewServer(
+		[]byte(*signingKey),
+		*dbconnection,
+	)
+	defer server.Storage.Db.Close()
+
+	pb.RegisterTimerServiceServer(grpcServer,
+		server)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

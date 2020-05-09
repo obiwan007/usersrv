@@ -2,27 +2,52 @@ package timerservicestorage
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
 	pb "github.com/obiwan007/usersrv/proto"
+	"github.com/obiwan007/usersrv/timersrv/api/storage/ent"
+
+	_ "github.com/lib/pq"
+
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 )
 
-type FileStorage struct{}
+type FileStorage struct{ Db *ent.Client }
 
 var timers []*pb.Timer
 var maxId int = 0
 var lock sync.Mutex
 
-func NewFileStorage() *FileStorage {
+var psql = `CREATE DATABASE timersrv;
+CREATE TABLE timers (
+	id SERIAL PRIMARY KEY,
+	description VARCHAR(255) UNIQUE NOT NULL,
+	timerstart VARCHAR(255) NOT NULL
+  );`
 
-	t := &FileStorage{}
+func NewFileStorage(dbconnection string) *FileStorage {
+	log.Println("DB Connection", dbconnection)
+	client, err := ent.Open("postgres", dbconnection)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	log.Println("DB connected")
+
+	// run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
+	t := &FileStorage{Db: client}
 	if err := t.Load("file.json", &timers); err != nil {
 		log.Println(err)
 	}
@@ -32,7 +57,7 @@ func NewFileStorage() *FileStorage {
 
 }
 
-func (t *FileStorage) Add(timer pb.Timer) pb.Timer {
+func (t *FileStorage) Add(ctx context.Context, timer *pb.Timer, c *claims.MyCustomClaims) (*pb.Timer, error) {
 	timer.Id = fmt.Sprint(maxId)
 	maxId = maxId + 1
 
@@ -42,12 +67,28 @@ func (t *FileStorage) Add(timer pb.Timer) pb.Timer {
 	timer.TimerEnd = ""
 	timer.ElapsedSeconds = 0
 
-	timers = append(timers, &timer)
-	fmt.Println("Adding to File:", timer)
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
+	newtimer, err := t.Db.Timer. // UserClient.
+					Create().                          // User create builder.
+					SetDescription(timer.Description). // Set field value.
+					SetProjectid(timer.Project).       // Set field value.
+					SetProjectid(timer.Project).       // Set field value.
+					SetMandantid(c.Mandant).
+					SetUserid(c.Subject).
+					Save(ctx) // Create and return.
+	if err != nil {
+		return nil, err
 	}
-	return timer
+	response := &pb.Timer{Id: strconv.Itoa(newtimer.ID),
+		Description: newtimer.Description,
+		Project:     newtimer.Projectid,
+	}
+
+	//timers = append(timers, &timer)
+	fmt.Println("Adding to File:", timer)
+	// if err := t.Save("file.json", timers); err != nil {
+	// 	fmt.Println("Err", err)
+	// }
+	return response, nil
 }
 
 func (t *FileStorage) Update(timer pb.Timer) *pb.Timer {

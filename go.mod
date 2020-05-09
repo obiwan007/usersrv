@@ -15,12 +15,11 @@ require (
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/dealtap/graphql-gen-go v0.0.0-20180306142455-c400f7ed5997 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/facebookincubator/ent v0.2.1
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
-	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
 	github.com/golang/protobuf v1.3.5
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
-	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/graph-gophers/graphql-go v0.0.0-20200309224638-dae41bde9ef9
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
@@ -29,6 +28,7 @@ require (
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/lib/pq v1.4.0
+	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/namsral/flag v1.7.4-pre
 	github.com/nats-io/nats-server/v2 v2.1.6 // indirect
@@ -40,7 +40,7 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5
 	github.com/openzipkin/zipkin-go-opentracing v0.3.5
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v0.9.3 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/satori/go.uuid v1.2.0
@@ -52,7 +52,6 @@ require (
 	go.uber.org/zap v1.14.1 // indirect
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	golang.org/x/tools v0.0.0-20200114235610-7ae403b6b589 // indirect
 	google.golang.org/grpc v1.26.0
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )

@@ -62,8 +62,12 @@ rungql:
 runuser:
 	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans | sed -e 's/^/[Command2] /'
 
+timergen:
+	cd timersrv/api/storage && go generate ./ent
+
 runtimer:
-	cd timersrv/cli && go run main.go --port 10001 --zipkin http://localhost:9411/api/v1/spans
+	cd timersrv/cli && go run main.go -config config.conf --port 10001 --zipkin http://localhost:9411/api/v1/spans
+
 
 runproject:
 	cd projectsrv/cli && go run main.go --port 10002 --zipkin http://localhost:9411/api/v1/spans
@@ -203,3 +207,6 @@ dbshell:
 
 runnats:
 	nats-streaming-server --store file --dir ./data --max_msgs 0 --max_bytes 0
+
+postgres:
+	brew services start postgresql
