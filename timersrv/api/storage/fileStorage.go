@@ -26,13 +26,6 @@ var timers []*pb.Timer
 var maxId int = 0
 var lock sync.Mutex
 
-var psql = `CREATE DATABASE timersrv;
-CREATE TABLE timers (
-	id SERIAL PRIMARY KEY,
-	description VARCHAR(255) UNIQUE NOT NULL,
-	timerstart VARCHAR(255) NOT NULL
-  );`
-
 func NewFileStorage(dbconnection string) *FileStorage {
 	log.Println("DB Connection", dbconnection)
 	client, err := ent.Open("postgres", dbconnection)
@@ -57,9 +50,6 @@ func NewFileStorage(dbconnection string) *FileStorage {
 }
 
 func (t *FileStorage) Add(ctx context.Context, timer *pb.Timer, c *claims.MyCustomClaims) (*pb.Timer, error) {
-	timer.Id = fmt.Sprint(maxId)
-	maxId = maxId + 1
-
 	timer.IsRunning = false
 	timer.IsBilled = false
 	timer.TimerStart = ""
@@ -69,7 +59,6 @@ func (t *FileStorage) Add(ctx context.Context, timer *pb.Timer, c *claims.MyCust
 	newtimer, err := t.Db.Timer. // UserClient.
 					Create().                          // User create builder.
 					SetDescription(timer.Description). // Set field value.
-					SetProjectid(timer.Project).       // Set field value.
 					SetProjectid(timer.Project).       // Set field value.
 					SetMandantid(c.Mandant).
 					SetUserid(c.Subject).

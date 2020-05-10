@@ -22,7 +22,12 @@ func (r TimerResolver) Project(ctx context.Context) *ProjectResolver {
 		return nil
 	}
 
-	t := &pb.Id{Id: r.R.Project.ID}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil
+	}
+
+	t := &pb.Id{Id: r.R.Project.ID, Jwt: token.Raw}
 	result, err := r.Root.projectSvc.Get(ctx, t)
 
 	if err != nil {

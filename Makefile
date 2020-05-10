@@ -72,6 +72,9 @@ runtimer:
 runproject:
 	cd projectsrv/cli && go run main.go --port 10002 --zipkin http://localhost:9411/api/v1/spans
 
+projectgen:
+	cd projectsrv/api/storage && go generate ./ent
+
 runclient:
 	cd clientsrv/cli && go run main.go --port 10003 --zipkin http://localhost:9411/api/v1/spans
 
