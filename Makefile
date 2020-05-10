@@ -78,6 +78,8 @@ projectgen:
 runclient:
 	cd clientsrv/cli && go run main.go --port 10003 --zipkin http://localhost:9411/api/v1/spans
 
+clientgen:
+	cd clientsrv/api/storage && go generate ./ent
 
 runfrontend:
 	cd frontend && GRAPHQL="http://localhost:8090" && npm run start
