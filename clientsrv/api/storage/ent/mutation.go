@@ -5,7 +5,7 @@ package ent
 import (
 	"fmt"
 
-	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/client"
+	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/timerclient"
 
 	"github.com/facebookincubator/ent"
 )
@@ -19,12 +19,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeClient = "Client"
+	TypeTimerClient = "TimerClient"
 )
 
-// ClientMutation represents an operation that mutate the Clients
+// TimerClientMutation represents an operation that mutate the TimerClients
 // nodes in the graph.
-type ClientMutation struct {
+type TimerClientMutation struct {
 	config
 	op            Op
 	typ           string
@@ -37,21 +37,21 @@ type ClientMutation struct {
 	clearedFields map[string]struct{}
 }
 
-var _ ent.Mutation = (*ClientMutation)(nil)
+var _ ent.Mutation = (*TimerClientMutation)(nil)
 
-// newClientMutation creates new mutation for $n.Name.
-func newClientMutation(c config, op Op) *ClientMutation {
-	return &ClientMutation{
+// newTimerClientMutation creates new mutation for $n.Name.
+func newTimerClientMutation(c config, op Op) *TimerClientMutation {
+	return &TimerClientMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeClient,
+		typ:           TypeTimerClient,
 		clearedFields: make(map[string]struct{}),
 	}
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ClientMutation) Client() *Client {
+func (m TimerClientMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -59,7 +59,7 @@ func (m ClientMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m ClientMutation) Tx() (*Tx, error) {
+func (m TimerClientMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
 	}
@@ -70,7 +70,7 @@ func (m ClientMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *ClientMutation) ID() (id int, exists bool) {
+func (m *TimerClientMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -78,12 +78,12 @@ func (m *ClientMutation) ID() (id int, exists bool) {
 }
 
 // SetDescription sets the description field.
-func (m *ClientMutation) SetDescription(s string) {
+func (m *TimerClientMutation) SetDescription(s string) {
 	m.description = &s
 }
 
 // Description returns the description value in the mutation.
-func (m *ClientMutation) Description() (r string, exists bool) {
+func (m *TimerClientMutation) Description() (r string, exists bool) {
 	v := m.description
 	if v == nil {
 		return
@@ -92,17 +92,17 @@ func (m *ClientMutation) Description() (r string, exists bool) {
 }
 
 // ResetDescription reset all changes of the description field.
-func (m *ClientMutation) ResetDescription() {
+func (m *TimerClientMutation) ResetDescription() {
 	m.description = nil
 }
 
 // SetName sets the name field.
-func (m *ClientMutation) SetName(s string) {
+func (m *TimerClientMutation) SetName(s string) {
 	m.name = &s
 }
 
 // Name returns the name value in the mutation.
-func (m *ClientMutation) Name() (r string, exists bool) {
+func (m *TimerClientMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -111,17 +111,17 @@ func (m *ClientMutation) Name() (r string, exists bool) {
 }
 
 // ResetName reset all changes of the name field.
-func (m *ClientMutation) ResetName() {
+func (m *TimerClientMutation) ResetName() {
 	m.name = nil
 }
 
 // SetAddress sets the address field.
-func (m *ClientMutation) SetAddress(s string) {
+func (m *TimerClientMutation) SetAddress(s string) {
 	m.address = &s
 }
 
 // Address returns the address value in the mutation.
-func (m *ClientMutation) Address() (r string, exists bool) {
+func (m *TimerClientMutation) Address() (r string, exists bool) {
 	v := m.address
 	if v == nil {
 		return
@@ -130,30 +130,30 @@ func (m *ClientMutation) Address() (r string, exists bool) {
 }
 
 // ClearAddress clears the value of address.
-func (m *ClientMutation) ClearAddress() {
+func (m *TimerClientMutation) ClearAddress() {
 	m.address = nil
-	m.clearedFields[client.FieldAddress] = struct{}{}
+	m.clearedFields[timerclient.FieldAddress] = struct{}{}
 }
 
 // AddressCleared returns if the field address was cleared in this mutation.
-func (m *ClientMutation) AddressCleared() bool {
-	_, ok := m.clearedFields[client.FieldAddress]
+func (m *TimerClientMutation) AddressCleared() bool {
+	_, ok := m.clearedFields[timerclient.FieldAddress]
 	return ok
 }
 
 // ResetAddress reset all changes of the address field.
-func (m *ClientMutation) ResetAddress() {
+func (m *TimerClientMutation) ResetAddress() {
 	m.address = nil
-	delete(m.clearedFields, client.FieldAddress)
+	delete(m.clearedFields, timerclient.FieldAddress)
 }
 
 // SetUserid sets the userid field.
-func (m *ClientMutation) SetUserid(s string) {
+func (m *TimerClientMutation) SetUserid(s string) {
 	m.userid = &s
 }
 
 // Userid returns the userid value in the mutation.
-func (m *ClientMutation) Userid() (r string, exists bool) {
+func (m *TimerClientMutation) Userid() (r string, exists bool) {
 	v := m.userid
 	if v == nil {
 		return
@@ -162,30 +162,30 @@ func (m *ClientMutation) Userid() (r string, exists bool) {
 }
 
 // ClearUserid clears the value of userid.
-func (m *ClientMutation) ClearUserid() {
+func (m *TimerClientMutation) ClearUserid() {
 	m.userid = nil
-	m.clearedFields[client.FieldUserid] = struct{}{}
+	m.clearedFields[timerclient.FieldUserid] = struct{}{}
 }
 
 // UseridCleared returns if the field userid was cleared in this mutation.
-func (m *ClientMutation) UseridCleared() bool {
-	_, ok := m.clearedFields[client.FieldUserid]
+func (m *TimerClientMutation) UseridCleared() bool {
+	_, ok := m.clearedFields[timerclient.FieldUserid]
 	return ok
 }
 
 // ResetUserid reset all changes of the userid field.
-func (m *ClientMutation) ResetUserid() {
+func (m *TimerClientMutation) ResetUserid() {
 	m.userid = nil
-	delete(m.clearedFields, client.FieldUserid)
+	delete(m.clearedFields, timerclient.FieldUserid)
 }
 
 // SetMandantid sets the mandantid field.
-func (m *ClientMutation) SetMandantid(s string) {
+func (m *TimerClientMutation) SetMandantid(s string) {
 	m.mandantid = &s
 }
 
 // Mandantid returns the mandantid value in the mutation.
-func (m *ClientMutation) Mandantid() (r string, exists bool) {
+func (m *TimerClientMutation) Mandantid() (r string, exists bool) {
 	v := m.mandantid
 	if v == nil {
 		return
@@ -194,52 +194,52 @@ func (m *ClientMutation) Mandantid() (r string, exists bool) {
 }
 
 // ClearMandantid clears the value of mandantid.
-func (m *ClientMutation) ClearMandantid() {
+func (m *TimerClientMutation) ClearMandantid() {
 	m.mandantid = nil
-	m.clearedFields[client.FieldMandantid] = struct{}{}
+	m.clearedFields[timerclient.FieldMandantid] = struct{}{}
 }
 
 // MandantidCleared returns if the field mandantid was cleared in this mutation.
-func (m *ClientMutation) MandantidCleared() bool {
-	_, ok := m.clearedFields[client.FieldMandantid]
+func (m *TimerClientMutation) MandantidCleared() bool {
+	_, ok := m.clearedFields[timerclient.FieldMandantid]
 	return ok
 }
 
 // ResetMandantid reset all changes of the mandantid field.
-func (m *ClientMutation) ResetMandantid() {
+func (m *TimerClientMutation) ResetMandantid() {
 	m.mandantid = nil
-	delete(m.clearedFields, client.FieldMandantid)
+	delete(m.clearedFields, timerclient.FieldMandantid)
 }
 
 // Op returns the operation name.
-func (m *ClientMutation) Op() Op {
+func (m *TimerClientMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Client).
-func (m *ClientMutation) Type() string {
+// Type returns the node type of this mutation (TimerClient).
+func (m *TimerClientMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
-func (m *ClientMutation) Fields() []string {
+func (m *TimerClientMutation) Fields() []string {
 	fields := make([]string, 0, 5)
 	if m.description != nil {
-		fields = append(fields, client.FieldDescription)
+		fields = append(fields, timerclient.FieldDescription)
 	}
 	if m.name != nil {
-		fields = append(fields, client.FieldName)
+		fields = append(fields, timerclient.FieldName)
 	}
 	if m.address != nil {
-		fields = append(fields, client.FieldAddress)
+		fields = append(fields, timerclient.FieldAddress)
 	}
 	if m.userid != nil {
-		fields = append(fields, client.FieldUserid)
+		fields = append(fields, timerclient.FieldUserid)
 	}
 	if m.mandantid != nil {
-		fields = append(fields, client.FieldMandantid)
+		fields = append(fields, timerclient.FieldMandantid)
 	}
 	return fields
 }
@@ -247,17 +247,17 @@ func (m *ClientMutation) Fields() []string {
 // Field returns the value of a field with the given name.
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
-func (m *ClientMutation) Field(name string) (ent.Value, bool) {
+func (m *TimerClientMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case client.FieldDescription:
+	case timerclient.FieldDescription:
 		return m.Description()
-	case client.FieldName:
+	case timerclient.FieldName:
 		return m.Name()
-	case client.FieldAddress:
+	case timerclient.FieldAddress:
 		return m.Address()
-	case client.FieldUserid:
+	case timerclient.FieldUserid:
 		return m.Userid()
-	case client.FieldMandantid:
+	case timerclient.FieldMandantid:
 		return m.Mandantid()
 	}
 	return nil, false
@@ -266,37 +266,37 @@ func (m *ClientMutation) Field(name string) (ent.Value, bool) {
 // SetField sets the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *ClientMutation) SetField(name string, value ent.Value) error {
+func (m *TimerClientMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case client.FieldDescription:
+	case timerclient.FieldDescription:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
 		return nil
-	case client.FieldName:
+	case timerclient.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
 		return nil
-	case client.FieldAddress:
+	case timerclient.FieldAddress:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAddress(v)
 		return nil
-	case client.FieldUserid:
+	case timerclient.FieldUserid:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserid(v)
 		return nil
-	case client.FieldMandantid:
+	case timerclient.FieldMandantid:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -304,105 +304,105 @@ func (m *ClientMutation) SetField(name string, value ent.Value) error {
 		m.SetMandantid(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Client field %s", name)
+	return fmt.Errorf("unknown TimerClient field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented
 // or decremented during this mutation.
-func (m *ClientMutation) AddedFields() []string {
+func (m *TimerClientMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was in/decremented
 // from a field with the given name. The second value indicates
 // that this field was not set, or was not define in the schema.
-func (m *ClientMutation) AddedField(name string) (ent.Value, bool) {
+func (m *TimerClientMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *ClientMutation) AddField(name string, value ent.Value) error {
+func (m *TimerClientMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Client numeric field %s", name)
+	return fmt.Errorf("unknown TimerClient numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
-func (m *ClientMutation) ClearedFields() []string {
+func (m *TimerClientMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(client.FieldAddress) {
-		fields = append(fields, client.FieldAddress)
+	if m.FieldCleared(timerclient.FieldAddress) {
+		fields = append(fields, timerclient.FieldAddress)
 	}
-	if m.FieldCleared(client.FieldUserid) {
-		fields = append(fields, client.FieldUserid)
+	if m.FieldCleared(timerclient.FieldUserid) {
+		fields = append(fields, timerclient.FieldUserid)
 	}
-	if m.FieldCleared(client.FieldMandantid) {
-		fields = append(fields, client.FieldMandantid)
+	if m.FieldCleared(timerclient.FieldMandantid) {
+		fields = append(fields, timerclient.FieldMandantid)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
-func (m *ClientMutation) FieldCleared(name string) bool {
+func (m *TimerClientMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *ClientMutation) ClearField(name string) error {
+func (m *TimerClientMutation) ClearField(name string) error {
 	switch name {
-	case client.FieldAddress:
+	case timerclient.FieldAddress:
 		m.ClearAddress()
 		return nil
-	case client.FieldUserid:
+	case timerclient.FieldUserid:
 		m.ClearUserid()
 		return nil
-	case client.FieldMandantid:
+	case timerclient.FieldMandantid:
 		m.ClearMandantid()
 		return nil
 	}
-	return fmt.Errorf("unknown Client nullable field %s", name)
+	return fmt.Errorf("unknown TimerClient nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation regarding the
 // given field name. It returns an error if the field is not
 // defined in the schema.
-func (m *ClientMutation) ResetField(name string) error {
+func (m *TimerClientMutation) ResetField(name string) error {
 	switch name {
-	case client.FieldDescription:
+	case timerclient.FieldDescription:
 		m.ResetDescription()
 		return nil
-	case client.FieldName:
+	case timerclient.FieldName:
 		m.ResetName()
 		return nil
-	case client.FieldAddress:
+	case timerclient.FieldAddress:
 		m.ResetAddress()
 		return nil
-	case client.FieldUserid:
+	case timerclient.FieldUserid:
 		m.ResetUserid()
 		return nil
-	case client.FieldMandantid:
+	case timerclient.FieldMandantid:
 		m.ResetMandantid()
 		return nil
 	}
-	return fmt.Errorf("unknown Client field %s", name)
+	return fmt.Errorf("unknown TimerClient field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
-func (m *ClientMutation) AddedEdges() []string {
+func (m *TimerClientMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
-func (m *ClientMutation) AddedIDs(name string) []ent.Value {
+func (m *TimerClientMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	}
 	return nil
@@ -410,14 +410,14 @@ func (m *ClientMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
-func (m *ClientMutation) RemovedEdges() []string {
+func (m *TimerClientMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
-func (m *ClientMutation) RemovedIDs(name string) []ent.Value {
+func (m *TimerClientMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	}
 	return nil
@@ -425,14 +425,14 @@ func (m *ClientMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
-func (m *ClientMutation) ClearedEdges() []string {
+func (m *TimerClientMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
-func (m *ClientMutation) EdgeCleared(name string) bool {
+func (m *TimerClientMutation) EdgeCleared(name string) bool {
 	switch name {
 	}
 	return false
@@ -440,15 +440,15 @@ func (m *ClientMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
-func (m *ClientMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown Client unique edge %s", name)
+func (m *TimerClientMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TimerClient unique edge %s", name)
 }
 
 // ResetEdge resets all changes in the mutation regarding the
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
-func (m *ClientMutation) ResetEdge(name string) error {
+func (m *TimerClientMutation) ResetEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Client edge %s", name)
+	return fmt.Errorf("unknown TimerClient edge %s", name)
 }

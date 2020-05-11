@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	// ClientsColumns holds the columns for the "clients" table.
-	ClientsColumns = []*schema.Column{
+	// TimerClientsColumns holds the columns for the "timer_clients" table.
+	TimerClientsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "name", Type: field.TypeString, Default: ""},
@@ -17,16 +17,16 @@ var (
 		{Name: "userid", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "mandantid", Type: field.TypeString, Nullable: true, Default: ""},
 	}
-	// ClientsTable holds the schema information for the "clients" table.
-	ClientsTable = &schema.Table{
-		Name:        "clients",
-		Columns:     ClientsColumns,
-		PrimaryKey:  []*schema.Column{ClientsColumns[0]},
+	// TimerClientsTable holds the schema information for the "timer_clients" table.
+	TimerClientsTable = &schema.Table{
+		Name:        "timer_clients",
+		Columns:     TimerClientsColumns,
+		PrimaryKey:  []*schema.Column{TimerClientsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ClientsTable,
+		TimerClientsTable,
 	}
 )
 

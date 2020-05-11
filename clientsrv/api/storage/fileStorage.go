@@ -1,166 +1,147 @@
 package timerservicestorage
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
+	"context"
 	"log"
-	"os"
-	"sync"
+	"strconv"
 
+	_ "github.com/lib/pq"
+	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent"
+	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/timerclient"
+
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
-type FileStorage struct{}
+// FileStorage type
+type FileStorage struct{ Db *ent.Client }
 
-var timers []*pb.Client
-var maxId int = 0
-var lock sync.Mutex
+// NewFileStorage delvers an instance of the DB
+func NewFileStorage(dbconnection string) *FileStorage {
 
-func NewFileStorage() *FileStorage {
-
-	t := &FileStorage{}
-	if err := t.Load("file.json", &timers); err != nil {
-		log.Println(err)
+	log.Println("DB Connection", dbconnection)
+	client, err := ent.Open("postgres", dbconnection)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	maxId = len(timers)
-	fmt.Println("Timers:", maxId)
+	log.Println("DB connected")
+
+	// run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
+	t := &FileStorage{Db: client}
+
 	return t
 
 }
 
-func (t *FileStorage) Add(timer pb.Client) pb.Client {
-	timer.Id = fmt.Sprint(maxId)
-	maxId = maxId + 1
+// Add new Client to DB
+func (t *FileStorage) Add(ctx context.Context, entity *pb.Client, c *claims.MyCustomClaims) (*pb.Client, error) {
 
-	timers = append(timers, &timer)
-	fmt.Println("Adding to File:", timer)
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
-	}
-	return timer
-}
-
-func (t *FileStorage) Update(timer pb.Client) pb.Client {
-	old, _ := t.Get(timer.Id)
-
-	old.Name = timer.Name
-	old.Description = timer.Description
-	old.Address = timer.Address
-
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
-	}
-	return *old
-}
-
-func (t *FileStorage) Delete(id string) (*pb.Client, error) {
-	log.Println("Delete", id)
-	index, err := t.GetIndex(id)
+	newEntity, err := t.Db.TimerClient. // UserClient.
+						Create().                           // User create builder.
+						SetName(entity.Name).               // Set field value.
+						SetDescription(entity.Description). // Set field value.
+						SetAddress(entity.Address).         // Set field value.
+						SetMandantid(c.Mandant).
+						SetUserid(c.Subject).
+						Save(ctx) // Create and return.
 	if err != nil {
 		return nil, err
 	}
-	res, _ := t.Get(id)
-	timers = append(timers[:index], timers[index+1:]...)
-	if err := t.Save("file.json", timers); err != nil {
-		fmt.Println("Err", err)
+	response := &pb.Client{Id: strconv.Itoa(newEntity.ID),
+		Description: newEntity.Description,
+		Name:        newEntity.Name,
+		Address:     newEntity.Address,
 	}
-	return res, nil
+
+	return response, err
 }
 
-func (t *FileStorage) GetIndex(id string) (int, error) {
-	// idx := sort.Search(len(users), func(i int) bool {
-	// 	return users[i].Id == id
-	// })
-	var index int = -1
-	for i, u := range timers {
-		if u.Id == id {
-			index = i
-			break
-		}
-	}
-	fmt.Println("Found index", index)
-	if index != -1 {
-		return index, nil
-	}
-	return -1, errors.New("No such id found")
-}
+// Update Client via new Client object
+func (t *FileStorage) Update(ctx context.Context, entity *pb.Client, c *claims.MyCustomClaims) (*pb.Client, error) {
+	id, _ := strconv.Atoi(entity.Id)
 
-// GetUser will return a user with a given Id
-func (t *FileStorage) Get(id string) (*pb.Client, error) {
-	// idx := sort.Search(len(users), func(i int) bool {
-	// 	return users[i].Id == id
-	// })
-	var res *pb.Client = nil
-	for _, u := range timers {
-		if u.Id == id {
-			res = u
-			break
-		}
-	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		return res, nil
-	}
-	return &pb.Client{}, errors.New("No such id found")
-}
-
-// Start will return a user with a given Id
-
-func (t *FileStorage) GetAll() []*pb.Client {
-	// for _, u := range users {
-	// 	fmt.Println(u)
-	// }
-	return timers
-}
-
-// Save saves a representation of v to the file at path.
-func (t *FileStorage) Save(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	r, err := Marshal(v)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(f, r)
-	return err
-}
-
-// Load loads the file at path into v.
-// Use os.IsNotExist() to see if the returned error is due
-// to the file being missing.
-func (t *FileStorage) Load(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return Unmarshal(f, v)
-}
-
-// Marshal is a function that marshals the object into an
-// io.Reader.
-// By default, it uses the JSON marshaller.
-var Marshal = func(v interface{}) (io.Reader, error) {
-	b, err := json.MarshalIndent(v, "", "\t")
+	existingTimer, err := t.Db.TimerClient.
+		Query().
+		Where(timerclient.And(timerclient.ID(id), timerclient.Userid(c.Subject))).
+		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return bytes.NewReader(b), nil
+	new, err := existingTimer.
+		Update().
+		SetNillableDescription(checkNil(entity.Description)).
+		SetNillableName(checkNil(entity.Name)).
+		SetNillableAddress(checkNil(entity.Address)).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	response := toPb(new)
+	return response, err
 }
 
-// Unmarshal is a function that unmarshals the data from the
-// reader into the specified value.
-// By default, it uses the JSON unmarshaller.
-var Unmarshal = func(r io.Reader, v interface{}) error {
-	return json.NewDecoder(r).Decode(v)
+// Delete Client from DB
+func (t *FileStorage) Delete(ctx context.Context, entityID string, c *claims.MyCustomClaims) (*pb.Client, error) {
+	id, _ := strconv.Atoi(entityID)
+	existingTimer, err := t.Db.TimerClient.
+		Query().
+		Where(timerclient.And(timerclient.ID(id), timerclient.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	t.Db.TimerClient.DeleteOne(existingTimer).Exec(ctx)
+
+	return nil, nil
+}
+
+// Get Client will return a user with a given Id
+func (t *FileStorage) Get(ctx context.Context, ID string, c *claims.MyCustomClaims) (*pb.Client, error) {
+	id, _ := strconv.Atoi(ID)
+	newtimer, err := t.Db.TimerClient.
+		Query().
+		Where(timerclient.And(timerclient.ID(id), timerclient.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := toPb(newtimer)
+	return response, nil
+}
+
+// GetAll returns list of your clients
+func (t *FileStorage) GetAll(ctx context.Context, c *claims.MyCustomClaims) ([]*pb.Client, error) {
+	existingTimer, err := t.Db.TimerClient.
+		Query().Where(timerclient.Userid(c.Subject)).All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	var list []*pb.Client
+	for _, res := range existingTimer {
+		t := toPb(res)
+		list = append(list, t)
+	}
+	return list, err
+}
+
+func toPb(newtimer *ent.TimerClient) *pb.Client {
+	response := &pb.Client{Id: strconv.Itoa(newtimer.ID),
+		Description: newtimer.Description,
+		Address:     newtimer.Address,
+		Name:        newtimer.Name,
+	}
+	return response
+}
+
+func checkNil(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return &v
 }

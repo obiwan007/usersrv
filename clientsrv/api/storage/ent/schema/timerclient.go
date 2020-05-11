@@ -5,13 +5,14 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
-// Client holds the schema definition for the Client entity.
-type Client struct {
+// TimerClient holds the schema definition for the TimerClient entity.
+type TimerClient struct {
 	ent.Schema
 }
 
-// Fields of the Client.
-func (Client) Fields() []ent.Field {
+// Fields of the TimerClient.
+func (TimerClient) Fields() []ent.Field {
+	// Fields of the Client.
 	return []ent.Field{
 		field.String("description").Default(""),
 		field.String("name").Default(""),
@@ -21,7 +22,7 @@ func (Client) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Client.
-func (Client) Edges() []ent.Edge {
+// Edges of the TimerClient.
+func (TimerClient) Edges() []ent.Edge {
 	return nil
 }

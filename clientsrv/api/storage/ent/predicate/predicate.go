@@ -6,5 +6,5 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
-// Client is the predicate function for client builders.
-type Client func(*sql.Selector)
+// TimerClient is the predicate function for timerclient builders.
+type TimerClient func(*sql.Selector)

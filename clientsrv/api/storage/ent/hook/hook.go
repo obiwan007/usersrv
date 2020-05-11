@@ -9,15 +9,15 @@ import (
 	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent"
 )
 
-// The ClientFunc type is an adapter to allow the use of ordinary
-// function as Client mutator.
-type ClientFunc func(context.Context, *ent.ClientMutation) (ent.Value, error)
+// The TimerClientFunc type is an adapter to allow the use of ordinary
+// function as TimerClient mutator.
+type TimerClientFunc func(context.Context, *ent.TimerClientMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f ClientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ClientMutation)
+func (f TimerClientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TimerClientMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ClientMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TimerClientMutation", m)
 	}
 	return f(ctx, mv)
 }

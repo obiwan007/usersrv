@@ -51,5 +51,7 @@
     ]
   },
   "go.editorContextMenuCommands": {},
-  "go.gopath": ""
+  "go.gopath": "",
+  "go.languageServerFlags": [],
+  "go.useLanguageServer": true
 }

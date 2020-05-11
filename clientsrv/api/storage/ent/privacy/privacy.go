@@ -154,26 +154,26 @@ func DenyMutationOperationRule(op ent.Op) MutationRule {
 	})
 }
 
-// The ClientQueryRuleFunc type is an adapter to allow the use of ordinary
+// The TimerClientQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
-type ClientQueryRuleFunc func(context.Context, *ent.ClientQuery) error
+type TimerClientQueryRuleFunc func(context.Context, *ent.TimerClientQuery) error
 
 // EvalQuery return f(ctx, q).
-func (f ClientQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.ClientQuery); ok {
+func (f TimerClientQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TimerClientQuery); ok {
 		return f(ctx, q)
 	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ClientQuery", q)
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.TimerClientQuery", q)
 }
 
-// The ClientMutationRuleFunc type is an adapter to allow the use of ordinary
+// The TimerClientMutationRuleFunc type is an adapter to allow the use of ordinary
 // functions as a mutation rule.
-type ClientMutationRuleFunc func(context.Context, *ent.ClientMutation) error
+type TimerClientMutationRuleFunc func(context.Context, *ent.TimerClientMutation) error
 
 // EvalMutation calls f(ctx, m).
-func (f ClientMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.ClientMutation); ok {
+func (f TimerClientMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.TimerClientMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ClientMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.TimerClientMutation", m)
 }

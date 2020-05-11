@@ -3,34 +3,34 @@
 package ent
 
 import (
-	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/client"
 	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/schema"
+	"github.com/obiwan007/usersrv/clientsrv/api/storage/ent/timerclient"
 )
 
 // The init function reads all schema descriptors with runtime
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
-	clientFields := schema.Client{}.Fields()
-	_ = clientFields
-	// clientDescDescription is the schema descriptor for description field.
-	clientDescDescription := clientFields[0].Descriptor()
-	// client.DefaultDescription holds the default value on creation for the description field.
-	client.DefaultDescription = clientDescDescription.Default.(string)
-	// clientDescName is the schema descriptor for name field.
-	clientDescName := clientFields[1].Descriptor()
-	// client.DefaultName holds the default value on creation for the name field.
-	client.DefaultName = clientDescName.Default.(string)
-	// clientDescAddress is the schema descriptor for address field.
-	clientDescAddress := clientFields[2].Descriptor()
-	// client.DefaultAddress holds the default value on creation for the address field.
-	client.DefaultAddress = clientDescAddress.Default.(string)
-	// clientDescUserid is the schema descriptor for userid field.
-	clientDescUserid := clientFields[3].Descriptor()
-	// client.DefaultUserid holds the default value on creation for the userid field.
-	client.DefaultUserid = clientDescUserid.Default.(string)
-	// clientDescMandantid is the schema descriptor for mandantid field.
-	clientDescMandantid := clientFields[4].Descriptor()
-	// client.DefaultMandantid holds the default value on creation for the mandantid field.
-	client.DefaultMandantid = clientDescMandantid.Default.(string)
+	timerclientFields := schema.TimerClient{}.Fields()
+	_ = timerclientFields
+	// timerclientDescDescription is the schema descriptor for description field.
+	timerclientDescDescription := timerclientFields[0].Descriptor()
+	// timerclient.DefaultDescription holds the default value on creation for the description field.
+	timerclient.DefaultDescription = timerclientDescDescription.Default.(string)
+	// timerclientDescName is the schema descriptor for name field.
+	timerclientDescName := timerclientFields[1].Descriptor()
+	// timerclient.DefaultName holds the default value on creation for the name field.
+	timerclient.DefaultName = timerclientDescName.Default.(string)
+	// timerclientDescAddress is the schema descriptor for address field.
+	timerclientDescAddress := timerclientFields[2].Descriptor()
+	// timerclient.DefaultAddress holds the default value on creation for the address field.
+	timerclient.DefaultAddress = timerclientDescAddress.Default.(string)
+	// timerclientDescUserid is the schema descriptor for userid field.
+	timerclientDescUserid := timerclientFields[3].Descriptor()
+	// timerclient.DefaultUserid holds the default value on creation for the userid field.
+	timerclient.DefaultUserid = timerclientDescUserid.Default.(string)
+	// timerclientDescMandantid is the schema descriptor for mandantid field.
+	timerclientDescMandantid := timerclientFields[4].Descriptor()
+	// timerclient.DefaultMandantid holds the default value on creation for the mandantid field.
+	timerclient.DefaultMandantid = timerclientDescMandantid.Default.(string)
 }

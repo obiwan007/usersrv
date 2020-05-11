@@ -42,7 +42,12 @@ func (r TimerResolver) Project(ctx context.Context) *ProjectResolver {
 
 func (r TimerResolver) Client(ctx context.Context) *ClientResolver {
 
-	t := &pb.Id{Id: r.R.Client.ID}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil
+	}
+
+	t := &pb.Id{Id: r.R.Client.ID, Jwt: token.Raw}
 	result, err := r.Root.clientSvc.Get(ctx, t)
 
 	if err != nil {
@@ -56,8 +61,11 @@ func (r TimerResolver) Client(ctx context.Context) *ClientResolver {
 }
 
 func (r ProjectResolver) Client(ctx context.Context) *ClientResolver {
-
-	t := &pb.Id{Id: r.R.Client.ID}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil
+	}
+	t := &pb.Id{Id: r.R.Client.ID, Jwt: token.Raw}
 	result, err := r.Root.clientSvc.Get(ctx, t)
 
 	if err != nil {

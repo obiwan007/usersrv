@@ -5,63 +5,79 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"github.com/dgrijalva/jwt-go"
 	storage "github.com/obiwan007/usersrv/clientsrv/api/storage"
 	pb "github.com/obiwan007/usersrv/proto"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/obiwan007/usersrv/timersrv/api/storage/ent/timer"
+	"google.golang.org/grpc"
+
+	claims "github.com/obiwan007/usersrv/pkg/claims"
 )
 
 var sto storage.FileStorage
 
 type routeGuideServer struct {
-	storage storage.FileStorage
+	Storage    storage.FileStorage
+	SigningKey []byte
 }
 
-func Init(storage storage.FileStorage) {
-	fmt.Println("Init Project Service")
-	sto = storage
-}
-
-func (s *routeGuideServer) Add(ctx context.Context, timer *pb.Client) (*pb.Client, error) {
+func (s *routeGuideServer) Add(ctx context.Context, entity *pb.Client) (*pb.Client, error) {
 	fmt.Println("ADDING Client", timer.Description)
-	// No feature was found, return an unnamed feature
-	newuser := s.storage.Add(*timer)
-	return &newuser, nil
+	c, err := s.getClaims(entity.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	newuser, err := s.Storage.Add(ctx, entity, c)
+	return newuser, err
 }
-func (s *routeGuideServer) Update(ctx context.Context, timer *pb.Client) (*pb.Client, error) {
-	fmt.Println("ADDING Client", timer.Description)
-	// No feature was found, return an unnamed feature
-	newuser := s.storage.Update(*timer)
-	return &newuser, nil
+func (s *routeGuideServer) Update(ctx context.Context, entity *pb.Client) (*pb.Client, error) {
+	fmt.Println("Update Client", entity.Description)
+	c, err := s.getClaims(entity.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	newEntity, err := s.Storage.Update(ctx, entity, c)
+	return newEntity, err
 }
-func (s *routeGuideServer) Del(ctx context.Context, timerId *pb.Id) (*pb.Client, error) {
-	fmt.Println("Deleting Client", timerId.GetId())
-	// No feature was found, return an unnamed feature
-	deleted, err := s.storage.Delete(timerId.GetId())
+func (s *routeGuideServer) Del(ctx context.Context, entityID *pb.Id) (*pb.Client, error) {
+	fmt.Println("Deleting Client", entityID.GetId())
+	c, err := s.getClaims(entityID.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	deleted, err := s.Storage.Delete(ctx, entityID.GetId(), c)
 	return deleted, err
 }
 
-func (s *routeGuideServer) Get(ctx context.Context, timerId *pb.Id) (*pb.Client, error) {
-	fmt.Println("Get Client", timerId.GetId())
-	// No feature was found, return an unnamed feature
-	newtimer, err := s.storage.Get(timerId.GetId())
+func (s *routeGuideServer) Get(ctx context.Context, entityID *pb.Id) (*pb.Client, error) {
+	fmt.Println("Get Client", entityID.GetId())
+	c, err := s.getClaims(entityID.Jwt)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Client not found")
+		return nil, err
 	}
-	return newtimer, nil
+	newtimer, err := s.Storage.Get(ctx, entityID.GetId(), c)
+	return newtimer, err
 }
 
 func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListClient) (*pb.ClientResponse, error) {
 	fmt.Println("Get Clients")
-	timers := s.storage.GetAll()
+	c, err := s.getClaims(l.Jwt)
+	if err != nil {
+		return nil, err
+	}
+	allEntities, err := s.Storage.GetAll(ctx, c)
+	if err != nil {
+		return nil, err
+	}
 	u := new(pb.ClientResponse)
 
-	for _, timer := range timers {
-		conv := timer
+	for _, entity := range allEntities {
+		conv := entity
 		u.Clients = append(u.Clients, conv)
 	}
-	return u, nil
+	return u, err
 }
 
 // func AddUser(name string, password string) {
@@ -71,16 +87,28 @@ func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListClient) (*pb.Cl
 // 	sto.AddUser(user)
 // }
 
-func NewServer() *routeGuideServer {
-	fs := storage.NewFileStorage()
-	s := &routeGuideServer{storage: *fs}
+func NewServer(signingKey []byte, dbconnection string) *routeGuideServer {
+	fs := storage.NewFileStorage(dbconnection)
+	s := &routeGuideServer{Storage: *fs, SigningKey: signingKey}
 	return s
 }
 
-// func toAPITimer(newtimer storage.Timer) *pb.Timer {
-// 	return &pb.Timer{Description: newtimer.Description, Id: newtimer.Id}
-// }
+func (s *routeGuideServer) getClaims(jwtstring string) (*claims.MyCustomClaims, error) {
 
-// func fromAPITimer(newtimer pb.Timer) *storage.Timer {
-// 	return &storage.Timer{Description: newtimer.Description, Id: newtimer.Id}
-// }
+	token, err := jwt.ParseWithClaims(jwtstring, &claims.MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("There was an error")
+		}
+		return s.SigningKey, nil
+	})
+	// c, ok := token.Claims.(*claims.MyCustomClaims)
+
+	if c, ok := token.Claims.(*claims.MyCustomClaims); ok && token.Valid {
+		log.Printf("CLAIMS: %v %v", c.StandardClaims.Subject, c.Mandant)
+		return c, nil
+	} else {
+		log.Println(err)
+		return nil, grpc.Errorf(grpc.Code(jwt.ValidationError{}), "Error %v", err)
+	}
+
+}
