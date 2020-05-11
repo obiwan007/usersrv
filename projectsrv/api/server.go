@@ -47,25 +47,25 @@ func (s *routeGuideServer) Update(ctx context.Context, entity *pb.Project) (*pb.
 	newuser, err := s.Storage.Update(ctx, entity, c)
 	return newuser, err
 }
-func (s *routeGuideServer) Del(ctx context.Context, id *pb.Id) (*pb.Project, error) {
-	fmt.Println("Deleting Project", id.GetId())
-	c, err := s.getClaims(id.Jwt)
+func (s *routeGuideServer) Del(ctx context.Context, entityID *pb.Id) (*pb.Project, error) {
+	fmt.Println("Deleting Project", entityID.GetId())
+	c, err := s.getClaims(entityID.Jwt)
 	if err != nil {
 		return nil, err
 	}
 	// No feature was found, return an unnamed feature
-	s.Storage.Delete(ctx, id.GetId(), c)
-	return nil, nil
+	s.Storage.Delete(ctx, entityID.GetId(), c)
+	return &pb.Project{Id: entityID.Id}, nil
 }
 
-func (s *routeGuideServer) Get(ctx context.Context, id *pb.Id) (*pb.Project, error) {
-	fmt.Println("Get Project  with JWT", id.GetId(), id.GetJwt())
-	c, err := s.getClaims(id.GetJwt())
+func (s *routeGuideServer) Get(ctx context.Context, entityID *pb.Id) (*pb.Project, error) {
+	fmt.Println("Get Project  with JWT", entityID.GetId(), entityID.GetJwt())
+	c, err := s.getClaims(entityID.GetJwt())
 	if err != nil {
 		return nil, err
 	}
 	// No feature was found, return an unnamed feature
-	newtimer, err := s.Storage.Get(ctx, id.GetId(), c)
+	newtimer, err := s.Storage.Get(ctx, entityID.GetId(), c)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Project not found")
 	}

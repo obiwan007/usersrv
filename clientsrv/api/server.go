@@ -47,8 +47,8 @@ func (s *routeGuideServer) Del(ctx context.Context, entityID *pb.Id) (*pb.Client
 	if err != nil {
 		return nil, err
 	}
-	deleted, err := s.Storage.Delete(ctx, entityID.GetId(), c)
-	return deleted, err
+	s.Storage.Delete(ctx, entityID.GetId(), c)
+	return &pb.Client{Id: entityID.Id}, nil
 }
 
 func (s *routeGuideServer) Get(ctx context.Context, entityID *pb.Id) (*pb.Client, error) {

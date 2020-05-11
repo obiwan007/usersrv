@@ -26,7 +26,7 @@ var (
 	port         = flag.Int("port", 10001, "The server port")
 	zipkin       = flag.String("zipkin", "http://zipkin:9411/api/v1/spans", "Zipkin URL")
 	signingKey   = flag.String("signingkey", "captainjacksparrowsayshi", "JWT Key")
-	dbconnection = flag.String("dbconnection", "postgres://localhost:5432/timer?sslmode=disable", "DB Connectiostring")
+	dbconnection = flag.String("dbconnectiontimer", "postgres://localhost:5432/timer?sslmode=disable", "DB Connectiostring")
 )
 
 func main() {
