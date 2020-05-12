@@ -93,14 +93,8 @@ runstore:
 docker: docker-build docker-push
 
 docker-build: builddockerfrontend builddockergqlsrv builddockerusersrv builddockertimersrv builddockerprojectsrv builddockerclientsrv
-	# docker build -t obiwan007/gqlsrv:${VERSION} -f ./gql_Dockerfile . 
-	# docker build -t obiwan007/usersrv:${VERSION} -f ./user_Dockerfile . 
-	# cd frontend && docker build -t obiwan007/frontend:${VERSION} -f ./nginxDockerfile .
 	
 docker-push: pushdockerusersrv 	pushdockergqlsrv pushdockerfrontend pushdockertimersrv pushdockerprojectsrv pushdockerclientsrv
-	# docker push obiwan007/frontend:${VERSION}	
-	# docker push obiwan007/gqlsrv:${VERSION}
-	# docker push obiwan007/usersrv:${VERSION}
 
 dockerfrontend: builddockerfrontend pushdockerfrontend
 
@@ -160,6 +154,8 @@ compose-up:
 kapplyzipkin:
 	kubectl apply -f config/zipkin.yaml
 
+#################################################################################### KUBERNETES 
+
 kapply:
 	kubectl apply -f config/frontendservice.yaml
 	kubectl apply -f config/gqlservice.yaml
@@ -184,11 +180,13 @@ kredeploy:
 	kubectl rollout restart deployment frontend-deployment
 
 kdashboard:
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 
 okteto:
 	export KUBECONFIG="${HOME}/Downloads/okteto-kube.config:${KUBECONFIG:-$HOME/.kube/config}"
 #	k get deployment api-deployment -o yaml | sed "s/\(image: obiwan007\/gqlsrv\):.*$/\1:VERSION/" | grep image
+
+#################################################################################### KUBERNETES 
 
 protobuf:
 	protoc -I proto/ proto/*.proto --go_out=plugins=grpc:proto

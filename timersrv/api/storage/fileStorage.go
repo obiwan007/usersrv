@@ -1,15 +1,10 @@
 package timerservicestorage
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"strconv"
-	"sync"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -22,10 +17,6 @@ import (
 
 type FileStorage struct{ Db *ent.Client }
 
-var timers []*pb.Timer
-var maxId int = 0
-var lock sync.Mutex
-
 func NewFileStorage(dbconnection string) *FileStorage {
 	log.Println("DB Connection", dbconnection)
 	client, err := ent.Open("postgres", dbconnection)
@@ -35,16 +26,11 @@ func NewFileStorage(dbconnection string) *FileStorage {
 	log.Println("DB connected")
 
 	// run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
+	if err := client.Debug().Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
 	t := &FileStorage{Db: client}
-	if err := t.Load("file.json", &timers); err != nil {
-		log.Println(err)
-	}
-	maxId = len(timers)
-	fmt.Println("Timers:", maxId)
 	return t
 
 }
@@ -212,55 +198,6 @@ func (t *FileStorage) GetAll(ctx context.Context, c *claims.MyCustomClaims) ([]*
 		list = append(list, t)
 	}
 	return list, err
-}
-
-// Save saves a representation of v to the file at path.
-func (t *FileStorage) Save(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	r, err := Marshal(v)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(f, r)
-	return err
-}
-
-// Load loads the file at path into v.
-// Use os.IsNotExist() to see if the returned error is due
-// to the file being missing.
-func (t *FileStorage) Load(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return Unmarshal(f, v)
-}
-
-// Marshal is a function that marshals the object into an
-// io.Reader.
-// By default, it uses the JSON marshaller.
-var Marshal = func(v interface{}) (io.Reader, error) {
-	b, err := json.MarshalIndent(v, "", "\t")
-	if err != nil {
-		return nil, err
-	}
-	return bytes.NewReader(b), nil
-}
-
-// Unmarshal is a function that unmarshals the data from the
-// reader into the specified value.
-// By default, it uses the JSON unmarshaller.
-var Unmarshal = func(r io.Reader, v interface{}) error {
-	return json.NewDecoder(r).Decode(v)
 }
 
 func toPb(newtimer *ent.Timer) *pb.Timer {
