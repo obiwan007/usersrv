@@ -19,7 +19,7 @@ spec:
           image: obiwan007/frontend:latest
           envFrom:
             - secretRef:
-              name: mysecret
+                name: mysecret
           imagePullPolicy: Always
           resources:
             limits:

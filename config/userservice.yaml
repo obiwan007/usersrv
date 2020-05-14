@@ -20,7 +20,7 @@ spec:
           imagePullPolicy: "Always"
           envFrom:
             - secretRef:
-              name: mysecret
+                name: mysecret
           resources:
             limits:
               memory: 512Mi
