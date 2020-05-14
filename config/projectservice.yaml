@@ -17,6 +17,9 @@ spec:
       containers:
         - name: user
           image: obiwan007/projectsrv:latest
+          envFrom:
+            - secretRef:
+              name: mysecret
           imagePullPolicy: "Always"
           resources:
             limits:

@@ -164,6 +164,7 @@ kapply:
 	kubectl apply -f config/projectservice.yaml
 	kubectl apply -f config/clientservice.yaml
 	kubectl apply -f config/zipkin.yaml
+	kubectl apply -f config/secret.yaml
 
 kfrontend:
 	kubectl rollout restart deployment frontend-deployment

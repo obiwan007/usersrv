@@ -17,6 +17,9 @@ spec:
       containers:
         - name: frontend
           image: obiwan007/frontend:latest
+          envFrom:
+            - secretRef:
+              name: mysecret
           imagePullPolicy: Always
           resources:
             limits:

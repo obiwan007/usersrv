@@ -18,6 +18,9 @@ spec:
         - name: user
           image: obiwan007/clientsrv:latest
           imagePullPolicy: "Always"
+          envFrom:
+            - secretRef:
+              name: mysecret
           resources:
             limits:
               memory: 512Mi
