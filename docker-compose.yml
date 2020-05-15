@@ -31,7 +31,7 @@ services:
       context: .
       dockerfile: ./Dockerfile_timer
     environment:
-      - DBCONNECTIONTIMER="postgres://host.docker.internal:5432/project?sslmode=disable"
+      - DBCONNECTIONTIMER="postgres://host.docker.internal:5432/timer?sslmode=disable"
     ports:
       - 10001:10001
     networks:
@@ -44,7 +44,7 @@ services:
       context: .
       dockerfile: ./Dockerfile_project
     environment:
-      - DBCONNECTIONPROJECT="postgres://host.docker.internal:5432/timer?sslmode=disable"
+      - DBCONNECTIONPROJECT="postgres://host.docker.internal:5432/project?sslmode=disable"
     ports:
       - 10002:10002
     networks:

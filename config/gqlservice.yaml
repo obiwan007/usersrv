@@ -18,6 +18,9 @@ spec:
         - name: api
           image: obiwan007/gqlsrv:latest
           imagePullPolicy: "Always"
+          envFrom:
+            - secretRef:
+                name: mysecret
           resources:
             limits:
               memory: 512Mi
