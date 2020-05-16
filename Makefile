@@ -53,6 +53,9 @@ clean:
 	rm -f $(BINARY_NAME_GQL)
 	rm -f $(BINARY_NAME_USER)
 
+runnginx:
+	cp ./frontend/nginx-local.conf /tmp/nginx.conf && docker run -it --rm --name some-nginx -p 8080:80 -v /tmp/nginx.conf:/etc/nginx/nginx.conf:ro -v /Users/markus.miertschink/dev/go/src/github.com/obiwan007/usersrv/frontend/build:/usr/share/nginx/html:ro nginx
+
 runall:
 	make rungql & make runuser & make runtimer & make runproject & make runclient & wait
 
