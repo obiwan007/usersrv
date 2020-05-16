@@ -1,140 +1,147 @@
 package userservicestorage
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
+	"context"
 	"log"
-	"os"
+	"strconv"
 	"sync"
+
+	_ "github.com/lib/pq"
+	claims "github.com/obiwan007/usersrv/pkg/claims"
+	pb "github.com/obiwan007/usersrv/proto"
+	"github.com/obiwan007/usersrv/usersrv/api/storage/ent"
+	"github.com/obiwan007/usersrv/usersrv/api/storage/ent/user"
 )
 
-type FileStorage struct{}
+type FileStorage struct{ Db *ent.Client }
 
 var users []User
 var maxId int = 0
 var lock sync.Mutex
 
-func NewFileStorage() *FileStorage {
+func NewFileStorage(dbconnection string) *FileStorage {
 
-	t := &FileStorage{}
-	if err := t.Load("file.json", &users); err != nil {
-		log.Println(err)
+	log.Println("DB Connection", dbconnection)
+	client, err := ent.Open("postgres", dbconnection)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	maxId = len(users)
-	fmt.Println("Users:", maxId)
+	log.Println("DB connected")
+
+	// run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
+	t := &FileStorage{Db: client}
 	return t
 
 }
 
-func (t *FileStorage) AddUser(user User) User {
-	user.Id = fmt.Sprint(maxId)
-	maxId = maxId + 1
-	users = append(users, user)
-	fmt.Println("Adding to File:", user)
-	if err := t.Save("file.json", users); err != nil {
-		fmt.Println("Err", err)
-	}
-	return user
-}
+func (t *FileStorage) AddUser(ctx context.Context, entity *pb.User, c *claims.MyCustomClaims) (*pb.User, error) {
 
-func (t *FileStorage) DeleteUser(user User) error {
-	return nil
-}
-
-// GetUser will return a user with a given Id
-func (t *FileStorage) GetUser(id string) (User, error) {
-	// idx := sort.Search(len(users), func(i int) bool {
-	// 	return users[i].Id == id
-	// })
-	var res *User = nil
-	for _, u := range users {
-		if u.Id == id {
-			res = &u
-			break
+	existing, err := t.Db.User.
+		Query().
+		Where(user.Userid(c.Subject)).
+		Only(ctx)
+	if err == nil {
+		new, err := existing.
+			Update().
+			SetNillableName(checkNil(entity.Name)).
+			SetMandantid(c.Mandant).
+			Save(ctx)
+		if err != nil {
+			return nil, err
 		}
+		response := toPb(new)
+		log.Println("Updated existing user")
+		return response, nil
 	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		return *res, nil
-	}
-	return User{}, errors.New("No such id found")
 
-}
-
-// GetUserFromEmail will return a user with a given email
-func (t *FileStorage) GetUserFromEmail(mail string) (User, error) {
-	var res *User = nil
-	for _, u := range users {
-		fmt.Println("Compare User", u.Email)
-		if u.Email == mail {
-			fmt.Println("Found User", u)
-			res = &u
-			break
-		}
-	}
-	fmt.Println("Found index", res)
-	if res != nil {
-		return *res, nil
-	}
-	return User{}, errors.New("No such id found")
-
-}
-
-func (t *FileStorage) ListUser() []User {
-	// for _, u := range users {
-	// 	fmt.Println(u)
-	// }
-	return users
-}
-
-// Save saves a representation of v to the file at path.
-func (t *FileStorage) Save(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	r, err := Marshal(v)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(f, r)
-	return err
-}
-
-// Load loads the file at path into v.
-// Use os.IsNotExist() to see if the returned error is due
-// to the file being missing.
-func (t *FileStorage) Load(path string, v interface{}) error {
-	lock.Lock()
-	defer lock.Unlock()
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return Unmarshal(f, v)
-}
-
-// Marshal is a function that marshals the object into an
-// io.Reader.
-// By default, it uses the JSON marshaller.
-var Marshal = func(v interface{}) (io.Reader, error) {
-	b, err := json.MarshalIndent(v, "", "\t")
+	newEntity, err := t.Db.User. // UserClient.
+					Create().             // User create builder.
+					SetName(entity.Name). // Set field value.
+					SetMandantid(c.Mandant).
+					SetUserid(c.Subject).
+					Save(ctx) // Create and return.
 	if err != nil {
 		return nil, err
 	}
-	return bytes.NewReader(b), nil
+	response := &pb.User{Id: strconv.Itoa(newEntity.ID),
+		Name:  newEntity.Name,
+		Email: newEntity.Userid,
+	}
+
+	return response, err
 }
 
-// Unmarshal is a function that unmarshals the data from the
-// reader into the specified value.
-// By default, it uses the JSON unmarshaller.
-var Unmarshal = func(r io.Reader, v interface{}) error {
-	return json.NewDecoder(r).Decode(v)
+func (t *FileStorage) DeleteUser(ctx context.Context, entityID string, c *claims.MyCustomClaims) error {
+	id, _ := strconv.Atoi(entityID)
+	existingTimer, err := t.Db.User.
+		Query().
+		Where(user.And(user.ID(id), user.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+	t.Db.User.DeleteOne(existingTimer).Exec(ctx)
+
+	return err
+}
+
+// GetUser will return a user with a given Id
+func (t *FileStorage) GetUser(ctx context.Context, ID string, c *claims.MyCustomClaims) (*pb.User, error) {
+	id, _ := strconv.Atoi(ID)
+	newtimer, err := t.Db.User.
+		Query().
+		Where(user.And(user.ID(id), user.Userid(c.Subject))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := toPb(newtimer)
+	return response, nil
+}
+
+// GetUserFromEmail will return a user with a given email
+func (t *FileStorage) GetUserFromEmail(ctx context.Context, mail string, c *claims.MyCustomClaims) (*pb.User, error) {
+	newtimer, err := t.Db.User.
+		Query().
+		Where(user.Userid(c.Subject)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := toPb(newtimer)
+	return response, nil
+}
+
+func (t *FileStorage) ListUser(ctx context.Context, c *claims.MyCustomClaims) ([]*pb.User, error) {
+	existingTimer, err := t.Db.User.
+		Query().Where(user.Userid(c.Subject)).All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	var list []*pb.User
+	for _, res := range existingTimer {
+		t := toPb(res)
+		list = append(list, t)
+	}
+	return list, err
+}
+
+func toPb(newtimer *ent.User) *pb.User {
+	response := &pb.User{Id: strconv.Itoa(newtimer.ID),
+		Email: newtimer.Userid,
+		Name:  newtimer.Name,
+	}
+	return response
+}
+
+func checkNil(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return &v
 }

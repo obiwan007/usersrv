@@ -119,6 +119,8 @@ func main() {
 	defer connClientSrv.Close()
 	gqlClientSrvClient := pb.NewClientServiceClient(connClientSrv)
 
+	gql.UserSrvClient = gqlUserSrvClient
+
 	resolver := gql.NewResolver(
 		gqlUserSrvClient,
 		gqlTimerSrvClient,

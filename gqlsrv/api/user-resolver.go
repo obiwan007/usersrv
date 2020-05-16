@@ -9,8 +9,11 @@ import (
 )
 
 func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserResolver, error) {
-
-	request := &api.Id{Id: *args.Id}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	request := &api.Id{Id: *args.Id, Jwt: token.Raw}
 
 	res, err := r.userSvc.GetUser(ctx, request)
 	if err != nil {
@@ -25,17 +28,11 @@ func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserRe
 
 }
 func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
-	// t := ctx.Value("jwt")
-
-	// token, ok := t.(*jwt.Token)
-	// if !ok || !token.Valid {
-	// 	return nil, errors.Errorf("Unauthorized")
-	// }
-
-	// fmt.Println(t)
-	// claims := token.Claims.(*MyCustomClaims)
-	// log.Println("Subject:", claims.Subject)
-	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{})
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	users, err := r.userSvc.GetUsers(ctx, &api.ListUsers{Jwt: token.Raw})
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +55,11 @@ func (r *Resolver) AllUsers(ctx context.Context) (*[]*UserResolver, error) {
 // }
 
 func (r *Resolver) CreateUser(ctx context.Context, args struct{ User UserInput }) (*string, error) {
-
-	request := &api.User{Name: *args.User.Name, Password: *args.User.Password, Email: *args.User.Email}
+	token, err := validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	request := &api.User{Jwt: token.Raw, Name: *args.User.Name, Password: *args.User.Password, Email: *args.User.Email}
 
 	res, err := r.userSvc.RegisterUser(ctx, request)
 	if err != nil {

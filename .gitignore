@@ -8,10 +8,7 @@ frontend/.env
 frontend.bak
 ordersdb*
 data
-storesrv
-ordersrv
-usersrv
 out.tmp
 timersrv/cli/timersrv
 timersrv/cli/__debug_bin
-projectsrv/cli/config.conf
+**/config.conf

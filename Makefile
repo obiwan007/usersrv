@@ -65,6 +65,9 @@ rungql:
 runuser:
 	cd usersrv/cli && go run main.go --port 10000 --zipkin http://localhost:9411/api/v1/spans | sed -e 's/^/[Command2] /'
 
+usergen:
+	cd usersrv/api/storage && go generate ./ent
+
 timergen:
 	cd timersrv/api/storage && go generate ./ent
 

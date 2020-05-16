@@ -32,6 +32,7 @@ message User {
   string id = 3;
   string email = 4;
   string token = 5;
+  string jwt = 6;
 }
 
 
@@ -39,10 +40,12 @@ message User {
 message Email {
   // The name of the feature.
   string email = 1;
+  string jwt = 2;
   // The point where the feature is detected.
 }
 
 message ListUsers {
+  string jwt = 1;
 }
 
 message UsersResponse {

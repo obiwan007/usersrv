@@ -12,6 +12,7 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	claims "github.com/obiwan007/usersrv/pkg/claims"
+	pb "github.com/obiwan007/usersrv/proto"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -101,6 +102,7 @@ var (
 	googleOauthConfig *oauth2.Config
 	// TODO: randomize it
 	oauthStateString = "pseudo-random"
+	UserSrvClient    pb.UserServiceClient
 )
 
 type loginUser struct {
@@ -125,6 +127,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
+
 	loginRes := &loginResponse{Token: token}
 	res, err := json.Marshal(loginRes)
 
@@ -179,6 +182,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
+	UserSrvClient.AddUser(r.Context(), &pb.User{Jwt: token, Name: content.Name, Email: content.Email})
 	// loginRes := &loginResponse{Token: token}
 	// res, err := json.Marshal(loginRes)
 
