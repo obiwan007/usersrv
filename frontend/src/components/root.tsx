@@ -40,8 +40,9 @@ import {
   useLocation,
   withRouter,
 } from "react-router-dom";
+import { AllTimerComponent, Timer as TimerEntry } from "../graphql";
 import security from "../lib/security";
-import timer from "../lib/timer";
+import timer, { Timer as TimerSrv } from "../lib/timer";
 import Clients from "./clients/clients";
 import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
@@ -166,16 +167,22 @@ function activeRoute(routeName: string, location: any) {
   return location.pathname.indexOf(routeName) > -1 ? true : false;
 }
 
+function showElapsed(t: any): string {
+  if (t) {
+    const time1 = new Date(t.timerStart!);
+    const time2 = new Date();
+    return TimerSrv.hms((time2.getTime() - time1.getTime()) / 1000);
+  }
+  return "Timer";
+}
 export function MainMenu(props: any) {
   const classes = useStyles();
   let location = useLocation();
   const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
   const isRunning = props.isRunning;
-  const timerText =
-    isRunning && !activeRoute("/timer", location)
-      ? timer.getTimer().hms()
-      : "Timer";
+
+  let currentTimer: TimerEntry | undefined = undefined;
   const drawer = (
     <div>
       {/* <div className={classes.toolbar} /> */}
@@ -186,20 +193,55 @@ export function MainMenu(props: any) {
       </div> */}
       <Divider />
       <List>
-        {[{ txt: timerText, link: "/timer" }].map((o, index) => (
-          <ListItem
-            selected={activeRoute(o.link, location)}
-            component={RouterLink}
-            to={o.link}
-            button
-            key={o.txt}
-          >
-            <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListItemIcon>
-            <ListItemText primary={o.txt} />
-          </ListItem>
-        ))}
+        <AllTimerComponent>
+          {({ data, loading, error }) => {
+            // Any errors? Say so!
+            currentTimer = undefined;
+            data?.allTimer?.forEach((d) => {
+              if (d) {
+                (d as any).projectId = d?.project?.id;
+                if (d.isRunning === true) {
+                  currentTimer = d;
+                }
+              }
+            });
+            const timerText =
+              isRunning && !activeRoute("/timer", location)
+                ? showElapsed(currentTimer)
+                : "Timer";
+            // console.log("currentTimer", currentTimer, data?.allTimer);
+            if (error) {
+              return (
+                <div>
+                  <h1>Error retrieving Timer list &mdash; {error.message}</h1>
+                  {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
+                </div>
+              );
+            }
+
+            // If the data is still loading, return with a basic
+            // message to alert the user
+
+            return (
+              <>
+                {[{ txt: timerText, link: "/timer" }].map((o, index) => (
+                  <ListItem
+                    selected={activeRoute(o.link, location)}
+                    component={RouterLink}
+                    to={o.link}
+                    button
+                    key={o.txt}
+                  >
+                    <ListItemIcon>
+                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    </ListItemIcon>
+                    <ListItemText primary={o.txt} />
+                  </ListItem>
+                ))}
+              </>
+            );
+          }}
+        </AllTimerComponent>
       </List>
       <Divider />
       <List>
