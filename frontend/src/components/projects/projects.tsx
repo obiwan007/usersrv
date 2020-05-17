@@ -196,9 +196,9 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                           options={{
                                             padding: "dense",
                                             minBodyHeight:
-                                              "calc(100vh - 360px)",
+                                              "calc(100vh - 306px)",
                                             maxBodyHeight:
-                                              "calc(100vh - 360px)",
+                                              "calc(100vh - 306px)",
                                           }}
                                           title="Projects"
                                           columns={columns}

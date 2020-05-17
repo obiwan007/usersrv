@@ -433,9 +433,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               padding: "dense",
                                               sorting: true,
                                               minBodyHeight:
-                                                "calc(100vh - 460px)",
+                                                "calc(100vh - 445px)",
                                               maxBodyHeight:
-                                                "calc(100vh - 460px)",
+                                                "calc(100vh - 445px)",
                                               pageSize: 20,
                                               pageSizeOptions: [10, 20, 100],
                                             }}

@@ -162,8 +162,8 @@ export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                     isLoading={loading}
                                     options={{
                                       padding: "dense",
-                                      minBodyHeight: "calc(100vh - 360px)",
-                                      maxBodyHeight: "calc(100vh - 360px)",
+                                      minBodyHeight: "calc(100vh - 306px)",
+                                      maxBodyHeight: "calc(100vh - 306px)",
                                     }}
                                     title="Clients"
                                     columns={this.columns}
