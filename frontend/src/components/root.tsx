@@ -132,7 +132,7 @@ export function ButtonAppBar(props: any) {
           </IconButton>
         )}
         <Typography variant="h6" className={classes.title}>
-          MyPlaner
+          My Time Tracker
         </Typography>
         {/* <Link
             component={RouterLink} to="/login"

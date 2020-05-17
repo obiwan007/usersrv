@@ -73,7 +73,6 @@ export class RunningClock extends React.PureComponent<IProps, IState> {
     this.componentWillUpdate();
   }
   componentWillReceiveProps(nextProps: IProps) {
-    console.log("UPDATE+++++++++++++++++", nextProps);
     if (nextProps.currentTimer) {
       if (!this.interval) {
         this.interval = setInterval(() => {

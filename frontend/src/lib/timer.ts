@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-import moment from "moment";
 let index = 0;
 export class TimeEntry {
   id: number = 0;
@@ -74,6 +72,7 @@ export class Timer {
     const tc = localStorage.getItem("timerCurrent");
     if (tc) {
       this.currentTimer = TimeEntry.fromRaw(JSON.parse(tc));
+      console.log("CURRENTTIMER LOADED", this.currentTimer);
     }
 
     const i = localStorage.getItem("timerIndex");
@@ -81,14 +80,10 @@ export class Timer {
     index = i ? +i : 0;
   }
   save() {
+    console.log("Save:", this.currentTimer);
     localStorage.setItem("timer", JSON.stringify(this.entries));
     localStorage.setItem("timerCurrent", JSON.stringify(this.currentTimer));
     localStorage.setItem("timerIndex", JSON.stringify(index));
-  }
-  startTimer() {
-    this.currentTimer.timerStart = new Date();
-    this.currentTimer.isRunning = true;
-    this.save();
   }
   discardTimer() {
     this.currentTimer.timerStart = new Date();
@@ -99,97 +94,62 @@ export class Timer {
   getTimer() {
     return this.currentTimer;
   }
-  endTimer() {
-    this.currentTimer.timerEnd = new Date();
-    this.currentTimer.isRunning = false;
-    this.currentTimer.elapsedSeconds = this.currentTimer.elapsed();
-    this.entries.push(this.currentTimer);
-    const lastProject = this.currentTimer.project;
-    this.currentTimer = new TimeEntry();
-    this.currentTimer.project = lastProject;
-    index = index + 1;
-    this.currentTimer.id = index;
-    this.save();
-  }
+
   elapsed(): number {
     return this.currentTimer.elapsed();
   }
-  del(p: TimeEntry, filter: string) {
-    let data = this.entries;
-    const entry = data.find((d) => d.id === p.id);
-
-    if (entry) {
-      console.log("Delete ", p);
-      const index = data.indexOf(entry);
-      data.splice(index, 1);
-    }
-    this.save();
-    return this.Entries(filter);
-  }
-
-  update(p: TimeEntry, filter: string) {
-    let data = this.entries;
-    const entry = data.find((d) => d.id === p.id);
-
-    if (entry) {
-      console.log("Delete ", p);
-      TimeEntry.fromRaw(p, entry);
-    }
-    this.save();
-    return this.Entries(filter);
-  }
-  Entries(filter = "0"): TimeEntry[] {
-    this.entries.sort(function (a, b) {
-      if (a.timerStart > b.timerStart) {
-        return -1;
-      }
-      if (b.timerStart > a.timerStart) {
-        return 1;
-      }
-      return 0;
-    });
-    console.log('"timefilter', filter);
-    switch (filter) {
-      case "0": // show all
-        return [...this.entries];
-      case "1": {
-        // Today
-        const cd = new Date().toDateString();
-        const entries = _.filter(this.entries, (e) => {
-          return e.timerStart.toDateString() === cd;
-        });
-        return entries;
-      }
-      case "2": {
-        // Yesterday
-        const cd = moment().add("day", -1).toDate().toDateString();
-        console.log(cd);
-        const entries = _.filter(this.entries, (e) => {
-          return e.timerStart.toDateString() === cd;
-        });
-        return entries;
-      }
-      case "7": {
-        // Start of Week
-        const cd = moment().startOf("week").toDate();
-        console.log(cd);
-        const entries = _.filter(this.entries, (e) => {
-          return e.timerStart.getTime() > cd.getTime();
-        });
-        return entries;
-      }
-      case "30": {
-        // Month
-        const cd = moment().startOf("month").toDate();
-        console.log(cd);
-        const entries = _.filter(this.entries, (e) => {
-          return e.timerStart.getTime() > cd.getTime();
-        });
-        return entries;
-      }
-    }
-    return [...this.entries];
-  }
+  // Entries(filter = "0"): TimeEntry[] {
+  //   this.entries.sort(function (a, b) {
+  //     if (a.timerStart > b.timerStart) {
+  //       return -1;
+  //     }
+  //     if (b.timerStart > a.timerStart) {
+  //       return 1;
+  //     }
+  //     return 0;
+  //   });
+  //   console.log('"timefilter', filter);
+  //   switch (filter) {
+  //     case "0": // show all
+  //       return [...this.entries];
+  //     case "1": {
+  //       // Today
+  //       const cd = new Date().toDateString();
+  //       const entries = _.filter(this.entries, (e) => {
+  //         return e.timerStart.toDateString() === cd;
+  //       });
+  //       return entries;
+  //     }
+  //     case "2": {
+  //       // Yesterday
+  //       const cd = moment().add("day", -1).toDate().toDateString();
+  //       console.log(cd);
+  //       const entries = _.filter(this.entries, (e) => {
+  //         return e.timerStart.toDateString() === cd;
+  //       });
+  //       return entries;
+  //     }
+  //     case "7": {
+  //       // Start of Week
+  //       const cd = moment().startOf("week").toDate();
+  //       console.log(cd);
+  //       const entries = _.filter(this.entries, (e) => {
+  //         return e.timerStart.getTime() > cd.getTime();
+  //       });
+  //       return entries;
+  //     }
+  //     case "30": {
+  //       // Month
+  //       const cd = moment().startOf("month").toDate();
+  //       console.log(cd);
+  //       const entries = _.filter(this.entries, (e) => {
+  //         return e.timerStart.getTime() > cd.getTime();
+  //       });
+  //       return entries;
+  //     }
+  //   }
+  //   return [...this.entries];
+  // }
 
   static hms(d: number | null | undefined): string {
     if (!d) {

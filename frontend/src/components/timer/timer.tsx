@@ -126,7 +126,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     this.setState({
       columns: this.getColumns(),
       description: timer.getTimer().description,
-      currentProject: "",
+      currentProject: timer.getTimer().project,
     });
     // this.interval = setInterval(() => {
     //   this.checkTimer();
@@ -135,12 +135,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   componentWillUnmount() {
     //clearInterval(this.interval!);
   }
-  handleDescriptionField = (event: any) => {
-    timer.currentTimer.description = event.target.value!;
-    timer.save();
-    this.setState({ description: event.target.value });
-    event.preventDefault();
-  };
 
   render() {
     const {
@@ -153,7 +147,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     const { classes } = this.props;
     const seconds = timer.elapsed();
     let currentTimer: TimerEntry | undefined = undefined;
-
+    console.log("Current Project", currentProject);
     const isRunning = false;
     return (
       <div>
@@ -191,11 +185,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         }
                                       }
                                     });
-                                    console.log(
-                                      "currentTimer",
-                                      currentTimer,
-                                      data?.allTimer
-                                    );
                                     if (error) {
                                       return (
                                         <div>
@@ -397,10 +386,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 //   }:  ${TimerSrv.hms(sum)}`
                                                 // }
                                                 onChange={(event) => {
-                                                  const list = timer.Entries(
-                                                    event.target
-                                                      .value! as string
-                                                  );
                                                   this.setState({
                                                     timefilter: event.target
                                                       .value! as string,
@@ -553,7 +538,13 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         render: (data: TimerEntry) => {
           return (
             <>
-              {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
+              {data.isRunning ? (
+                this.toTime(data.timerStart)
+              ) : (
+                <>
+                  {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
+                </>
+              )}
             </>
           );
         },
@@ -564,7 +555,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         width: "100px",
         editable: () => false,
         render: (data: TimerEntry) => {
-          return <>{TimerSrv.hms(data.elapsedSeconds)}</>;
+          return !data.isRunning ? (
+            <>{TimerSrv.hms(data.elapsedSeconds)}</>
+          ) : (
+            "Running"
+          );
         },
       },
     ];
@@ -591,6 +586,13 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     data.forEach((e) => e.id && (dict[+e.id] = e.name));
     return dict;
   }
+
+  handleDescriptionField = (event: any) => {
+    timer.currentTimer.description = event.target.value!;
+    timer.save();
+    this.setState({ description: event.target.value });
+    event.preventDefault();
+  };
   // showElapsed(t: TimerEntry | null | unknown): string {
   //   if (t) {
   //     const time1 = new Date(t.timerStart!);
@@ -612,14 +614,16 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     currentTimer?: TimerEntry
   ) {
     console.log("CurrentTimer:", currentTimer);
+
+    // New time will be created
     if (!currentTimer) {
       const newTimer = await createTimer({
         refetchQueries: [refetchAllTimerQuery()],
         fetchPolicy: "no-cache",
         variables: {
           d: {
-            description: "test", // newData.description,
-            project: "0", // newData.projectId,
+            description: timer.currentTimer.description, // newData.description,
+            project: timer.currentTimer.project, // newData.projectId,
           },
         },
       }).catch((ex) => {
