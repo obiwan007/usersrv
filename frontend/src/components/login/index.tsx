@@ -4,7 +4,7 @@
 // IMPORTS
 
 /* NPM */
-import { Button } from '@material-ui/core';
+import { Button, Container } from "@material-ui/core";
 import React from "react";
 /* Local */
 
@@ -21,7 +21,7 @@ interface IProps {
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 class Index extends React.PureComponent<IProps, IIndexState> {
   public state = {
-    dynamic: null
+    dynamic: null,
   };
 
   public componentDidMount = async () => {
@@ -36,15 +36,23 @@ class Index extends React.PureComponent<IProps, IIndexState> {
 
     return (
       <>
-        {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
-        <h1>Login</h1>
-        <Button variant="contained" color="primary" onClick={() => this.loginClick()}>Signin with Google</Button>
+        <Container maxWidth="md">
+          {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
+          <h1>Login</h1>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.loginClick()}
+          >
+            Signin with Google
+          </Button>
+        </Container>
       </>
     );
   }
 
   async loginClick() {
-    console.log('Redirect')
+    console.log("Redirect");
     window.location.href = window.location.origin + "/auth/login";
     // this.props.history.replace("/auth/login");
     // const ok = await Security.login("MyUsername@hotmail.com", "MyPassword");
