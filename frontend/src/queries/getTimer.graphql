@@ -1,5 +1,5 @@
-query AllTimer {
-  allTimer(filter: { dayrange: "1" }) {
+query AllTimer($d: AllTimerFilter!) {
+  allTimer(filter: $d) {
     description
     id
     timerStart

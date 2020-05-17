@@ -59,7 +59,6 @@ func (s *routeGuideServer) Del(ctx context.Context, entityID *pb.Id) (*pb.Projec
 }
 
 func (s *routeGuideServer) Get(ctx context.Context, entityID *pb.Id) (*pb.Project, error) {
-	fmt.Println("Get Project  with JWT", entityID.GetId(), entityID.GetJwt())
 	c, err := s.getClaims(entityID.GetJwt())
 	if err != nil {
 		return nil, err

@@ -173,7 +173,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                           <CreateTimerComponent>
                             {(createTimer, { data }) => {
                               return (
-                                <AllTimerComponent>
+                                <AllTimerComponent
+                                  variables={{ d: { dayrange: timefilter } }}
+                                >
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
                                     currentTimer = undefined;

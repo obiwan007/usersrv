@@ -182,12 +182,17 @@ func (t *FileStorage) Elapsed(timer *pb.Timer) float64 {
 	end, _ := time.Parse(time.RFC3339, timer.TimerEnd)
 	return end.Sub(start).Seconds()
 }
-func (t *FileStorage) GetAll(ctx context.Context, c *claims.MyCustomClaims) ([]*pb.Timer, error) {
+func (t *FileStorage) GetAll(ctx context.Context, dayRange int32, c *claims.MyCustomClaims) ([]*pb.Timer, error) {
 	// for _, u := range users {
 	// 	fmt.Println(u)
 	// }
+	if dayRange == -1 {
+		dayRange = 1000
+	}
+
+	dayRangeDate := time.Now().AddDate(0, 0, int(-dayRange))
 	existingTimer, err := t.Db.Timer.
-		Query().Where(timer.Userid(c.Subject)).All(ctx)
+		Query().Where(timer.And(timer.Userid(c.Subject), timer.TimerEndGTE(dayRangeDate))).All(ctx)
 
 	if err != nil {
 		return nil, err

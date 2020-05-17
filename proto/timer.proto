@@ -41,6 +41,8 @@ message Timer {
 
 message ListTimer {
   string jwt = 1;
+  int32 dayRange = 2;
+  string projectId = 3;
 }
 
 message TimerResponse {

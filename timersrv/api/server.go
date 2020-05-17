@@ -131,7 +131,7 @@ func (s *routeGuideServer) GetAll(ctx context.Context, l *pb.ListTimer) (*pb.Tim
 	// token, ok := t.(*jwt.Token)
 	// log.Println("Token", token.Valid, token)
 	// log.Println("Claims", token.Claims)
-	timers, err := s.Storage.GetAll(ctx, c)
+	timers, err := s.Storage.GetAll(ctx, l.DayRange, c)
 	u := &pb.TimerResponse{Timers: timers}
 
 	// for _, timer := range timers {

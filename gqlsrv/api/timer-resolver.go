@@ -3,19 +3,23 @@ package gql
 import (
 	"context"
 	"log"
+	"strconv"
 
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
 func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*TimerResolver, error) {
 	log.Println(*args.Filter.Dayrange)
-
+	dayRange, err := strconv.Atoi(*args.Filter.Dayrange)
+	if err != nil {
+		dayRange = -1
+	}
 	token, err := validateToken(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	query := &pb.ListTimer{Jwt: token.Raw}
+	query := &pb.ListTimer{Jwt: token.Raw, DayRange: int32(dayRange)}
 	result, err := r.timerSvc.GetAll(ctx, query)
 
 	if err != nil {

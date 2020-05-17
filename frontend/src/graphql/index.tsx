@@ -344,7 +344,9 @@ export type DeleteProjectMutation = (
   )> }
 );
 
-export type AllTimerQueryVariables = {};
+export type AllTimerQueryVariables = {
+  d: AllTimerFilter;
+};
 
 
 export type AllTimerQuery = (
@@ -744,8 +746,8 @@ export function withDeleteProject<TProps, TChildProps = {}, TDataName extends st
 export type DeleteProjectMutationResult = ApolloReactCommon.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
 export const AllTimerDocument = gql`
-    query AllTimer {
-  allTimer(filter: {dayrange: "1"}) {
+    query AllTimer($d: AllTimerFilter!) {
+  allTimer(filter: $d) {
     description
     id
     timerStart
@@ -761,7 +763,7 @@ export const AllTimerDocument = gql`
   }
 }
     `;
-export type AllTimerComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTimerQuery, AllTimerQueryVariables>, 'query'>;
+export type AllTimerComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTimerQuery, AllTimerQueryVariables>, 'query'> & ({ variables: AllTimerQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const AllTimerComponent = (props: AllTimerComponentProps) => (
       <ApolloReactComponents.Query<AllTimerQuery, AllTimerQueryVariables> query={AllTimerDocument} {...props} />
