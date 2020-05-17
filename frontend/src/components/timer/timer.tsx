@@ -174,7 +174,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                             {(createTimer, { data }) => {
                               return (
                                 <AllTimerComponent
-                                  variables={{ d: { dayrange: timefilter } }}
+                                  variables={{
+                                    d: {
+                                      dayrange: timefilter,
+                                    },
+                                  }}
                                 >
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
@@ -231,7 +235,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 }
                                                 margin="dense"
                                                 id="name"
-                                                label="What are your working on"
+                                                label="Work Topic"
                                                 type="text"
                                                 fullWidth
                                               />
@@ -620,7 +624,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     // New time will be created
     if (!currentTimer) {
       const newTimer = await createTimer({
-        refetchQueries: [refetchAllTimerQuery()],
+        refetchQueries: [
+          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+        ],
         fetchPolicy: "no-cache",
         variables: {
           d: {
@@ -634,7 +640,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       console.log("NewTimer", newTimer);
       if (newTimer) {
         startTimer({
-          refetchQueries: [refetchAllTimerQuery()],
+          refetchQueries: [
+            refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+          ],
           fetchPolicy: "no-cache",
           variables: {
             timerId: newTimer.data!.createTimer!.id!,
@@ -645,7 +653,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       }
     } else {
       stopTimer({
-        refetchQueries: [refetchAllTimerQuery()],
+        refetchQueries: [
+          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+        ],
         fetchPolicy: "no-cache",
         variables: {
           timerId: currentTimer.id!,
