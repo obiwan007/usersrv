@@ -21,6 +21,7 @@ const SECRET = "THEDAMNSECRET";
 http
   .createServer((req, res) => {
     req.on("data", (chunk) => {
+      console.log("Receved data");
       const signature = `sha1=${crypto
         .createHmac("sha1", SECRET)
         .update(chunk)
