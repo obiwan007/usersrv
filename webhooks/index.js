@@ -36,13 +36,14 @@ function deploy(res) {
     (err, stdout, stderr) => {
       if (err) {
         console.error(err);
-        return res.send(500);
+        // return res.send(500);
       }
-      console.log(stdout);
-      res.send(200);
+      console.log("Done");
+      // res.send(200);
     }
   );
 
-  cp.stdout = process.stdout;
-  cp.stderr = process.stderr;
+  cp.stdout.on("data", function (data) {
+    console.log(data);
+  });
 }
