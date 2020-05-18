@@ -11,6 +11,7 @@ import { MutationFunction } from "@apollo/react-common";
 import {
   Box,
   Button,
+  CircularProgress,
   createStyles,
   FormControl,
   IconButton,
@@ -88,6 +89,7 @@ interface IState {
   description: string;
   currentProject: string;
   timefilter: string;
+  isLoading: boolean;
 }
 interface IProps {
   history?: any;
@@ -119,6 +121,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       columns: [],
       timefilter: "1",
       sum: 0,
+      isLoading: false,
     };
   }
 
@@ -144,10 +147,13 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       timefilter,
       sum,
     } = this.state;
+
+    let isLoading = this.state.isLoading;
+
     const { classes } = this.props;
     const seconds = timer.elapsed();
     let currentTimer: TimerEntry | undefined = undefined;
-    console.log("Current Project", currentProject);
+
     const isRunning = false;
     return (
       <div>
@@ -191,6 +197,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         }
                                       }
                                     });
+                                    isLoading = isLoading || loading;
                                     if (error) {
                                       return (
                                         <div>
@@ -290,7 +297,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               </Select>
                                             </FormControl>
                                           </Box>
-
                                           <Box alignItems="center">
                                             <FormControl
                                               className={classes.topButtons}
@@ -305,6 +311,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                       ) => {
                                                         return (
                                                           <IconButton
+                                                            disabled={isLoading}
                                                             onClick={() =>
                                                               this.startStopTimer(
                                                                 createTimer,
@@ -317,22 +324,27 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                             color="secondary"
                                                             aria-label="menu"
                                                           >
-                                                            {!currentTimer && (
-                                                              <PlayArrow
-                                                                style={{
-                                                                  color:
-                                                                    green[500],
-                                                                }}
-                                                              />
+                                                            {isLoading && (
+                                                              <CircularProgress></CircularProgress>
                                                             )}
-                                                            {currentTimer && (
-                                                              <Stop
-                                                                style={{
-                                                                  color:
-                                                                    red[500],
-                                                                }}
-                                                              />
-                                                            )}
+                                                            {!isLoading &&
+                                                              !currentTimer && (
+                                                                <PlayArrow
+                                                                  style={{
+                                                                    color:
+                                                                      green[500],
+                                                                  }}
+                                                                />
+                                                              )}
+                                                            {!isLoading &&
+                                                              currentTimer && (
+                                                                <Stop
+                                                                  style={{
+                                                                    color:
+                                                                      red[500],
+                                                                  }}
+                                                                />
+                                                              )}
                                                           </IconButton>
                                                         );
                                                       }}
@@ -454,7 +466,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               onRowUpdate: (newData, oldData) =>
                                                 updateTimer({
                                                   refetchQueries: [
-                                                    refetchAllTimerQuery(),
+                                                    refetchAllTimerQuery({
+                                                      d: {
+                                                        dayrange: this.state
+                                                          .timefilter,
+                                                      },
+                                                    }),
                                                   ],
                                                   fetchPolicy: "no-cache",
                                                   variables: {
@@ -475,7 +492,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               onRowDelete: (oldData) =>
                                                 deleteTimer({
                                                   refetchQueries: [
-                                                    refetchAllTimerQuery(),
+                                                    refetchAllTimerQuery({
+                                                      d: {
+                                                        dayrange: this.state
+                                                          .timefilter,
+                                                      },
+                                                    }),
                                                   ],
                                                   fetchPolicy: "no-cache",
                                                   variables: {
@@ -619,51 +641,54 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     stopTimer: MutationFunction<StopTimerMutation, StopTimerMutationVariables>,
     currentTimer?: TimerEntry
   ) {
-    console.log("CurrentTimer:", currentTimer);
+    console.log("StartStop CurrentTimer:", currentTimer);
 
     // New time will be created
-    if (!currentTimer) {
-      const newTimer = await createTimer({
-        refetchQueries: [
-          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
-        ],
-        fetchPolicy: "no-cache",
-        variables: {
-          d: {
-            description: timer.currentTimer.description, // newData.description,
-            project: timer.currentTimer.project, // newData.projectId,
-          },
-        },
-      }).catch((ex) => {
-        console.log("Error in mutation", ex);
-      });
-      console.log("NewTimer", newTimer);
-      if (newTimer) {
-        startTimer({
+    this.setState({ isLoading: true }, async () => {
+      if (!currentTimer) {
+        const newTimer = await createTimer({
           refetchQueries: [
             refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
           ],
           fetchPolicy: "no-cache",
           variables: {
-            timerId: newTimer.data!.createTimer!.id!,
+            d: {
+              description: timer.currentTimer.description, // newData.description,
+              project: timer.currentTimer.project, // newData.projectId,
+            },
+          },
+        }).catch((ex) => {
+          console.log("Error in mutation", ex);
+        });
+        console.log("NewTimer", newTimer);
+        if (newTimer) {
+          startTimer({
+            refetchQueries: [
+              refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+            ],
+            fetchPolicy: "no-cache",
+            variables: {
+              timerId: newTimer.data!.createTimer!.id!,
+            },
+          }).catch((ex) => {
+            console.log("Error in mutation", ex);
+          });
+        }
+      } else {
+        await stopTimer({
+          refetchQueries: [
+            refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+          ],
+          fetchPolicy: "no-cache",
+          variables: {
+            timerId: currentTimer.id!,
           },
         }).catch((ex) => {
           console.log("Error in mutation", ex);
         });
       }
-    } else {
-      stopTimer({
-        refetchQueries: [
-          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
-        ],
-        fetchPolicy: "no-cache",
-        variables: {
-          timerId: currentTimer.id!,
-        },
-      }).catch((ex) => {
-        console.log("Error in mutation", ex);
-      });
-    }
+      this.setState({ isLoading: false });
+    });
 
     // this.state.isRunning ? timer.endTimer() : timer.startTimer();
     // this.setState({

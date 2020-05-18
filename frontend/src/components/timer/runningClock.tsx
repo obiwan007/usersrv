@@ -113,7 +113,6 @@ export class RunningClock extends React.PureComponent<IProps, IState> {
     return "00:00:00";
   }
   checkTimer = () => {
-    console.log("Check");
     this.setState({
       elapsed: new Date().getTime(),
     });
