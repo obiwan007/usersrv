@@ -4,7 +4,7 @@ var childProcess = require("child_process");
 var githubUsername = "obiwan007";
 
 app.get("/webhooks/github", function (req, res) {
-  console.log("Received");
+  console.log("Received GET");
 });
 
 app.post("/webhooks/github", function (req, res) {
