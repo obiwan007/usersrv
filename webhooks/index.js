@@ -1,7 +1,6 @@
 import { exec } from "child_process";
 import crypto from "crypto";
 import http from "http";
-var githubUsername = "obiwan007";
 
 const SECRET = "THEDAMNSECRET";
 
