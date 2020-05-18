@@ -5,3 +5,7 @@ frontend.bak
 ordersdb*
 data
 l
+webhooks
+eventstore
+ordersrv
+store
