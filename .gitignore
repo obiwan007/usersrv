@@ -12,3 +12,4 @@ out.tmp
 timersrv/cli/timersrv
 timersrv/cli/__debug_bin
 **/config.conf
+node_modules
