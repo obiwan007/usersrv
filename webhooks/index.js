@@ -8,6 +8,7 @@ app.get("/webhooks/github", function (req, res) {
 });
 
 app.post("/webhooks/github", function (req, res) {
+  console.log("Request", req);
   var sender = req.body.sender;
   var branch = req.body.ref;
 
