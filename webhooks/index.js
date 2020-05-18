@@ -32,7 +32,7 @@ http
 function deploy(res) {
   console.log("Receved trigger");
   const cp = exec(
-    "cd /home/markus/dev/usersrv && git pull && make docker && make kreapply",
+    "cd /home/markus/dev/usersrv && git pull && make docker && make kapply && make kredeploy",
     (err, stdout, stderr) => {
       if (err) {
         console.error(err);
@@ -42,8 +42,6 @@ function deploy(res) {
       // res.send(200);
     }
   );
-
-  cp.stdout.on("data", function (data) {
-    console.log(data);
-  });
+  cp.stdout.pipe(process.stdout);
+  cp.stderr.pipe(process.stderr);
 }

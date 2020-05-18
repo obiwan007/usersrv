@@ -179,11 +179,11 @@ kgql:
 	kubectl rollout restart deployment api-deployment
 
 kredeploy:
-	kubectl rollout restart deployment api-deployment
 	kubectl rollout restart deployment user-deployment
 	kubectl rollout restart deployment timer-deployment
 	kubectl rollout restart deployment project-deployment
 	kubectl rollout restart deployment client-deployment
+	kubectl rollout restart deployment api-deployment
 	kubectl rollout restart deployment frontend-deployment
 
 kdashboard:
