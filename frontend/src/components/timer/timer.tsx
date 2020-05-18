@@ -647,9 +647,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     this.setState({ isLoading: true }, async () => {
       if (!currentTimer) {
         const newTimer = await createTimer({
-          refetchQueries: [
-            refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
-          ],
+          // refetchQueries: [
+          //   refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+          // ],
           fetchPolicy: "no-cache",
           variables: {
             d: {
