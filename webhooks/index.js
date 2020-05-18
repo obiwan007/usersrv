@@ -1,4 +1,4 @@
-import childProcess from "child_process";
+import { exec } from "child_process";
 import crypto from "crypto";
 import http from "http";
 var githubUsername = "obiwan007";
@@ -32,14 +32,18 @@ http
 
 function deploy(res) {
   console.log("Receved trigger");
-  childProcess.exec(
+  const cp = exec(
     "cd /home/markus/dev/usersrv && git pull && make docker && make kreapply",
     function (err, stdout, stderr) {
       if (err) {
         console.error(err);
         return res.send(500);
       }
+      console.log(stdout);
       res.send(200);
     }
   );
+
+  cp.stdout = process.stdout;
+  cp.stderr = process.stderr;
 }
