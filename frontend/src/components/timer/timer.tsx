@@ -662,7 +662,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         });
         console.log("NewTimer", newTimer);
         if (newTimer) {
-          startTimer({
+          await startTimer({
             refetchQueries: [
               refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
             ],
