@@ -4,19 +4,6 @@ import http from "http";
 var githubUsername = "obiwan007";
 
 const SECRET = "THEDAMNSECRET";
-// app.get("/webhooks/github", function (req, res) {
-//   console.log("Received GET ");
-// });
-
-// app.post("/webhooks/github", function (req, res) {
-//   console.log("Request", req);
-//   var sender = req.body.sender;
-//   var branch = req.body.ref;
-
-//   if (branch.indexOf("master") > -1 && sender.login === githubUsername) {
-//     deploy(res);
-//   }
-// });
 
 http
   .createServer((req, res) => {
