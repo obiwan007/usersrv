@@ -33,7 +33,7 @@ function deploy(res) {
   console.log("Receved trigger");
   const cp = exec(
     "cd /home/markus/dev/usersrv && git pull && make docker && make kreapply",
-    function (err, stdout, stderr) {
+    (err, stdout, stderr) => {
       if (err) {
         console.error(err);
         return res.send(500);
