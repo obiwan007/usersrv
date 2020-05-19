@@ -129,7 +129,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                   allProjects?.allProjects as Project[]
                 );
               }
-            }            
+            }
             return (
               <UpdateTimerComponent>
                 {(updateTimer, { data }) => {
@@ -150,6 +150,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
                                     currentTimer = undefined;
+                                    console.log("IsLoading1", isLoading, loading);
+                                    isLoading = isLoading || loading;
+                                    console.log("IsLoading2", isLoading, loading);
+
                                     data?.allTimer?.forEach((d) => {
                                       if (d) {
                                         (d as any).projectId = d?.project?.id;
@@ -158,8 +162,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         }
                                       }
                                     });
-                                    isLoading = isLoading || loading;
-                                    console.log("IsLoading", isLoading);
+                                    
                                     if (error) {
                                       return (
                                         <div>
@@ -223,8 +226,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 label="Project"
                                                 value={
                                                   allProjects &&
-                                                  (allProjects.allProjects as any[])
-                                                    .length > 0
+                                                    (allProjects.allProjects as any[])
+                                                      .length > 0
                                                     ? currentProject
                                                     : ""
                                                 }
@@ -242,10 +245,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                         .project,
                                                   });
                                                 }}
-                                                // inputProps={{
-                                                //   name: "age",
-                                                //   id: "age-native-simple",
-                                                // }}
+                                              // inputProps={{
+                                              //   name: "age",
+                                              //   id: "age-native-simple",
+                                              // }}
                                               >
                                                 <MenuItem
                                                   aria-label="None"
@@ -377,10 +380,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                       .value! as string,
                                                   });
                                                 }}
-                                                // inputProps={{
-                                                //   name: "age",
-                                                //   id: "age-native-simple",
-                                                // }}
+                                              // inputProps={{
+                                              //   name: "age",
+                                              //   id: "age-native-simple",
+                                              // }}
                                               >
                                                 {this.filterSelect.map(
                                                   (f: any) => (
@@ -537,10 +540,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               {data.isRunning ? (
                 this.toTime(data.timerStart)
               ) : (
-                <>
-                  {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
-                </>
-              )}
+                  <>
+                    {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
+                  </>
+                )}
             </>
           );
         },
@@ -554,8 +557,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           return !data.isRunning ? (
             <>{TimerSrv.hms(data.elapsedSeconds)}</>
           ) : (
-            "Running"
-          );
+              "Running"
+            );
         },
       },
     ];
