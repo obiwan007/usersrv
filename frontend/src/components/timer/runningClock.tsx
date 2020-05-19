@@ -7,13 +7,7 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import {
-  createStyles,
-  Theme,
-  Typography,
-  WithStyles,
-  withStyles,
-} from "@material-ui/core";
+import { createStyles, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { Timer as TimerSrv } from "../../lib/timer";
@@ -70,23 +64,39 @@ export class RunningClock extends React.PureComponent<IProps, IState> {
   }
 
   componentDidMount() {
-    this.componentWillUpdate();
   }
-  componentWillReceiveProps(nextProps: IProps) {
-    if (nextProps.currentTimer) {
-      if (!this.interval) {
-        this.interval = setInterval(() => {
-          this.checkTimer();
-        }, 500);
-      }
-    } else {
-      if (this.interval) {
-        clearInterval(this.interval!);
-        this.interval = null;
+  // componentWillReceiveProps(nextProps: IProps) {
+  //   if (nextProps.currentTimer) {
+  //     if (!this.interval) {
+  //       this.interval = setInterval(() => {
+  //         this.checkTimer();
+  //       }, 500);
+  //     }
+  //   } else {
+  //     if (this.interval) {
+  //       clearInterval(this.interval!);
+  //       this.interval = null;
+  //     }
+  //   }
+  // }
+  componentDidUpdate(nextProps: IProps) {
+    // console.log('Didl Update', nextProps.currentTimer, this.props.currentTimer );
+    if (nextProps.currentTimer !== this.props.currentTimer) {
+      // console.log('Change detected', nextProps.currentTimer)
+      if (this.props.currentTimer) {
+        if (!this.interval) {
+          this.interval = setInterval(() => {
+            this.checkTimer();
+          }, 500);
+        }
+      } else {
+        if (this.interval) {
+          clearInterval(this.interval!);
+          this.interval = null;
+        }
       }
     }
   }
-  componentWillUpdate() {}
   componentWillUnmount() {
     if (this.interval) {
       clearInterval(this.interval!);

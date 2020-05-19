@@ -108,18 +108,11 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   render() {
-    const {
-      description,
-      currentProject,
-      columns,
-      timefilter,
-      sum,
-    } = this.state;
+    const { description, currentProject, columns, timefilter } = this.state;
 
     let isLoading = this.state.isLoading;
 
     const { classes } = this.props;
-    const seconds = timer.elapsed();
     let currentTimer: TimerEntry | undefined = undefined;
 
     const isRunning = false;
@@ -136,7 +129,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                   allProjects?.allProjects as Project[]
                 );
               }
-            }
+            }            
             return (
               <UpdateTimerComponent>
                 {(updateTimer, { data }) => {
@@ -228,7 +221,13 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               <Select
                                                 className={classes.selectEmpty}
                                                 label="Project"
-                                                value={currentProject}
+                                                value={
+                                                  allProjects &&
+                                                  (allProjects.allProjects as any[])
+                                                    .length > 0
+                                                    ? currentProject
+                                                    : ""
+                                                }
                                                 onChange={(event) => {
                                                   console.log(
                                                     "Projectselection:",
