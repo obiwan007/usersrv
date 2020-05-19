@@ -173,7 +173,7 @@ export function MainMenu(props: any) {
       
       <Divider />
       <List>
-        <AllTimerComponent variables={{ d: { dayrange: "50" } }}>
+        <AllTimerComponent variables={{ d: { dayrange: "0" } }}>
           {({ data, loading, error }) => {
             // Any errors? Say so!
             currentTimer = undefined;

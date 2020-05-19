@@ -636,6 +636,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           await startTimer({
             refetchQueries: [
               refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+              refetchAllTimerQuery({ d: { dayrange: "0" } }),
             ],
             fetchPolicy: "no-cache",
             variables: {
@@ -649,6 +650,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         await stopTimer({
           refetchQueries: [
             refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+            refetchAllTimerQuery({ d: { dayrange: "0" } }),
           ],
           fetchPolicy: "no-cache",
           variables: {
