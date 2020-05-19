@@ -185,6 +185,7 @@ export function MainMenu(props: any) {
                 }
               }
             });
+            console.log("Currenct", currentTimer && currentTimer!.isRunning, currentTimer )
             const timerText =
               currentTimer && currentTimer!.isRunning && !activeRoute("/timer", location)
                 ? showElapsed(currentTimer)
