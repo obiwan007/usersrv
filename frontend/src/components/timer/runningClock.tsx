@@ -64,6 +64,18 @@ export class RunningClock extends React.PureComponent<IProps, IState> {
   }
 
   componentDidMount() {
+    if (this.props.currentTimer) {
+      if (!this.interval) {
+        this.interval = setInterval(() => {
+          this.checkTimer();
+        }, 500);
+      }
+    } else {
+      if (this.interval) {
+        clearInterval(this.interval!);
+        this.interval = null;
+      }
+    }
   }
   // componentWillReceiveProps(nextProps: IProps) {
   //   if (nextProps.currentTimer) {
@@ -80,9 +92,9 @@ export class RunningClock extends React.PureComponent<IProps, IState> {
   //   }
   // }
   componentDidUpdate(nextProps: IProps) {
-    // console.log('Didl Update', nextProps.currentTimer, this.props.currentTimer );
+    console.log('Didl Update', nextProps.currentTimer, this.props.currentTimer );
     if (nextProps.currentTimer !== this.props.currentTimer) {
-      // console.log('Change detected', nextProps.currentTimer)
+      console.log('Change detected', nextProps.currentTimer)
       if (this.props.currentTimer) {
         if (!this.interval) {
           this.interval = setInterval(() => {
