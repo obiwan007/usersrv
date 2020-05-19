@@ -183,9 +183,6 @@ func (t *FileStorage) Elapsed(timer *pb.Timer) float64 {
 	return end.Sub(start).Seconds()
 }
 func (t *FileStorage) GetAll(ctx context.Context, dayRange int32, c *claims.MyCustomClaims) ([]*pb.Timer, error) {
-	// for _, u := range users {
-	// 	fmt.Println(u)
-	// }
 	log.Println("Dayrange", dayRange)
 	if dayRange == -1 {
 		dayRange = 1000
