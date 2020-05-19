@@ -170,12 +170,7 @@ export function MainMenu(props: any) {
   let currentTimer: TimerEntry | undefined = undefined;
   const drawer = (
     <div>
-      {/* <div className={classes.toolbar} /> */}
-      {/* <div className={classes.drawerHeader}>
-        <IconButton onClick={handleDrawerToggle}>
-          {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
-      </div> */}
+      
       <Divider />
       <List>
         <AllTimerComponent variables={{ d: { dayrange: "50" } }}>
