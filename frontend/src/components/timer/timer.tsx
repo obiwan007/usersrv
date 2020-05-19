@@ -8,45 +8,13 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  createStyles,
-  FormControl,
-  IconButton,
-  InputLabel,
-  List,
-  MenuItem,
-  Select,
-  TextField,
-  Theme,
-  WithStyles,
-  withStyles,
-} from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, FormControl, IconButton, InputLabel, List, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
 import { Delete, PlayArrow, Stop } from "@material-ui/icons";
 import MaterialTable from "material-table";
 import React from "react";
 import { withRouter } from "react-router-dom";
-import {
-  AllProjectsComponent,
-  AllTimerComponent,
-  CreateTimerComponent,
-  CreateTimerMutation,
-  CreateTimerMutationVariables,
-  DeleteTimerComponent,
-  Project,
-  refetchAllTimerQuery,
-  StartTimerComponent,
-  StartTimerMutation,
-  StartTimerMutationVariables,
-  StopTimerComponent,
-  StopTimerMutation,
-  StopTimerMutationVariables,
-  Timer as TimerEntry,
-  UpdateTimerComponent,
-} from "../../graphql";
+import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, UpdateTimerComponent } from "../../graphql";
 import project from "../../lib/project";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
 import { RunningClock } from "./runningClock";
@@ -198,6 +166,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                       }
                                     });
                                     isLoading = isLoading || loading;
+                                    console.log("IsLoading", isLoading);
                                     if (error) {
                                       return (
                                         <div>

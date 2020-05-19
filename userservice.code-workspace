@@ -34,7 +34,6 @@
   "settings": {
     "go.buildOnSave": "off",
     "go.vetOnSave": "off",
-    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
     },
