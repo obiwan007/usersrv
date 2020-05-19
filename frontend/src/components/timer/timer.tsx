@@ -110,7 +110,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   render() {
     const { description, currentProject, columns, timefilter } = this.state;
 
-    let isLoading = this.state.isLoading;
+    let isLoading = false;
 
     const { classes } = this.props;
     let currentTimer: TimerEntry | undefined = undefined;
@@ -150,8 +150,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
                                     currentTimer = undefined;
-                                    console.log("IsLoading1", isLoading, loading);
-                                    isLoading = isLoading || loading;
+                                    console.log("IsLoading1", this.state.isLoading, loading);
+                                    isLoading = this.state.isLoading || loading;
                                     console.log("IsLoading2", isLoading, loading);
 
                                     data?.allTimer?.forEach((d) => {
