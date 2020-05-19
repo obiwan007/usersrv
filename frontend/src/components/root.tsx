@@ -23,7 +23,7 @@ import React from "react";
 import { Link as RouterLink, Redirect, Route, Switch, useLocation, withRouter } from "react-router-dom";
 import { AllTimerComponent, Timer as TimerEntry } from "../graphql";
 import security from "../lib/security";
-import timer, { Timer as TimerSrv } from "../lib/timer";
+import { Timer as TimerSrv } from "../lib/timer";
 import Clients from "./clients/clients";
 import ScrollTop from "./helpers/scrollTop";
 import Home from "./home";
@@ -341,12 +341,11 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     });
     setInterval(() => {
       this.checkTimer();
-    }, 500);
+    }, 1000);
   };
   checkTimer = () => {
     this.setState({
-      isRunning: timer.getTimer().isRunning,
-      elapsed: timer.getTimer().elapsed(),
+      elapsed: this.state.elapsed+1
     });
   };
   public render() {
