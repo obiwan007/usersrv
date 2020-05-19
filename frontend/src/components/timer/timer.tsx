@@ -150,9 +150,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                   {({ data, loading, error }) => {
                                     // Any errors? Say so!
                                     currentTimer = undefined;
-                                    console.log("IsLoading1", this.state.isLoading, loading);
+                                    // console.log("IsLoading1", this.state.isLoading, loading);
                                     isLoading = this.state.isLoading || loading;
-                                    console.log("IsLoading2", isLoading, loading);
+                                    // console.log("IsLoading2", isLoading, loading);
 
                                     data?.allTimer?.forEach((d) => {
                                       if (d) {

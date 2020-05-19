@@ -10,19 +10,7 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
-import {
-  AppBar,
-  Button,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  makeStyles,
-  Toolbar,
-  useTheme,
-} from "@material-ui/core";
+import { AppBar, Button, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, useTheme } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
@@ -32,14 +20,7 @@ import MailIcon from "@material-ui/icons/Mail";
 import MenuIcon from "@material-ui/icons/Menu";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import React from "react";
-import {
-  Link as RouterLink,
-  Redirect,
-  Route,
-  Switch,
-  useLocation,
-  withRouter,
-} from "react-router-dom";
+import { Link as RouterLink, Redirect, Route, Switch, useLocation, withRouter } from "react-router-dom";
 import { AllTimerComponent, Timer as TimerEntry } from "../graphql";
 import security from "../lib/security";
 import timer, { Timer as TimerSrv } from "../lib/timer";
@@ -185,8 +166,7 @@ export function MainMenu(props: any) {
   let location = useLocation();
   const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
-  const isRunning = props.isRunning;
-
+  
   let currentTimer: TimerEntry | undefined = undefined;
   const drawer = (
     <div>
@@ -211,7 +191,7 @@ export function MainMenu(props: any) {
               }
             });
             const timerText =
-              isRunning && !activeRoute("/timer", location)
+              currentTimer && currentTimer!.isRunning && !activeRoute("/timer", location)
                 ? showElapsed(currentTimer)
                 : "Timer";
             // console.log("currentTimer", currentTimer, data?.allTimer);
