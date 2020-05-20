@@ -40,10 +40,12 @@ const styles = ({ palette, spacing }: Theme) =>
     fabButton: {
       position: 'absolute',
       zIndex: 10,
-      bottom: 30,
-      left: 10,
-      right: 10,
+      // bottom: 30,
+      // left: 10,
+      // right: 10,
       margin: '0 auto',
+      bottom: spacing(2),
+      right: spacing(2),
     },
     formControl: {
       margin: spacing(1),

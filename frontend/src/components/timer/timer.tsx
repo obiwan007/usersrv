@@ -8,21 +8,24 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
-import { Box, Button, CircularProgress, createStyles, FormControl, IconButton, InputLabel, List, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
-import { Delete, PlayArrow, Stop } from "@material-ui/icons";
-import MaterialTable from "material-table";
+import ListItem from "@material-ui/core/ListItem";
+import { Delete, PlayArrow, Stop, Timer as TimerIcon } from "@material-ui/icons";
 import React from "react";
 import { withRouter } from "react-router-dom";
-import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, UpdateTimerComponent } from "../../graphql";
-import project from "../../lib/project";
+import Autosizer from "react-virtualized-auto-sizer";
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, TimerInput, UpdateTimerComponent, UpdateTimerMutation, UpdateTimerMutationVariables } from "../../graphql";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
 import { RunningClock } from "./runningClock";
+
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
+      
       display: "flex",
       width: "300px",
       flexDirection: "column",
@@ -37,6 +40,9 @@ const styles = ({ palette, spacing }: Theme) =>
       paddingLeft: spacing(1),
       minWidth: 120,
       width: "100%",
+    },
+    list: {
+      listStyle: "none",      
     },
     topButtons: {
       marginLeft: spacing(2),
@@ -53,11 +59,13 @@ interface IState {
   isRunning: boolean;
   elapsed: number;
   sum: number;
-  columns: any[];
   description: string;
   currentProject: string;
+  currentTimer: TimerEntry;
   timefilter: string;
   isLoading: boolean;
+  addOpen: boolean;
+  editOpen: boolean;
 }
 interface IProps {
   history?: any;
@@ -81,21 +89,22 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     super(props, state);
     this.state = {
       currentProject: timer.getTimer().project,
+      currentTimer: {},
       description: "",
       isRunning: timer.getTimer().isRunning,
       startTime: timer.getTimer().timerStart,
       endTime: timer.getTimer().timerEnd,
       elapsed: timer.getTimer().elapsed(),
-      columns: [],
       timefilter: "1",
       sum: 0,
       isLoading: false,
+      addOpen: false,
+      editOpen: false,
     };
   }
 
   componentDidMount() {
     this.setState({
-      columns: this.getColumns(),
       description: timer.getTimer().description,
       currentProject: timer.getTimer().project,
     });
@@ -108,7 +117,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   render() {
-    const { description, currentProject, columns, timefilter } = this.state;
+    const { description, currentProject, timefilter } = this.state;
 
     let isLoading = false;
 
@@ -116,20 +125,20 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     let currentTimer: TimerEntry | undefined = undefined;
 
     const isRunning = false;
+    let allTimer: any = [];
     return (
       <div>
-        <h3>Timer</h3>
         <AllProjectsComponent>
           {({ data, loading, error }) => {
             const allProjects = data;
-            if (columns) {
-              const f = columns.find((c) => c.title === "Project");
-              if (f) {
-                f.lookup = this.projectsDict(
-                  allProjects?.allProjects as Project[]
-                );
-              }
-            }
+            // if (columns) {
+            //   const f = columns.find((c) => c.title === "Project");
+            //   if (f) {
+            //     f.lookup = this.projectsDict(
+            //       allProjects?.allProjects as Project[]
+            //     );
+            //   }
+            // }
             return (
               <UpdateTimerComponent>
                 {(updateTimer, { data }) => {
@@ -153,7 +162,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                     // console.log("IsLoading1", this.state.isLoading, loading);
                                     isLoading = this.state.isLoading || loading;
                                     // console.log("IsLoading2", isLoading, loading);
-
+                                    allTimer = data;
+                                    const count = allTimer?.allTimer?.length;
                                     data?.allTimer?.forEach((d) => {
                                       if (d) {
                                         (d as any).projectId = d?.project?.id;
@@ -407,84 +417,33 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             </Typography>
           </Box> */}
                                         </Box>
-                                        <List
-                                          component="nav"
-                                          aria-label="main mailbox folders"
+                                        <div
+                                          className={classes.list}
+                                          style={{
+                                            height: "calc(100vh - 249px)",
+                                            minHeight: "calc(100vh - 249px)",
+                                          }}
                                         >
-                                          <MaterialTable
-                                            isLoading={loading}
-                                            options={{
-                                              actionsColumnIndex: -1,
-                                              padding: "dense",
-                                              sorting: true,
-                                              minBodyHeight:
-                                                "calc(100vh - 445px)",
-                                              maxBodyHeight:
-                                                "calc(100vh - 445px)",
-                                              pageSize: 20,
-                                              pageSizeOptions: [10, 20, 100],
-                                            }}
-                                            title="Timetable"
-                                            columns={columns}
-                                            data={
-                                              data?.allTimer?.map(
-                                                (u) => u
-                                              ) as any[]
+                                          <Autosizer>
+                                            {({ height, width }) =>
+                                              (<FixedSizeList
+                                                height={height}
+                                                width={width}
+                                                itemCount={count}
+                                                itemSize={80}
+                                                itemData={{allTimer, deleteTimer}}
+                                              // style={{
+                                              //   height: "calc(100vh - 445px)",
+                                              //   minHeight: "calc(100vh - 445px)",
+                                              // }}
+                                              >
+
+                                                {this.renderRow}
+                                              </FixedSizeList>)
                                             }
-                                            editable={{
-                                              isEditable: (rowData) => {
-                                                return true;
-                                              }, // only name(a) rows would be editable
-                                              isDeletable: (rowData) => true, // only name(a) rows would be deletable
-                                              onRowUpdate: (newData, oldData) =>
-                                                updateTimer({
-                                                  refetchQueries: [
-                                                    refetchAllTimerQuery({
-                                                      d: {
-                                                        dayrange: this.state
-                                                          .timefilter,
-                                                      },
-                                                    }),
-                                                  ],
-                                                  fetchPolicy: "no-cache",
-                                                  variables: {
-                                                    d: {
-                                                      id: newData.id,
-                                                      description:
-                                                        newData.description,
-                                                      project:
-                                                        newData.projectId,
-                                                    },
-                                                  },
-                                                }).catch((ex) => {
-                                                  console.log(
-                                                    "Error in mutation",
-                                                    ex
-                                                  );
-                                                }),
-                                              onRowDelete: (oldData) =>
-                                                deleteTimer({
-                                                  refetchQueries: [
-                                                    refetchAllTimerQuery({
-                                                      d: {
-                                                        dayrange: this.state
-                                                          .timefilter,
-                                                      },
-                                                    }),
-                                                  ],
-                                                  fetchPolicy: "no-cache",
-                                                  variables: {
-                                                    timerId: oldData.id,
-                                                  },
-                                                }).catch((ex) => {
-                                                  console.log(
-                                                    "Error in mutation",
-                                                    ex
-                                                  );
-                                                }),
-                                            }}
-                                          />
-                                        </List>
+
+                                          </Autosizer>
+                                        </div>
                                       </>
                                     );
                                   }}
@@ -501,71 +460,323 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             );
           }}
         </AllProjectsComponent>
+
+        {this.renderDialog()}
+      </div >
+    );
+  }
+  renderRow = (props: ListChildComponentProps) => {
+    const { index, style } = props;
+    console.log('PROPS', props.data.allTimer.allTimer)
+    if (!props.data.allTimer){
+      return <></>
+    }
+    const entry = props.data.allTimer.allTimer[index];
+    return (
+      <div style={style} key={index}>
+        <ListItem button onClick={() => this.setState({ currentTimer: Object.assign({}, entry), editOpen: true })}>
+          <ListItemIcon>
+            <TimerIcon />
+          </ListItemIcon>
+          <ListItemText style={{ width: '50%' }} primary={entry.description} secondary={entry.project?.name} ></ListItemText>
+          <ListItemText style={{ width: '30%' }} primary={this.toLocaleDate(entry.timerStart)} secondary={<>
+            {entry.isRunning ? (
+              <>
+                {this.toTime(entry.timerStart)} - running
+              </>
+            ) : (
+                <>
+                  {this.toTime(entry.timerStart)} - {this.toTime(entry.timerEnd)}
+                </>
+              )}
+          </>} >
+          </ListItemText>
+          <ListItemText style={{ width: '20%' }} primary={!entry.isRunning ? (
+            <>{TimerSrv.hms(entry.elapsedSeconds)}</>
+          ) : (
+              "Running"
+            )}></ListItemText>
+          <ListItemSecondaryAction>
+            <IconButton onClick={() => this.deleteTimer(entry, props.data.deleteTimer)} edge="end" aria-label="delete">
+            <Delete />
+          </IconButton>
+            {/* <IconButton edge="end" aria-label="delete">
+              <Delete />
+            </IconButton> */}
+          </ListItemSecondaryAction>
+        </ListItem>
       </div>
     );
   }
-  getColumns = () => {
-    const columns = [
-      { width: "40%", title: "Description", field: "description" },
-      // {
-      //   title: "Client",
-      //   field: "client",
-      //   editable: () => true,
-      //   lookup: client.EntriesDict(),
-      // },
-      {
-        title: "Project",
-        field: "projectId",
-        width: "350px",
-        editable: () => true,
-        lookup: project.EntriesDict(),
-      },
-      {
-        title: "Date",
-        field: "tStart",
-        width: "150px",
-        defaultSort: "desc",
-        editable: () => false,
-        render: (data: TimerEntry) => {
-          return <>{this.toLocaleDate(data.timerStart)}</>;
-        },
-      },
-      {
-        title: "Time",
-        field: "tStart",
-        width: "280px",
-        editable: () => false,
-        defaultSort: "desc",
-        render: (data: TimerEntry) => {
+  renderDialog = () => {
+    const { addOpen, editOpen, currentTimer } = this.state;
+    const { classes } = this.props;
+    return (
+      <AllProjectsComponent>
+        {({ data, loading, error }) => {
+          const allProjects = data;
           return (
-            <>
-              {data.isRunning ? (
-                this.toTime(data.timerStart)
-              ) : (
-                  <>
-                    {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
-                  </>
-                )}
-            </>
-          );
+            <UpdateTimerComponent>
+              {(updateTimer, { data }) => {
+                return (
+                  <CreateTimerComponent>
+                    {(createTimer, { data }) => {
+                      return (
+
+                        <Dialog
+                          open={addOpen || editOpen}
+                          onClose={() =>
+                            this.setState({ addOpen: false, editOpen: false })
+                          }
+                          aria-labelledby="simple-modal-title"
+                          aria-describedby="simple-modal-description"
+                        >
+                          <DialogTitle id="simple-dialog-title">
+                            {editOpen ? "Edit Timer Entry" : "Add new Timer Entry"}
+                          </DialogTitle>
+                          <DialogContent>
+                            {/* <DialogContentText>
+                          To subscribe to this website, please enter
+                          your email address here. We will send
+                          updates occasionally.
+                    </DialogContentText> */}
+                            <form noValidate autoComplete="off">
+                              {/* <FormControl className={classes.formControl}>
+                                <TextField
+                                  required
+                                  autoFocus
+                                  defaultValue={currentTimer.name}
+                                  onChange={(data) => {
+                                    currentTimer.name = data.target.value!;
+                                    console.log(currentTimer);
+                                    this.setState({
+                                      currentTimer: currentTimer,
+                                    });
+                                  }}
+                                  margin="dense"
+                                  id="name"
+                                  label="Title of Project"
+                                  type="text"
+                                  fullWidth
+                                />
+                              </FormControl> */}
+                              <FormControl className={classes.formControl}>
+                                <TextField
+                                  margin="dense"
+                                  id="description"
+                                  label="Description of Workunit"
+                                  type="text"
+                                  defaultValue={currentTimer.description}
+                                  onChange={(data) => {
+                                    currentTimer.description = data.target.value!;
+                                    console.log(currentTimer);
+                                    this.setState({
+                                      currentTimer: currentTimer,
+                                    });
+                                  }}
+                                  fullWidth
+                                />
+                              </FormControl>
+                              <FormControl className={classes.formControl}>
+                                <InputLabel id="demo-simple-select-helper-label">Project</InputLabel>
+                                <Select
+                                  // className={classes.selectEmpty}
+                                  label="Project"
+                                  value={
+                                    allProjects &&
+                                      (allProjects.allProjects as any[])
+                                        .length > 0
+                                      ? currentTimer?.project?.id
+                                      : ""
+                                  }
+                                  onChange={(event) => {
+                                    console.log(
+                                      "Clientselection:",
+                                      event.target
+                                    );
+                                    if (currentTimer) {
+                                      console.log('Selected', event.target.value as string);
+                                      // </form>currentProject.client = event.target.value as string;
+                                      const selected = allProjects?.allProjects?.find(c => c?.id === event.target.value as string);
+                                      currentTimer.project = selected;
+                                      this.setState({ currentTimer: currentTimer });
+                                    }
+                                  }}
+                                >
+                                  <MenuItem
+                                    aria-label="None"
+                                    value=""
+                                  />
+                                  {allProjects &&
+                                    allProjects.allProjects?.map((e: any) => (
+                                      <MenuItem
+                                        key={e.id!}
+                                        value={e.id!}
+                                      >
+                                        {e.name}
+                                      </MenuItem>
+                                    )
+                                    )}
+                                </Select>
+                              </FormControl>
+                            </form>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button
+                              onClick={() => this.handleClose(false)}
+                              color="primary"
+                            >
+                              Cancel
+                    </Button>
+                            <Button
+                              onClick={() => this.handleClose(true, updateTimer, createTimer)}
+                              color="primary"
+                            >
+                              {addOpen ? "Create" : "Update"}
+                            </Button>
+                          </DialogActions>
+
+                        </Dialog>
+                      )
+                    }}
+                  </CreateTimerComponent>)
+              }}
+            </UpdateTimerComponent>)
+        }}
+      </AllProjectsComponent>
+    );
+  }
+  handleClose = async (state: any,
+    updateClient?: MutationFunction<UpdateTimerMutation, UpdateTimerMutationVariables>,
+    createClient?: MutationFunction<CreateTimerMutation, CreateTimerMutationVariables>,
+  ) => {
+    console.log(state);
+    // if (state) {
+    //   project.addProject(this.state.currentProject);
+    const newData = this.state.currentTimer!;
+    const data: TimerInput = {
+      id: newData.id,
+      name: newData.name,
+      description: newData.description,
+      project: newData.project?.id
+    };
+    console.log('Newdata', data)
+    if (this.state.editOpen && updateClient) {
+      await updateClient({
+        refetchQueries: [
+          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+          refetchAllTimerQuery({ d: { dayrange: "0" } }),
+        ],
+        fetchPolicy: "no-cache",
+        variables: {
+          d: data
         },
-      },
-      {
-        title: "Seconds",
-        field: "elapsedSeconds",
-        width: "100px",
-        editable: () => false,
-        render: (data: TimerEntry) => {
-          return !data.isRunning ? (
-            <>{TimerSrv.hms(data.elapsedSeconds)}</>
-          ) : (
-              "Running"
-            );
+      }).catch((ex) => {
+        console.log(
+          "Error in mutation",
+          ex
+        );
+      });
+    }
+    else if (this.state.addOpen && createClient) {
+      await createClient({
+        refetchQueries: [
+          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+          refetchAllTimerQuery({ d: { dayrange: "0" } }),
+        ],
+        fetchPolicy: "no-cache",
+        variables: {
+          d: data
         },
-      },
-    ];
-    return columns;
+      }).catch((ex) => {
+        console.log(
+          "Error in mutation",
+          ex
+        );
+      });
+    }
+    this.setState({ addOpen: false, editOpen: false });
   };
+
+  deleteTimer = (entity: TimerEntry, deleteTimer: MutationFunction<DeleteTimerMutation, DeleteTimerMutationVariables>) => {
+    deleteTimer({
+      refetchQueries: [
+        refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
+        refetchAllTimerQuery({ d: { dayrange: "0" } }),
+      ],
+      fetchPolicy: "no-cache",
+      variables: {
+        timerId: entity!.id!,
+      },
+    }).catch((ex) => {
+      console.log(
+        "Error in mutation",
+        ex
+      );
+    });
+  }
+  // getColumns = () => {
+  //   const columns = [
+  //     { width: "40%", title: "Description", field: "description" },
+  //     // {
+  //     //   title: "Client",
+  //     //   field: "client",
+  //     //   editable: () => true,
+  //     //   lookup: client.EntriesDict(),
+  //     // },
+  //     {
+  //       title: "Project",
+  //       field: "projectId",
+  //       width: "350px",
+  //       editable: () => true,
+  //       lookup: project.EntriesDict(),
+  //     },
+  //     {
+  //       title: "Date",
+  //       field: "tStart",
+  //       width: "150px",
+  //       defaultSort: "desc",
+  //       editable: () => false,
+  //       render: (data: TimerEntry) => {
+  //         return <>{this.toLocaleDate(data.timerStart)}</>;
+  //       },
+  //     },
+  //     {
+  //       title: "Time",
+  //       field: "tStart",
+  //       width: "280px",
+  //       editable: () => false,
+  //       defaultSort: "desc",
+  //       render: (data: TimerEntry) => {
+  //         return (
+  //           <>
+  //             {data.isRunning ? (
+  //               this.toTime(data.timerStart)
+  //             ) : (
+  //                 <>
+  //                   {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
+  //                 </>
+  //               )}
+  //           </>
+  //         );
+  //       },
+  //     },
+  //     {
+  //       title: "Seconds",
+  //       field: "elapsedSeconds",
+  //       width: "100px",
+  //       editable: () => false,
+  //       render: (data: TimerEntry) => {
+  //         return !data.isRunning ? (
+  //           <>{TimerSrv.hms(data.elapsedSeconds)}</>
+  //         ) : (
+  //             "Running"
+  //           );
+  //       },
+  //     },
+  //   ];
+  //   return columns;
+  // };
   toTime(d: string | null | undefined): string {
     if (!d) {
       return "";

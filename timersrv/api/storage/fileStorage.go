@@ -191,7 +191,10 @@ func (t *FileStorage) GetAll(ctx context.Context, dayRange int32, c *claims.MyCu
 	dayRangeDate := time.Now().AddDate(0, 0, int(-dayRange))
 	log.Println("Dayrange", dayRange, dayRangeDate)
 	existingTimer, err := t.Db.Timer.
-		Query().Where(timer.And(timer.Userid(c.Subject), timer.Or(timer.IsRunning(true), timer.TimerStartGTE(dayRangeDate)))).All(ctx)
+		Query().
+		Where(timer.And(timer.Userid(c.Subject), timer.Or(timer.IsRunning(true), timer.TimerStartGTE(dayRangeDate)))).
+		Order(ent.Desc(timer.FieldTimerStart)).
+		All(ctx)
 
 	if err != nil {
 		return nil, err
