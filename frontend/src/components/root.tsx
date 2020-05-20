@@ -164,7 +164,7 @@ function showElapsed(t: any): string {
 export function MainMenu(props: any) {
   const classes = useStyles();
   let location = useLocation();
-  const { container, mobileOpen, handleDrawerToggle } = props;
+  const { container, mobileOpen, handleDrawerToggle, closeDrawer } = props;
   const theme = useTheme();
 
   let currentTimer: TimerEntry | undefined = undefined;
@@ -228,6 +228,7 @@ export function MainMenu(props: any) {
                     selected={activeRoute(o.link, location)}
                     component={RouterLink}
                     to={o.link}
+                    onClick={closeDrawer}
                     button
                     key={o.txt}
                   >
@@ -254,6 +255,7 @@ export function MainMenu(props: any) {
             to={o.link}
             button
             key={o.txt}
+            onClick={closeDrawer}
           >
             <ListItemIcon>
               {index % 2 === 0 ? <HomeIcon /> : <ShowChart />}
@@ -274,6 +276,7 @@ export function MainMenu(props: any) {
         ].map((o, index) => (
           <ListItem
             button
+            onClick={closeDrawer}
             selected={activeRoute(o.link, location)}
             key={o.txt}
             component={RouterLink}
@@ -302,7 +305,7 @@ export function MainMenu(props: any) {
           variant="temporary"
           anchor={theme.direction === "rtl" ? "right" : "left"}
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={closeDrawer}
           classes={{
             paper: classes.drawerPaper,
           }}
@@ -394,6 +397,9 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
               {...this.state}
               handleDrawerToggle={() =>
                 this.setState({ menuVisible: !menuVisible })
+              }
+              closeDrawer={() =>
+                this.setState({ menuVisible: false })
               }
               mobileOpen={menuVisible}
             ></MainMenu>
