@@ -16,9 +16,9 @@ import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
+import { Assignment, Brightness7, Home as HomeIcon, Label, MonetizationOn, People, ShowChart, Timer as TimerIcon } from "@material-ui/icons";
 import MailIcon from "@material-ui/icons/Mail";
 import MenuIcon from "@material-ui/icons/Menu";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
 import React from "react";
 import { Link as RouterLink, Redirect, Route, Switch, useLocation, withRouter } from "react-router-dom";
 import { AllTimerComponent, Timer as TimerEntry } from "../graphql";
@@ -166,11 +166,30 @@ export function MainMenu(props: any) {
   let location = useLocation();
   const { container, mobileOpen, handleDrawerToggle } = props;
   const theme = useTheme();
-  
+
   let currentTimer: TimerEntry | undefined = undefined;
+
+  const getIcon = (index: number) => {
+    switch (index) {
+      case 0:
+        return (<Assignment />)
+        case 1:
+        return (<MonetizationOn />)
+        case 2:
+        return (<People />)
+        case 3:
+        return (<Label />)
+        case 4:
+        return (<Brightness7 />)
+        
+      default:
+        return <></>
+    }
+  }
+
   const drawer = (
     <div>
-      
+
       <Divider />
       <List>
         <AllTimerComponent variables={{ d: { dayrange: "0" } }}>
@@ -213,7 +232,7 @@ export function MainMenu(props: any) {
                     key={o.txt}
                   >
                     <ListItemIcon>
-                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                      {index % 2 === 0 ? <TimerIcon /> : <MailIcon />}
                     </ListItemIcon>
                     <ListItemText primary={o.txt} />
                   </ListItem>
@@ -237,7 +256,7 @@ export function MainMenu(props: any) {
             key={o.txt}
           >
             <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              {index % 2 === 0 ? <HomeIcon /> : <ShowChart />}
             </ListItemIcon>
             <ListItemText primary={o.txt} />
           </ListItem>
@@ -261,7 +280,11 @@ export function MainMenu(props: any) {
             to={o.link}
           >
             <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              {
+                getIcon(index)
+              }
+
+              {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
             </ListItemIcon>
             <ListItemText primary={o.txt} />
           </ListItem>
@@ -315,7 +338,7 @@ interface IStateRoot {
   elapsed: number;
 }
 
-interface IPropsRoot {}
+interface IPropsRoot { }
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   public state = {
@@ -345,7 +368,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   };
   checkTimer = () => {
     this.setState({
-      elapsed: this.state.elapsed+1
+      elapsed: this.state.elapsed + 1
     });
   };
   public render() {

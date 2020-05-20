@@ -51,6 +51,7 @@ func (t *FileStorage) Add(ctx context.Context, prj pb.Project, c *claims.MyCusto
 					SetTeam(prj.Team).
 					SetTags(prj.Tags).
 					SetStatus(prj.Tags).
+					SetNillableClientid(checkNil(prj.Client)).
 					Save(ctx) // Create and return.
 	if err != nil {
 		return nil, err

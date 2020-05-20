@@ -162,7 +162,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         }
                                       }
                                     });
-                                    
+
                                     if (error) {
                                       return (
                                         <div>
@@ -220,7 +220,9 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 classes.selectEmpty,
                                               ].join(" ")}
                                             >
-                                              <InputLabel>Project</InputLabel>
+                                              <InputLabel shrink id="demo-simple-select-placeholder-label-label">
+                                                Client
+                                              </InputLabel>
                                               <Select
                                                 className={classes.selectEmpty}
                                                 label="Project"
