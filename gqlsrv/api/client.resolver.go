@@ -116,7 +116,7 @@ func client2Gql(result *pb.Client) *Client {
 		Description: result.Description,
 		ID:          result.Id,
 		Name:        result.Name,
-		// Address:     result.Address,
+		Address:     result.Address,
 	}
 	return test
 }
@@ -126,6 +126,7 @@ func clientGql2pb(arg *ClientInput) *pb.Client {
 		Id:          checkNil(arg.ID, ""),
 		Description: checkNil(arg.Description, ""),
 		Name:        checkNil(arg.Name, ""),
+		Address:     checkNil(arg.Address, ""),
 	}
 	return t
 }
