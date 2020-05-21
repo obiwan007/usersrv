@@ -464,7 +464,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
   renderRow = (props: ListChildComponentProps) => {
     const { index, style } = props;
-    console.log('PROPS', props.data.allTimer.allTimer)
     if (!props.data.allTimer) {
       return <></>
     }

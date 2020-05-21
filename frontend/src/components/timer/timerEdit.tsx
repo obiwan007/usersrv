@@ -85,10 +85,8 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     //clearInterval(this.interval!);
   }
 
-  componentDidUpdate(nextProps: IProps) {
-    console.log('Didl Update', nextProps.timer, this.props.timer);
+  componentDidUpdate(nextProps: IProps) {    
     if (nextProps.timer !== this.props.timer) {
-      console.log('Change detected', nextProps.timer)
       this.setState({ currentTimer: Object.assign({}, this.props.timer), addOpen: this.props.addOpen, editOpen: this.props.editOpen })
     }
   }
