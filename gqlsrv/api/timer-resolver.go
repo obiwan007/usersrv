@@ -183,6 +183,9 @@ func timerGql2pb(arg *TimerInput) *pb.Timer {
 		Name:        checkNil(arg.Name, ""),
 		Tags:        checkNil(arg.Tags, ""),
 		Project:     checkNil(arg.Project, ""),
+		TimerStart:  checkNil(arg.TimerStart, ""),
+		TimerEnd:    checkNil(arg.TimerEnd, ""),
+		IsBilled:    checkNilBool(arg.IsBilled, false),
 	}
 	return t
 }

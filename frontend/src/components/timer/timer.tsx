@@ -8,7 +8,7 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
-import { Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, FormControl, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
 import ListItem from "@material-ui/core/ListItem";
 import { Delete, PlayArrow, Stop, Timer as TimerIcon } from "@material-ui/icons";
@@ -16,9 +16,10 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import Autosizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, TimerInput, UpdateTimerComponent, UpdateTimerMutation, UpdateTimerMutationVariables } from "../../graphql";
+import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, UpdateTimerComponent } from "../../graphql";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
 import { RunningClock } from "./runningClock";
+import TimerEdit from "./timerEdit";
 
 // ----------------------------------------------------------------------------
 
@@ -117,7 +118,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   render() {
-    const { description, currentProject, timefilter } = this.state;
+    const { description, currentProject, timefilter, addOpen, editOpen } = this.state;
 
     let isLoading = false;
 
@@ -454,7 +455,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           }}
         </AllProjectsComponent>
 
-        {this.renderDialog()}
+        <TimerEdit timefilter={timefilter} timer={this.state.currentTimer} addOpen={addOpen} editOpen={editOpen} onClose={()=>{this.setState({addOpen: false, editOpen: false})}}>
+
+        </TimerEdit>
+        {/* {this.renderDialog()} */}
       </div >
     );
   }
@@ -503,195 +507,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       </div>
     );
   }
-  renderDialog = () => {
-    const { addOpen, editOpen, currentTimer } = this.state;
-    const { classes } = this.props;
-    return (
-      <AllProjectsComponent>
-        {({ data, loading, error }) => {
-          const allProjects = data;
-          return (
-            <UpdateTimerComponent>
-              {(updateTimer, { data }) => {
-                return (
-                  <CreateTimerComponent>
-                    {(createTimer, { data }) => {
-                      return (
-
-                        <Dialog
-                          open={addOpen || editOpen}
-                          onClose={() =>
-                            this.setState({ addOpen: false, editOpen: false })
-                          }
-                          aria-labelledby="simple-modal-title"
-                          aria-describedby="simple-modal-description"
-                        >
-                          <DialogTitle id="simple-dialog-title">
-                            {editOpen ? "Edit Timer Entry" : "Add new Timer Entry"}
-                          </DialogTitle>
-                          <DialogContent>
-                            {/* <DialogContentText>
-                          To subscribe to this website, please enter
-                          your email address here. We will send
-                          updates occasionally.
-                    </DialogContentText> */}
-                            <form noValidate autoComplete="off">
-                              {/* <FormControl className={classes.formControl}>
-                                <TextField
-                                  required
-                                  autoFocus
-                                  defaultValue={currentTimer.name}
-                                  onChange={(data) => {
-                                    currentTimer.name = data.target.value!;
-                                    console.log(currentTimer);
-                                    this.setState({
-                                      currentTimer: currentTimer,
-                                    });
-                                  }}
-                                  margin="dense"
-                                  id="name"
-                                  label="Title of Project"
-                                  type="text"
-                                  fullWidth
-                                />
-                              </FormControl> */}
-                              <FormControl className={classes.formControl}>
-                                <TextField
-                                  margin="dense"
-                                  id="description"
-                                  label="Description of Workunit"
-                                  type="text"
-                                  defaultValue={currentTimer.description}
-                                  onChange={(data) => {
-                                    currentTimer.description = data.target.value!;
-                                    console.log(currentTimer);
-                                    this.setState({
-                                      currentTimer: currentTimer,
-                                    });
-                                  }}
-                                  fullWidth
-                                />
-                              </FormControl>
-                              <FormControl className={classes.formControl}>
-                                <InputLabel id="demo-simple-select-helper-label">Project</InputLabel>
-                                <Select
-                                  // className={classes.selectEmpty}
-                                  label="Project"
-                                  value={
-                                    allProjects &&
-                                      (allProjects.allProjects as any[])
-                                        .length > 0
-                                      ? currentTimer?.project?.id
-                                      : ""
-                                  }
-                                  onChange={(event) => {
-                                    console.log(
-                                      "Clientselection:",
-                                      event.target
-                                    );
-                                    if (currentTimer) {
-                                      console.log('Selected', event.target.value as string);
-                                      // </form>currentProject.client = event.target.value as string;
-                                      const selected = allProjects?.allProjects?.find(c => c?.id === event.target.value as string);
-                                      currentTimer.project = selected;
-                                      this.setState({ currentTimer: currentTimer });
-                                    }
-                                  }}
-                                >
-                                  <MenuItem
-                                    aria-label="None"
-                                    value=""
-                                  />
-                                  {allProjects &&
-                                    allProjects.allProjects?.map((e: any) => (
-                                      <MenuItem
-                                        key={e.id!}
-                                        value={e.id!}
-                                      >
-                                        {e.name}
-                                      </MenuItem>
-                                    )
-                                    )}
-                                </Select>
-                              </FormControl>
-                            </form>
-                          </DialogContent>
-                          <DialogActions>
-                            <Button
-                              onClick={() => this.handleClose(false)}
-                              color="primary"
-                            >
-                              Cancel
-                    </Button>
-                            <Button
-                              onClick={() => this.handleClose(true, updateTimer, createTimer)}
-                              color="primary"
-                            >
-                              {addOpen ? "Create" : "Update"}
-                            </Button>
-                          </DialogActions>
-
-                        </Dialog>
-                      )
-                    }}
-                  </CreateTimerComponent>)
-              }}
-            </UpdateTimerComponent>)
-        }}
-      </AllProjectsComponent>
-    );
-  }
-  handleClose = async (state: any,
-    updateClient?: MutationFunction<UpdateTimerMutation, UpdateTimerMutationVariables>,
-    createClient?: MutationFunction<CreateTimerMutation, CreateTimerMutationVariables>,
-  ) => {
-    console.log(state);
-    // if (state) {
-    //   project.addProject(this.state.currentProject);
-    const newData = this.state.currentTimer!;
-    const data: TimerInput = {
-      id: newData.id,
-      name: newData.name,
-      description: newData.description,
-      project: newData.project?.id
-    };
-    console.log('Newdata', data)
-    if (this.state.editOpen && updateClient) {
-      await updateClient({
-        refetchQueries: [
-          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
-          refetchAllTimerQuery({ d: { dayrange: "0" } }),
-        ],
-        fetchPolicy: "no-cache",
-        variables: {
-          d: data
-        },
-      }).catch((ex) => {
-        console.log(
-          "Error in mutation",
-          ex
-        );
-      });
-    }
-    else if (this.state.addOpen && createClient) {
-      await createClient({
-        refetchQueries: [
-          refetchAllTimerQuery({ d: { dayrange: this.state.timefilter } }),
-          refetchAllTimerQuery({ d: { dayrange: "0" } }),
-        ],
-        fetchPolicy: "no-cache",
-        variables: {
-          d: data
-        },
-      }).catch((ex) => {
-        console.log(
-          "Error in mutation",
-          ex
-        );
-      });
-    }
-    this.setState({ addOpen: false, editOpen: false });
-  };
 
   deleteTimer = (entity: TimerEntry, deleteTimer: MutationFunction<DeleteTimerMutation, DeleteTimerMutationVariables>) => {
     deleteTimer({

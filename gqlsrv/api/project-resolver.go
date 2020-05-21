@@ -142,3 +142,10 @@ func checkNil(ptr *string, def string) string {
 	}
 	return *ptr
 }
+
+func checkNilBool(ptr *bool, def bool) bool {
+	if ptr == nil {
+		return def
+	}
+	return *ptr
+}

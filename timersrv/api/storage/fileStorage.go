@@ -75,12 +75,28 @@ func (t *FileStorage) Update(ctx context.Context, timerEntity *pb.Timer, c *clai
 	if err != nil {
 		return nil, err
 	}
+	start, errStart := time.Parse(time.RFC3339, timerEntity.TimerStart)
+	end, errEnd := time.Parse(time.RFC3339, timerEntity.TimerEnd)
+
+	startP := &start
+	endP := &end
+
+	if errEnd != nil {
+		endP = &existingTimer.TimerEnd
+	}
+	if errStart != nil {
+		startP = &existingTimer.TimerStart
+	}
+
 	newtimer, err := existingTimer.
 		Update().
 		SetNillableDescription(checkNil(timerEntity.Description)).
 		SetNillableProjectid(checkNil(timerEntity.Project)).
 		SetNillableTags(checkNil(timerEntity.Tags)).
 		SetNillableIsBilled(&timerEntity.IsBilled).
+		SetNillableTimerEnd(endP).
+		SetNillableTimerStart(startP).
+		SetElapsedSeconds(int(endP.Sub(*startP).Seconds())).
 		Save(ctx)
 	if err != nil {
 		return nil, err
