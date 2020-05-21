@@ -118,7 +118,12 @@ export function ButtonAppBar(props: any) {
           </IconButton>
         )}
         <Typography variant="h6" className={classes.title}>
+          <Hidden xsDown implementation="css">
           My Time Tracker
+          </Hidden>
+          <Hidden smUp implementation="css">
+          MTT
+          </Hidden>
         </Typography>
         {/* <Link
             component={RouterLink} to="/login"
@@ -135,9 +140,11 @@ export function ButtonAppBar(props: any) {
         )}
         {props.isLoggedIn && (
           <>
-            <Button component={RouterLink} to="/user" color="inherit">
-              {props.username}
-            </Button>
+            <Hidden xsDown implementation="css">
+              <Button component={RouterLink} to="/user" color="inherit">
+                {props.username}
+              </Button>
+            </Hidden>
             <Avatar alt="Remy Sharp" src={picture}>
               {props.username}
             </Avatar>
@@ -173,15 +180,15 @@ export function MainMenu(props: any) {
     switch (index) {
       case 0:
         return (<Assignment />)
-        case 1:
+      case 1:
         return (<MonetizationOn />)
-        case 2:
+      case 2:
         return (<People />)
-        case 3:
+      case 3:
         return (<Label />)
-        case 4:
+      case 4:
         return (<Brightness7 />)
-        
+
       default:
         return <></>
     }

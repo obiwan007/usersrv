@@ -8,7 +8,7 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
-import { Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, CircularProgress, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
 import ListItem from "@material-ui/core/ListItem";
 import { Delete, PlayArrow, Stop, Timer as TimerIcon } from "@material-ui/icons";
@@ -25,7 +25,7 @@ import { RunningClock } from "./runningClock";
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     root: {
-      
+
       display: "flex",
       width: "300px",
       flexDirection: "column",
@@ -42,7 +42,7 @@ const styles = ({ palette, spacing }: Theme) =>
       width: "100%",
     },
     list: {
-      listStyle: "none",      
+      listStyle: "none",
     },
     topButtons: {
       marginLeft: spacing(2),
@@ -124,7 +124,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     const { classes } = this.props;
     let currentTimer: TimerEntry | undefined = undefined;
 
-    const isRunning = false;
+    let isRunning = false;
     let allTimer: any = [];
     return (
       <div>
@@ -169,6 +169,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         (d as any).projectId = d?.project?.id;
                                         if (d.isRunning === true) {
                                           currentTimer = d;
+                                          isRunning = true;
                                         }
                                       }
                                     });
@@ -231,11 +232,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               ].join(" ")}
                                             >
                                               <InputLabel shrink id="demo-simple-select-placeholder-label-label">
-                                                Client
+                                                Prpject
                                               </InputLabel>
                                               <Select
                                                 className={classes.selectEmpty}
-                                                label="Project"
                                                 value={
                                                   allProjects &&
                                                     (allProjects.allProjects as any[])
@@ -344,7 +344,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               <IconButton
                                                 disabled={!isRunning}
                                                 onClick={() =>
-                                                  this.discardTimer()
+                                                  this.deleteTimer(currentTimer!, deleteTimer)
                                                 }
                                                 edge="start"
                                                 color="inherit"
@@ -378,14 +378,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               <Select
                                                 className={classes.selectEmpty}
                                                 value={timefilter}
-                                                // renderValue={(value) =>
-                                                //   `${
-                                                //     this.filterSelect.find(
-                                                //       (f: any) =>
-                                                //         f.key === value
-                                                //     ).value
-                                                //   }:  ${TimerSrv.hms(sum)}`
-                                                // }
+
                                                 onChange={(event) => {
                                                   this.setState({
                                                     timefilter: event.target
@@ -420,8 +413,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                         <div
                                           className={classes.list}
                                           style={{
-                                            height: "calc(100vh - 249px)",
-                                            minHeight: "calc(100vh - 249px)",
+                                            height: "calc(100vh - 260px)",
+                                            minHeight: "calc(100vh - 260px)",
                                           }}
                                         >
                                           <Autosizer>
@@ -431,7 +424,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 width={width}
                                                 itemCount={count}
                                                 itemSize={80}
-                                                itemData={{allTimer, deleteTimer}}
+                                                itemData={{ allTimer, deleteTimer }}
                                               // style={{
                                               //   height: "calc(100vh - 445px)",
                                               //   minHeight: "calc(100vh - 445px)",
@@ -468,16 +461,18 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   renderRow = (props: ListChildComponentProps) => {
     const { index, style } = props;
     console.log('PROPS', props.data.allTimer.allTimer)
-    if (!props.data.allTimer){
+    if (!props.data.allTimer) {
       return <></>
     }
     const entry = props.data.allTimer.allTimer[index];
     return (
       <div style={style} key={index}>
         <ListItem button onClick={() => this.setState({ currentTimer: Object.assign({}, entry), editOpen: true })}>
-          <ListItemIcon>
-            <TimerIcon />
-          </ListItemIcon>
+          <Hidden xsDown implementation="css">
+            <ListItemIcon>
+              <TimerIcon />
+            </ListItemIcon>
+          </Hidden>
           <ListItemText style={{ width: '50%' }} primary={entry.description} secondary={entry.project?.name} ></ListItemText>
           <ListItemText style={{ width: '30%' }} primary={this.toLocaleDate(entry.timerStart)} secondary={<>
             {entry.isRunning ? (
@@ -498,8 +493,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             )}></ListItemText>
           <ListItemSecondaryAction>
             <IconButton onClick={() => this.deleteTimer(entry, props.data.deleteTimer)} edge="end" aria-label="delete">
-            <Delete />
-          </IconButton>
+              <Delete />
+            </IconButton>
             {/* <IconButton edge="end" aria-label="delete">
               <Delete />
             </IconButton> */}
@@ -715,68 +710,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       );
     });
   }
-  // getColumns = () => {
-  //   const columns = [
-  //     { width: "40%", title: "Description", field: "description" },
-  //     // {
-  //     //   title: "Client",
-  //     //   field: "client",
-  //     //   editable: () => true,
-  //     //   lookup: client.EntriesDict(),
-  //     // },
-  //     {
-  //       title: "Project",
-  //       field: "projectId",
-  //       width: "350px",
-  //       editable: () => true,
-  //       lookup: project.EntriesDict(),
-  //     },
-  //     {
-  //       title: "Date",
-  //       field: "tStart",
-  //       width: "150px",
-  //       defaultSort: "desc",
-  //       editable: () => false,
-  //       render: (data: TimerEntry) => {
-  //         return <>{this.toLocaleDate(data.timerStart)}</>;
-  //       },
-  //     },
-  //     {
-  //       title: "Time",
-  //       field: "tStart",
-  //       width: "280px",
-  //       editable: () => false,
-  //       defaultSort: "desc",
-  //       render: (data: TimerEntry) => {
-  //         return (
-  //           <>
-  //             {data.isRunning ? (
-  //               this.toTime(data.timerStart)
-  //             ) : (
-  //                 <>
-  //                   {this.toTime(data.timerStart)} - {this.toTime(data.timerEnd)}
-  //                 </>
-  //               )}
-  //           </>
-  //         );
-  //       },
-  //     },
-  //     {
-  //       title: "Seconds",
-  //       field: "elapsedSeconds",
-  //       width: "100px",
-  //       editable: () => false,
-  //       render: (data: TimerEntry) => {
-  //         return !data.isRunning ? (
-  //           <>{TimerSrv.hms(data.elapsedSeconds)}</>
-  //         ) : (
-  //             "Running"
-  //           );
-  //       },
-  //     },
-  //   ];
-  //   return columns;
-  // };
+
   toTime(d: string | null | undefined): string {
     if (!d) {
       return "";
@@ -881,12 +815,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     //   currentProject: timer.getTimer().project,
     //   description: timer.getTimer().description,
     // });
-  }
-  discardTimer() {
-    timer.discardTimer();
-    this.setState({
-      description: timer.getTimer().description,
-    });
   }
 
   checkTimer = () => {

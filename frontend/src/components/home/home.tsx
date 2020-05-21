@@ -12,18 +12,6 @@ import Typography from "@material-ui/core/Typography";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -34,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(8, 0, 6),
   },
   firstHero: {
-    height: "calc( 100vh - 130px)",
+    height: "calc( 100vh - 100px)",
     background:
       "radial-gradient(circle at 50% 50%,  rgba(85,214,176,1) 10%, rgba(85,108,214,1) 100%)", // theme.palette.background.paper,
     padding: theme.spacing(8, 0, 6),
@@ -243,20 +231,55 @@ export default function Home() {
       </main>
       {/* Footer */}
       <footer className={classes.footer}>
-        <Typography variant="h6" align="center" gutterBottom>
-          Footer
+        <Typography variant="h6" align="left" gutterBottom>
+          Über uns
         </Typography>
         <Typography
           variant="subtitle1"
-          align="center"
+          align="left"
           color="textSecondary"
           component="p"
         >
-          Something here to give the footer a purpose!
+          Contact
         </Typography>
         <Copyright />
       </footer>
       {/* End footer */}
     </React.Fragment>
+  );
+
+
+
+}
+
+export function Copyright() {
+  return (
+    <>
+      <Typography
+        variant="body2"
+        style={{ paddingTop: 10, height: 40 }}
+        align="center"
+      >
+        {"Copyright © "}
+        <Link color="inherit" href="https://material-ui.com/">
+          MMedia GbR
+      </Link>{" "}
+        {new Date().getFullYear()}
+        {"."}
+      </Typography>
+      <Typography
+        variant="body2"
+        style={{ paddingTop: 10, height: 40 }}
+        align="center"
+      >
+        <Link color="inherit" href="https://material-ui.com/">
+          Impressum
+    </Link>
+    &nbsp; | &nbsp;
+    <Link color="inherit" href="https://material-ui.com/">
+          Datenschutz
+    </Link>
+      </Typography>
+    </>
   );
 }
