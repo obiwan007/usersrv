@@ -232,7 +232,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               ].join(" ")}
                                             >
                                               <InputLabel shrink id="demo-simple-select-placeholder-label-label">
-                                                Prpject
+                                                Project
                                               </InputLabel>
                                               <Select
                                                 className={classes.selectEmpty}

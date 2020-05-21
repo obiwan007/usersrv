@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(8, 0, 6),
   },
   firstHero: {
-    height: "calc( 100vh - 100px)",
+    height: "calc( 100vh - 60px)",
     background:
       "radial-gradient(circle at 50% 50%,  rgba(85,214,176,1) 10%, rgba(85,108,214,1) 100%)", // theme.palette.background.paper,
     padding: theme.spacing(8, 0, 6),
@@ -232,7 +232,7 @@ export default function Home() {
       {/* Footer */}
       <footer className={classes.footer}>
         <Typography variant="h6" align="left" gutterBottom>
-          Über uns
+          About My Time Tracker
         </Typography>
         <Typography
           variant="subtitle1"

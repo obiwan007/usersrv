@@ -432,7 +432,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
             </ScrollTop>
           </div>
         </div>
-        <Copyright></Copyright>
+        {/* <Copyright></Copyright> */}
       </div>
     );
   }

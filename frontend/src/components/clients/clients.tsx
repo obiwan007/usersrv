@@ -144,27 +144,29 @@ export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
         <Button onClick={() => this.addProject()}>Add Client</Button> */}
 
-                      <List
-                        component="nav"
-                        aria-label="main mailbox folders"
-                      >
-                        {(data?.allClients?.map(
-                          (u) => u
-                        ) as any[])?.map((entry: Client) => (
-                          <ListItem button onClick={() => this.setState({ currentClient: Object.assign({}, entry), editOpen: true })}>
-                            <ListItemIcon>
-                            <MonetizationOn />
-                            </ListItemIcon>
-                            <ListItemText primary={entry.name} secondary={entry.description} ></ListItemText>
-                            <ListItemSecondaryAction>
-                              <IconButton onClick={() => this.deleteClient(entry, deleteClient)} edge="end" aria-label="delete">
-                                <Delete />
-                              </IconButton>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        ))}
+                      <div>
+                        <List
+                          component="nav"
+                          aria-label="main mailbox folders"
+                        >
+                          {(data?.allClients?.map(
+                            (u) => u
+                          ) as any[])?.map((entry: Client) => (
+                            <ListItem button onClick={() => this.setState({ currentClient: Object.assign({}, entry), editOpen: true })}>
+                              <ListItemIcon>
+                                <MonetizationOn />
+                              </ListItemIcon>
+                              <ListItemText primary={entry.name} secondary={entry.description} ></ListItemText>
+                              <ListItemSecondaryAction>
+                                <IconButton onClick={() => this.deleteClient(entry, deleteClient)} edge="end" aria-label="delete">
+                                  <Delete />
+                                </IconButton>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          ))}
 
-                      </List>
+                        </List>
+                      </div>
                       <Fab onClick={() => this.addProject()} color="secondary" aria-label="add" className={classes.fabButton}>
                         <AddIcon />
                       </Fab>
@@ -314,7 +316,7 @@ export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       name: newData.name,
       description:
         newData.description,
-        address:
+      address:
         newData.address,
     };
     console.log('Newdata', data)
