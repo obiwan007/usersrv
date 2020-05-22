@@ -11,6 +11,7 @@ import { MutationFunction } from "@apollo/react-common";
 import { Box, Button, createStyles, FormControl, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, Theme, WithStyles, withStyles } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import { Delete, Timer as TimerIcon } from "@material-ui/icons";
+import * as _ from "lodash";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import Autosizer from "react-virtualized-auto-sizer";
@@ -36,10 +37,17 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     formControl: {
       margin: spacing(1),
-      paddingRight: spacing(1),
-      paddingLeft: spacing(1),
+      // paddingRight: spacing(1),
+      // paddingLeft: spacing(1),
       minWidth: 120,
       width: "100%",
+    },
+    container: {
+      paddingTop: spacing(2),
+    },
+    box: {
+      paddingRight: spacing(1),
+      paddingLeft: spacing(2),
     },
     list: {
       listStyle: "none",
@@ -106,8 +114,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     const { filterProject, timefilter, addOpen, editOpen } = this.state;
     const { classes } = this.props;
     let allTimer: any = [];
-
-    console.log('FilterProject:', filterProject);
+    
     return (
       <div>
 
@@ -123,9 +130,14 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               >
                 {({ data, loading, error }) => {
                   // Any errors? Say so!
-                  allTimer = data;
-                  const count = allTimer?.allTimer?.length;
+                  allTimer = _.cloneDeep(data);
+                  if (filterProject?.id && !loading && data?.allTimer) {
+                    allTimer.allTimer = allTimer?.allTimer?.filter((a: TimerEntry) => a?.project?.id === filterProject.id);
+                    
+                  }
 
+                  const count = allTimer?.allTimer?.length;
+                  
                   if (error) {
                     return (
                       <div>
@@ -156,10 +168,10 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                         display="flex"
                         flexDirection="row"
                         alignItems="center"
+                        className={classes.container}
                       >
-                        <Box>
+                        <Box className={classes.box}>
                           <FormControl
-                            style={{ width: 250 }}
                             className={[
                               classes.formControl,
                               classes.selectEmpty,
@@ -197,9 +209,8 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                         </Box>
 
 
-                        <Box>
+                        <Box className={classes.box}>
                           <FormControl
-                            style={{ width: 250 }}
                             className={[
                               classes.formControl,
                               classes.selectEmpty,
