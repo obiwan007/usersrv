@@ -99,6 +99,7 @@ function Copyright() {
 export function ButtonAppBar(props: any) {
   const classes = useStyles();
   const { picture, handleDrawerToggle, isLoggedIn } = props;
+  console.log('Picture', picture)
   return (
     // <div className={classes.root}>
     <AppBar

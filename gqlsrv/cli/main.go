@@ -27,7 +27,14 @@ var (
 	tlsForGrpc         = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	gClientID          = flag.String("clientid", "xxxxxxxxxxxxxx", "OAuth2 client Id")
 	gClientSecr        = flag.String("clientsecret", "yyyyyyyyyyyyy", "OAuth2 client secret")
-	redirect           = flag.String("redirect", "http://localhost:3000/auth/callback", "OAuth2 client redirect callback")
+	gRedirect          = flag.String("redirect", "http://localhost:3000/auth/callback", "OAuth2 client redirect callback")
+	aClientID          = flag.String("aclientid", "xxxxxxxxxxxxxx", "OAuth2 client Id")
+	aClientSecr        = flag.String("aclientsecret", "yyyyyyyyyyyyy", "OAuth2 client secret")
+	aRedirect          = flag.String("aredirect", "http://localhost:3000/auth/callbackA", "OAuth2 client redirect callback")
+	mClientID          = flag.String("mclientid", "xxxxxxxxxxxxxx", "OAuth2 client Id")
+	mClientSecr        = flag.String("mclientsecret", "yyyyyyyyyyyyy", "OAuth2 client secret")
+	mTenant            = flag.String("mtenant", "common", "OAuth2 Azure Tenant Id")
+	mRedirect          = flag.String("mredirect", "http://localhost:3000/auth/callbackA", "OAuth2 client redirect callback")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
 	serverAddr         = flag.String("server_addr", "usersrv:10000", "The server address in the format of host:port")
 	userSrv            = flag.String("usersrv", "usersrv:10000", "The server address in the format of host:port")
@@ -129,7 +136,10 @@ func main() {
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
-	mux := gql.NewRouter(schema, tracer, gClientID, gClientSecr, redirect)
+	mux := gql.NewRouter(schema, tracer,
+		&gql.AuthSecret{ClientID: gClientID, ClientSecr: gClientSecr, RedirectUrl: gRedirect},
+		&gql.AuthSecret{ClientID: aClientID, ClientSecr: aClientSecr, RedirectUrl: aRedirect},
+		&gql.AuthSecret{ClientID: mClientID, ClientSecr: mClientSecr, RedirectUrl: mRedirect, Tenant: mTenant})
 
 	// cors.Default() setup the middleware with default options being
 	// all origins accepted with simple methods (GET, POST). See

@@ -1,6 +1,7 @@
 package gql
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,6 +17,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/microsoft"
 )
 
 var page = []byte(`
@@ -99,7 +101,9 @@ var page = []byte(`
 `)
 
 var (
-	googleOauthConfig *oauth2.Config
+	googleOauthConfig    *oauth2.Config
+	appleOauthConfig     *oauth2.Config
+	microsoftOauthConfig *oauth2.Config
 	// TODO: randomize it
 	oauthStateString = "pseudo-random"
 	UserSrvClient    pb.UserServiceClient
@@ -163,14 +167,49 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 // 	w.Write(res)
 // }
 
-func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
-	url := googleOauthConfig.AuthCodeURL(oauthStateString)
-	log.Println("Handling Google Login Redirect", googleOauthConfig.ClientID)
+func handleAppleLogin(w http.ResponseWriter, r *http.Request) {
+	url := appleOauthConfig.AuthCodeURL(oauthStateString)
+	log.Println("Handling Apple Login Redirect", appleOauthConfig.ClientID)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
+func handleMicrosoftLogin(w http.ResponseWriter, r *http.Request) {
+	url := microsoftOauthConfig.AuthCodeURL(oauthStateString)
+	log.Println("Handling Microsoft Login Redirect", microsoftOauthConfig.ClientID)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+
+	url := googleOauthConfig.AuthCodeURL(oauthStateString)
+	log.Println("Handling Google Login Redirect", googleOauthConfig.ClientID)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	return
+}
+
+func handleDefaultLogin(w http.ResponseWriter, r *http.Request) {
+	keys, ok := r.URL.Query()["provider"]
+
+	if !ok || len(keys[0]) < 1 {
+		log.Println("Url Param 'provider' is missing")
+		handleGoogleLogin(w, r)
+		return
+	}
+	key := keys[0]
+	log.Println("Url Param 'provider' is: " + string(key))
+	switch key {
+	case "apple":
+		handleAppleLogin(w, r)
+		break
+
+	case "microsoft":
+		handleMicrosoftLogin(w, r)
+		break
+	}
+}
+
 func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
-	content, err := getUserInfo(r.FormValue("state"), r.FormValue("code"))
+	content, err := getUserInfoGoogle(r.FormValue("state"), r.FormValue("code"))
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -192,7 +231,135 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// log.Fprintf(w, "Content: %s\n", content)
 }
 
-type UserInfo struct {
+func handleMicrosoftCallback(w http.ResponseWriter, r *http.Request) {
+	authorizationCode := r.URL.Query().Get("code")
+	log.Println("Code:", authorizationCode)
+	content, err := getUserInfoMicrosoft(r.FormValue("state"), r.FormValue("code"))
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	log.Println("Name", content.Name)
+	log.Println("Email", content.Email)
+	token, err := getToken(content.Name, content.Picture, "0", content.Email)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+	UserSrvClient.AddUser(r.Context(), &pb.User{Jwt: token, Name: content.Name, Email: content.Email})
+	// loginRes := &loginResponse{Token: token}
+	// res, err := json.Marshal(loginRes)
+
+	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
+	// w.Write(res)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	// log.Fprintf(w, "Content: %s\n", content)
+}
+
+type UserInfoMicrosoft struct {
+	Sub           string `json:"sub"`
+	Name          string `json:"displayName"`
+	GivenName     string `json:"givenName"`
+	FamilyName    string `json:"surname"`
+	Profile       string `json:"profile"`
+	Picture       string `json:"picture"`
+	Email         string `json:"userPrincipalName"`
+	EmailVerified bool   `json:"email_verified"`
+	Gender        string `json:"gender"`
+}
+
+func getUserInfoMicrosoft(state string, code string) (*UserInfoMicrosoft, error) {
+	if state != oauthStateString {
+		return nil, fmt.Errorf("invalid oauth state")
+	}
+	log.Println("Code:", code, microsoftOauthConfig.RedirectURL)
+
+	// opts:=[]oauth2.AuthCodeOption{"wl.email",},
+	token, err := microsoftOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
+	}
+	log.Println("Access token retrieved from Azure", token.AccessToken)
+	url := "https://graph.microsoft.com/v1.0/me"
+	// Create a Bearer string by appending string access token
+	var bearer = "Bearer " + token.AccessToken
+
+	// Create a new request using http
+	req, err := http.NewRequest("GET", url, nil)
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", bearer)
+	req.Header.Add("Accept", "application/json")
+	// Send req using http Client
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
+	}
+
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
+	}
+	log.Println("Content", string(contents))
+
+	var result UserInfoMicrosoft
+	if err := json.Unmarshal(contents, &result); err != nil {
+		return nil, err
+	}
+
+	// urlPhoto := "https://graph.microsoft.com/beta/users/" + result.Email + "/photos/48x48/$value"
+	// reqPhoto, err := http.NewRequest("GET", urlPhoto, nil)
+	// reqPhoto.Header.Add("Authorization", bearer)
+	// client = &http.Client{}
+	// responsePhoto, err := client.Do(reqPhoto)
+	// if responsePhoto.StatusCode != 200 {
+	// 	log.Println("No photo found", responsePhoto.StatusCode)
+	// 	return &result, nil
+	// }
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed getting user Photo: %s", err.Error())
+	// }
+
+	// defer responsePhoto.Body.Close()
+	// contentsPhoto, err := ioutil.ReadAll(responsePhoto.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed reading response body: %s", err.Error())
+	// }
+
+	// imgBase64Str := base64.StdEncoding.EncodeToString(contentsPhoto)
+	// log.Println("Content Photo:", urlPhoto, len(imgBase64Str))
+
+	// result.Picture = "data:image/jpeg;base64," + imgBase64Str
+
+	return &result, nil
+}
+
+func handleAppleCallback(w http.ResponseWriter, r *http.Request) {
+	content, err := getUserInfoGoogle(r.FormValue("state"), r.FormValue("code"))
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	log.Println("Content", content)
+	log.Println("Name", content.Name)
+	token, err := getToken(content.Name, content.Picture, "0", content.Email)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+	UserSrvClient.AddUser(r.Context(), &pb.User{Jwt: token, Name: content.Name, Email: content.Email})
+	// loginRes := &loginResponse{Token: token}
+	// res, err := json.Marshal(loginRes)
+
+	http.SetCookie(w, &http.Cookie{Name: "Auth", Value: token, HttpOnly: true, Path: "/", Expires: time.Now().Add(time.Hour * 1)})
+	// w.Write(res)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	// log.Fprintf(w, "Content: %s\n", content)
+}
+
+type UserInfoGoogle struct {
 	Sub           string `json:"sub"`
 	Name          string `json:"name"`
 	GivenName     string `json:"given_name"`
@@ -204,7 +371,7 @@ type UserInfo struct {
 	Gender        string `json:"gender"`
 }
 
-func getUserInfo(state string, code string) (*UserInfo, error) {
+func getUserInfoGoogle(state string, code string) (*UserInfoGoogle, error) {
 	if state != oauthStateString {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
@@ -225,25 +392,47 @@ func getUserInfo(state string, code string) (*UserInfo, error) {
 		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
 	}
 
-	var result UserInfo
+	var result UserInfoGoogle
 	if err := json.Unmarshal(contents, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer, gClientID, gClientSecr, redirectUrl *string) *TracedServeMux {
+type AuthSecret struct {
+	ClientID, ClientSecr, RedirectUrl, Tenant *string
+}
+
+func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer, gSecrets, appleSecrets, microsoftSecrets *AuthSecret) *TracedServeMux {
 	// mux := http.NewServeMux()
 
 	googleOauthConfig = &oauth2.Config{
-		ClientID:     *gClientID,   //
-		ClientSecret: *gClientSecr, //
-		RedirectURL:  *redirectUrl,
+		ClientID:     *gSecrets.ClientID,   //
+		ClientSecret: *gSecrets.ClientSecr, //
+		RedirectURL:  *gSecrets.RedirectUrl,
 		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint: google.Endpoint,
 	}
-	log.Printf("OAuth %s %s %s", (*gClientID)[:6], (*gClientSecr)[:6], *redirectUrl)
+
+	appleOauthConfig = &oauth2.Config{
+		ClientID:     *appleSecrets.ClientID,   //
+		ClientSecret: *appleSecrets.ClientSecr, //
+		RedirectURL:  *appleSecrets.RedirectUrl,
+		Scopes:       []string{"email", "name"},
+		Endpoint: oauth2.Endpoint{AuthURL: "https://appleid.apple.com/auth/authorize",
+			TokenURL: "https://appleid.apple.com/auth/token"},
+	}
+
+	microsoftOauthConfig = &oauth2.Config{
+		ClientID:     *microsoftSecrets.ClientID,   //
+		ClientSecret: *microsoftSecrets.ClientSecr, //
+		RedirectURL:  *microsoftSecrets.RedirectUrl,
+		Scopes:       []string{"user.read", "profile", "openid"},
+		Endpoint:     microsoft.AzureADEndpoint(*microsoftSecrets.Tenant),
+	}
+
+	// log.Printf("OAuth %s %s %s", (*gClientID)[:6], (*gClientSecr)[:6], *redirectUrl)
 	mux := NewServeMux(tracer)
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -251,8 +440,11 @@ func NewRouter(schema *graphql.Schema, tracer opentracing.Tracer, gClientID, gCl
 	}))
 	mux.Handle("/query", &relay.Handler{Schema: schema})
 
-	mux.Handle("/auth/login", http.HandlerFunc(handleGoogleLogin))
+	mux.Handle("/auth/login", http.HandlerFunc(handleDefaultLogin))
+	mux.Handle("/auth/logina", http.HandlerFunc(handleAppleLogin))
 	mux.Handle("/auth/callback", http.HandlerFunc(handleGoogleCallback))
+	mux.Handle("/auth/callbackA", http.HandlerFunc(handleAppleCallback))
+	mux.Handle("/auth/callbackM", http.HandlerFunc(handleMicrosoftCallback))
 	mux.Handle("/auth/refresh", http.HandlerFunc(handleRefresh))
 	// TODO: Add more routes here for other endpoints.
 	// TODO: Add authentication endpoints or serving up regular assets?

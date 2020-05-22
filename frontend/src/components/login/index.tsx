@@ -4,7 +4,7 @@
 // IMPORTS
 
 /* NPM */
-import { Button, Container } from "@material-ui/core";
+import { Button, Container, FormControl, Grid, Paper } from "@material-ui/core";
 import React from "react";
 /* Local */
 
@@ -36,24 +36,59 @@ class Index extends React.PureComponent<IProps, IIndexState> {
 
     return (
       <>
-        <Container maxWidth="md">
+        <Container maxWidth="sm">
           {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
-          <h1>Login</h1>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => this.loginClick()}
-          >
-            Signin with Google
-          </Button>
+          <Paper  >
+            <h1>Login</h1>
+            <Grid container spacing={3} justify="center" direction="row" alignItems="center">
+              <Grid item xs>
+                <FormControl>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => this.loginClick(0)}
+                  >
+                    Signin with Google
+                   </Button>
+
+                </FormControl>
+              </Grid>
+
+            </Grid>
+
+            <Grid container spacing={3} justify="center" direction="row" alignItems="center">
+              <Grid item xs>
+                <FormControl >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth={true}
+                    onClick={() => this.loginClick(2)}
+                  >
+                    Signin with Microsoft
+                  </Button>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
         </Container>
       </>
     );
   }
 
-  async loginClick() {
+  async loginClick(mode: number) {
     console.log("Redirect");
-    window.location.href = window.location.origin + "/auth/login";
+    switch (mode) {
+      case 0:
+        window.location.href = window.location.origin + "/auth/login";
+        break;
+      case 1:
+        window.location.href = window.location.origin + "/auth/login?provider=apple";
+        break;
+      case 2:
+        window.location.href = window.location.origin + "/auth/login?provider=microsoft";
+        break;
+    }
     // this.props.history.replace("/auth/login");
     // const ok = await Security.login("MyUsername@hotmail.com", "MyPassword");
     // console.log("Redirecting");

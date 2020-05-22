@@ -15,6 +15,20 @@ module.exports = function (app) {
         })
     );
     app.use(
+        '/auth/callbackM',
+        createProxyMiddleware({
+            target: 'http://localhost:8090',
+            changeOrigin: true,
+        })
+    );
+    app.use(
+        '/auth/callbackA',
+        createProxyMiddleware({
+            target: 'http://localhost:8090',
+            changeOrigin: true,
+        })
+    );
+    app.use(
         '/auth/refresh',
         createProxyMiddleware({
             target: 'http://localhost:8090',
