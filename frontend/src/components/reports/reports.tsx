@@ -101,7 +101,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   constructor(props: PROPS_WITH_STYLES, state: IState) {
     super(props, state);
     this.state = {
-      timefilter: "1",
+      timefilter: "7",
       sum: 0,
       addOpen: false,
       editOpen: false,
@@ -119,6 +119,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     // this.interval = setInterval(() => {
     //   this.checkTimer();
     // }, 500);
+    this.setFilterTimerange("7")
   }
   componentWillUnmount() {
     //clearInterval(this.interval!);
@@ -381,7 +382,11 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   setFilterTimerange(days: string) {
     let t1 = moment();
     let t2 = moment().add("days", -100);
+
     switch (days) {
+      case "1":
+        t2 = moment().hour(0);
+        break;
       case "2":
         t2 = moment().add("days", -1);
         break;
