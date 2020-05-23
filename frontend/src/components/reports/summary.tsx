@@ -21,7 +21,7 @@ import { AllTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, P
 import { Timer as TimerSrv } from "../../lib/timer";
 import theme from '../../theme';
 import ProjectSelect from "../projects/projectSelect";
-
+import BarChart from "./barchart";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -315,66 +315,79 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                     </Box>
                   </MuiPickersUtilsProvider>
                 </Box>
-                <div
-                  className={classes.list}
-                  style={{
-                    overflowY: "auto",
-                    height: "calc(100vh - 250px)",
-                    minHeight: "calc(100vh - 250px)",
-                  }}
-                >
+                <div style={{
+                  overflowY: "auto",
+                  height: "calc(100vh - 250px)",
+                  minHeight: "calc(100vh - 250px)",
+                }}>
+                  <div
+                    style={{
+                      overflowY: "auto",
+                      height: "50%",
+                    }}>
+                    <BarChart></BarChart>
 
-                  <List
-                    component="nav"
-                    aria-label="main mailbox folders"
+                  </div>
+                  <div
+                    className={classes.list}
+                    style={{
+                      overflowY: "auto",
+                      height: "50%",
+                    }}
                   >
-                    {_.map(allProjects, (entry: ProjectGroup, index) => (
-                      <>
-                        <ListItem button key={index} onClick={() => {
-                          this.handleExpand(entry, isOpen);
-                        }}>
-                          <ListItemIcon>
-                            <Assignment />
-                          </ListItemIcon>
-                          <ListItemText style={{width: "70%"}} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
-                          <ListItemText style={{width: "80px"}} primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>                          
-                          <ListItemSecondaryAction>
-                            <Typography
-                              // component="h1"
-                              // variant="h2"
-                              align="right"
-                              color="textPrimary"
+
+                    <List
+                      component="nav"
+                      aria-label="main mailbox folders"
+                    >
+                      {_.map(allProjects, (entry: ProjectGroup, index) => (
+                        <>
+                          <ListItem button key={index} onClick={() => {
+                            this.handleExpand(entry, isOpen);
+                          }}>
+                            <ListItemIcon>
+                              <Assignment />
+                            </ListItemIcon>
+                            <ListItemText style={{ width: "70%" }} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
+                            <ListItemText style={{ width: "80px" }} primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>
+                            <ListItemSecondaryAction>
+                              <Typography
+                                // component="h1"
+                                // variant="h2"
+                                align="right"
+                                color="textPrimary"
                               //gutterBottom
-                            >
-                              
-                              {this.getIsOpen(entry) ? <ExpandLess /> : <ExpandMore />}
-                            </Typography>
+                              >
 
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                        <Collapse in={this.getIsOpen(entry)} timeout="auto" unmountOnExit>
-                          <List dense={true} component="div" disablePadding>
-                            {entry.timeEntries.map(t =>
-                              (<ListItem button className={classes.nested}>
-                                <ListItemIcon>
-                                  <TimerIcon />
-                                </ListItemIcon>
-                                <ListItemText style={{width: "70%"}}  primary={t.description} />
-                                <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
-                                <ListItemSecondaryAction>
-                                </ListItemSecondaryAction>
+                                {this.getIsOpen(entry) ? <ExpandLess /> : <ExpandMore />}
+                              </Typography>
+
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          <Collapse in={this.getIsOpen(entry)} timeout="auto" unmountOnExit>
+                            <List dense={true} component="div" disablePadding>
+                              {entry.timeEntries.map(t =>
+                                (<ListItem button className={classes.nested}>
+                                  <ListItemIcon>
+                                    <TimerIcon />
+                                  </ListItemIcon>
+                                  <ListItemText style={{ width: "70%" }} primary={t.description} />
+                                  <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
+                                  <ListItemSecondaryAction>
+                                  </ListItemSecondaryAction>
 
 
-                              </ListItem>)
-                            )
-                            }
+                                </ListItem>)
+                              )
+                              }
 
-                          </List>
-                        </Collapse>
-                      </>
-                    ))}
+                            </List>
+                          </Collapse>
+                        </>
+                      ))}
 
-                  </List>
+                    </List>
+                  </div>
                 </div>
               </>
             )
