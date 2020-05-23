@@ -19,6 +19,7 @@ import Typography from "@material-ui/core/Typography";
 import { Assignment, Brightness7, Home as HomeIcon, Label, MonetizationOn, People, ShowChart } from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
 import React from "react";
+import CookieConsent from "react-cookie-consent";
 import { Link as RouterLink, Redirect, Route, Switch, useHistory, useLocation, withRouter } from "react-router-dom";
 import { Timer as TimerEntry } from "../graphql";
 import security from "../lib/security";
@@ -202,8 +203,8 @@ export function MainMenu(props: any) {
       <Divider />
       <TimerMenuEntry isActiveRoute={activeRouteTimer} onClick={() => {
 
-          closeDrawer();
-          history.push("/timer");
+        closeDrawer();
+        history.push("/timer");
       }} />
       <Divider />
       <List>
@@ -389,6 +390,25 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           </div>
         </div>
         {/* <Copyright></Copyright> */}
+        <CookieConsent
+          location="bottom"
+          buttonText="Accept Cookies"
+          cookieName="cookieAccepted"
+          style={{ zIndex: 2000, background: "#2B373B" }}
+          buttonStyle={{ color: "#4e503b", fontSize: "20px" }}
+          expires={150}
+        >
+          Diese Webseite verwendet Cookies.<br></br>
+          <span style={{ fontSize: "16px" }}>
+          Why We Use Cookies
+This site uses cookies to make your browsing experience more convenient and personal. 
+Cookies store useful information on your computer to help us improve the efficiency and relevance of our site for you. 
+In some cases, they are essential to making the site work properly. By accessing this site, you consent to the use of cookies. 
+For more information, refer to our privacy policy and cookie policy.<br></br>
+            Wir verwenden Cookies, um Inhalte und Anzeigen diser Website zu personalisieren und die aktuelle eingeloggte Sitzung zu speichern.
+           </span>
+        </CookieConsent>
+
       </div>
     );
   }
