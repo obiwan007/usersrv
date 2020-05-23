@@ -16,12 +16,11 @@ import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
-import { Assignment, Brightness7, Home as HomeIcon, Label, MonetizationOn, People, ShowChart, Timer as TimerIcon } from "@material-ui/icons";
-import MailIcon from "@material-ui/icons/Mail";
+import { Assignment, Brightness7, Home as HomeIcon, Label, MonetizationOn, People, ShowChart } from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
 import React from "react";
-import { Link as RouterLink, Redirect, Route, Switch, useLocation, withRouter } from "react-router-dom";
-import { AllTimerComponent, Timer as TimerEntry } from "../graphql";
+import { Link as RouterLink, Redirect, Route, Switch, useHistory, useLocation, withRouter } from "react-router-dom";
+import { Timer as TimerEntry } from "../graphql";
 import security from "../lib/security";
 import { Timer as TimerSrv } from "../lib/timer";
 import Clients from "./clients/clients";
@@ -32,6 +31,7 @@ import Projects from "./projects/projects";
 import Reports from "./reports/reports";
 import "./root.css";
 import Timer from "./timer/timer";
+import TimerMenuEntry from "./timerMenuEntry";
 import Users from "./users";
 
 // ----------------------------------------------------------------------------
@@ -120,10 +120,10 @@ export function ButtonAppBar(props: any) {
         )}
         <Typography variant="h6" className={classes.title}>
           <Hidden xsDown implementation="css">
-          My Time Tracker
+            My Time Tracker
           </Hidden>
           <Hidden smUp implementation="css">
-          MTT
+            MTT
           </Hidden>
         </Typography>
         {/* <Link
@@ -172,6 +172,7 @@ function showElapsed(t: any): string {
 export function MainMenu(props: any) {
   const classes = useStyles();
   let location = useLocation();
+  let history = useHistory();
   const { container, mobileOpen, handleDrawerToggle, closeDrawer } = props;
   const theme = useTheme();
 
@@ -194,63 +195,16 @@ export function MainMenu(props: any) {
         return <></>
     }
   }
-
+  const activeRouteTimer = activeRoute("/timer", location);
   const drawer = (
     <div>
 
       <Divider />
-      <List>
-        <AllTimerComponent variables={{ d: { dayrange: "0" } }}>
-          {({ data, loading, error }) => {
-            // Any errors? Say so!
-            currentTimer = undefined;
-            data?.allTimer?.forEach((d) => {
-              if (d) {
-                (d as any).projectId = d?.project?.id;
-                if (d.isRunning === true) {
-                  currentTimer = d;
-                }
-              }
-            });
-            const timerText =
-              currentTimer && currentTimer!.isRunning && !activeRoute("/timer", location)
-                ? showElapsed(currentTimer)
-                : "Timer";
-            // console.log("currentTimer", currentTimer, data?.allTimer);
-            if (error) {
-              return (
-                <div>
-                  <h1>Error retrieving Timer list &mdash; {error.message}</h1>
-                  {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
-                </div>
-              );
-            }
+      <TimerMenuEntry isActiveRoute={activeRouteTimer} onClick={() => {
 
-            // If the data is still loading, return with a basic
-            // message to alert the user
-
-            return (
-              <>
-                {[{ txt: timerText, link: "/timer" }].map((o, index) => (
-                  <ListItem
-                    selected={activeRoute(o.link, location)}
-                    component={RouterLink}
-                    to={o.link}
-                    onClick={closeDrawer}
-                    button
-                    key={o.txt}
-                  >
-                    <ListItemIcon>
-                      {index % 2 === 0 ? <TimerIcon /> : <MailIcon />}
-                    </ListItemIcon>
-                    <ListItemText primary={o.txt} />
-                  </ListItem>
-                ))}
-              </>
-            );
-          }}
-        </AllTimerComponent>
-      </List>
+          closeDrawer();
+          history.push("/timer");
+      }} />
       <Divider />
       <List>
         {[
@@ -373,9 +327,9 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
       picture: security.picture,
       name: security.username,
     });
-    setInterval(() => {
-      this.checkTimer();
-    }, 1000);
+    // setInterval(() => {
+    //   this.checkTimer();
+    // }, 1000);
   };
   checkTimer = () => {
     this.setState({

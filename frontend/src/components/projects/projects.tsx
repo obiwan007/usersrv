@@ -157,7 +157,12 @@ export class Projects extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                   // message to alert the user
 
                   return (
-                    <div>
+                    <div style={{
+                      marginTop: 5,
+                      overflowY: "auto",
+                      height: "calc(100vh - 75px)",
+                      minHeight: "calc(100vh - 75px)",
+                    }}>
                       <List
                         component="nav"
                         aria-label="main mailbox folders"

@@ -7,7 +7,7 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { Box, createStyles, Tab, Tabs, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Box, createStyles, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
 import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -93,7 +93,7 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <Box p={3}>
-          <Typography>{children}</Typography>
+          <div>{children}</div>
         </Box>
       )}
     </div>

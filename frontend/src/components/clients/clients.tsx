@@ -144,7 +144,12 @@ export class Clients extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
         <Button onClick={() => this.addProject()}>Add Client</Button> */}
 
-                      <div>
+                      <div style={{
+                        marginTop: 5,
+                        overflowY: "auto",
+                        height: "calc(100vh - 75px)",
+                        minHeight: "calc(100vh - 75px)",
+                      }}>
                         <List
                           component="nav"
                           aria-label="main mailbox folders"

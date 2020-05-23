@@ -11,7 +11,7 @@ import { MutationFunction } from "@apollo/react-common";
 import DateFnsUtils from '@date-io/date-fns';
 import { Box, Button, Collapse, createStyles, FormControl, InputLabel, List, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
-import { Assignment, ExpandLess, ExpandMore, StarBorder } from "@material-ui/icons";
+import { Assignment, ExpandLess, ExpandMore, Timer as TimerIcon } from "@material-ui/icons";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import * as _ from "lodash";
 import moment from "moment";
@@ -318,8 +318,9 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                 <div
                   className={classes.list}
                   style={{
-                    height: "calc(100vh - 200px)",
-                    minHeight: "calc(100vh - 200px)",
+                    overflowY: "auto",
+                    height: "calc(100vh - 250px)",
+                    minHeight: "calc(100vh - 250px)",
                   }}
                 >
 
@@ -335,15 +336,15 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                           <ListItemIcon>
                             <Assignment />
                           </ListItemIcon>
-                          <ListItemText style={{width: "80%"}} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
-                          <ListItemText primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>                          
+                          <ListItemText style={{width: "70%"}} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
+                          <ListItemText style={{width: "80px"}} primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>                          
                           <ListItemSecondaryAction>
                             <Typography
                               // component="h1"
                               // variant="h2"
                               align="right"
                               color="textPrimary"
-                              gutterBottom
+                              //gutterBottom
                             >
                               
                               {this.getIsOpen(entry) ? <ExpandLess /> : <ExpandMore />}
@@ -356,9 +357,9 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                             {entry.timeEntries.map(t =>
                               (<ListItem button className={classes.nested}>
                                 <ListItemIcon>
-                                  <StarBorder />
+                                  <TimerIcon />
                                 </ListItemIcon>
-                                <ListItemText style={{width: "80%"}}  primary={t.description} />
+                                <ListItemText style={{width: "70%"}}  primary={t.description} />
                                 <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
                                 <ListItemSecondaryAction>
                                 </ListItemSecondaryAction>
@@ -387,8 +388,9 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
   private handleExpand(entry: ProjectGroup, isOpen: { [id: string]: boolean; }) {
     const id = entry!.project!.id!;
-    isOpen[id] = !isOpen[id];
-    this.setState({ isOpen });
+    const newOpen = _.clone(isOpen);
+    newOpen[id] = !newOpen[id];
+    this.setState({ isOpen: newOpen });
   }
 
 
