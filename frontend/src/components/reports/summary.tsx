@@ -99,6 +99,17 @@ class ProjectGroup {
 export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
 export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
+
+  options: any = {
+    tooltips: {
+      callbacks: {
+        label: (tooltipItem: any, data: any) => {
+          return TimerSrv.hms(tooltipItem.yLabel * 3600);;
+        }
+      }
+    }
+  };
+
   filterSelect: any = [
     // { key: "0", value: "all" },
     { key: "1", value: "Today" },
@@ -126,6 +137,8 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       isOpen: {},
     };
   }
+
+
 
   componentDidMount() {
     // this.setState({
@@ -193,15 +206,16 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             if (allProjects && count > 0 && allTimer) {
               this.calculateBarchart(allProjects, timefilter, filterTimerStart, filterTimerEnd)
               console.log('All', allProjects);
-              const id = allTimer!.find(t => t?.project !==null)!.project!.id!;
+              const id = allTimer!.find(t => t?.project !== null)!.project!.id!;
               console.log('ID:', id);
               barchart = {
-                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d.format("ddd")),
+                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d.format("D MMM ddd")),
                 backgroundColors: _.map(allProjects, p => this.getRandomColor()),
                 datasets: _.map(allProjects, (p, key) => ({
                   label: p.project?.name,
-                  data: p.ranges.map(s => s/3600),
+                  data: p.ranges.map(s => s / 3600),
                   backgroundColor: this.getRandomColor(),
+
                 }))
               }
 
@@ -343,7 +357,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                       overflowY: "auto",
                       height: "50%",
                     }}>
-                    <BarChart data={barchart}></BarChart>
+                    <BarChart data={barchart} options={this.options}></BarChart>
 
                   </div>
                   <div
@@ -424,7 +438,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     const days = r.duration("days");
     console.log('Diff:', r.duration("days"))
     _.map(allProjects, p => {
-      if (days < 30) {
+      if (days < 15) {
         let start = filterTimerStart;
         p.dates = new Array<Moment.Moment>(days);
         p.ranges = new Array<number>(days);
@@ -432,6 +446,28 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         p.ranges.fill(0, 0, days);
         for (let interval = 0; interval <= days; interval++) {
           const r = moment.rangeFromInterval("days", 1, start);
+          console.log('Range', r)
+          p.dates[interval] = start;
+          p.timeEntries.forEach(t => {
+            if (t && t.elapsedSeconds && r.contains(t!.t1!)) {
+
+              p.ranges[interval] += t.elapsedSeconds!;
+            }
+          })
+
+          start = r.end;
+        }
+
+      }
+      if (days > 14) {
+        const weeks = r.duration("weeks");
+        let start = filterTimerStart;
+        p.dates = new Array<Moment.Moment>(weeks);
+        p.ranges = new Array<number>(weeks);
+        p.ranges.fill(0, 0, weeks);
+        p.ranges.fill(0, 0, weeks);
+        for (let interval = 0; interval <= weeks; interval++) {
+          const r = moment.rangeFromInterval("weeks", 1, start);
           console.log('Range', r)
           p.dates[interval] = start;
           p.timeEntries.forEach(t => {

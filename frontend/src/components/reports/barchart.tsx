@@ -8,8 +8,35 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
+import * as _ from "lodash";
 import React from "react";
-import { Bar } from 'react-chartjs-2';
+import { Bar, defaults } from 'react-chartjs-2';
+
+_.merge(defaults, {
+  bar: {
+    scales: {
+      yAxes: [{
+        gridLines: {
+          color: 'grey' // makes grid lines from y axis red
+        }
+      }],
+      xAxes: [{
+        gridLines: {
+          color: 'grey' // makes grid lines from y axis red
+        }
+      }]
+    },
+  },
+  global: {
+    defaultColor: 'white',
+    defaultFontColor: "white",
+    line: {
+      borderColor: 'white',
+    },
+
+  }
+});
+console.log("CHART", defaults);
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -46,6 +73,7 @@ interface IProps {
   history?: any;
   currentTimer: any;
   data: any;
+  options: any;
 }
 export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
 export class BarChart extends React.PureComponent<IProps, IState> {
@@ -96,7 +124,7 @@ export class BarChart extends React.PureComponent<IProps, IState> {
   }
 
   render() {
-    const {data} = this.props;
+    const { data, options } = this.props;
     return (
       <div style={{ position: "relative", margin: "auto", width: "100%", height: '100%' }}>
         {/* <h2>Bar Example (custom size)</h2> */}
@@ -104,7 +132,7 @@ export class BarChart extends React.PureComponent<IProps, IState> {
           data={data}
           // width={50}
           // height={150}
-          options={{
+          options={{...options,
             maintainAspectRatio: false
           }}
         />
