@@ -1,8 +1,8 @@
 {
   "folders": [
     {
-      "path": "."
-    },
+      "path": "frontend"
+    },    
     {
       "path": "proto"
     },
@@ -12,9 +12,7 @@
     {
       "path": "usersrv"
     },
-    {
-      "path": "frontend"
-    },
+    
     {
       "path": "eventstore"
     },
@@ -29,7 +27,10 @@
     },
     {
       "path": "clientsrv"
-    }
+    },
+    {
+      "path": "."
+    },
   ],
   "settings": {
     "go.buildOnSave": "off",

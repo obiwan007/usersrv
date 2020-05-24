@@ -328,9 +328,12 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
       picture: security.picture,
       name: security.username,
     });
-    // setInterval(() => {
-    //   this.checkTimer();
-    // }, 1000);
+    if (isLoggedIn) {
+      setInterval(async () => {
+        const isLoggedIn = await security.refresh();
+        console.log('Refreshed token', isLoggedIn);
+      }, 1000*3000);
+    }
   };
   checkTimer = () => {
     this.setState({
@@ -400,10 +403,10 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
         >
           Diese Webseite verwendet Cookies.<br></br>
           <span style={{ fontSize: "16px" }}>
-          Why We Use Cookies
-This site uses cookies to make your browsing experience more convenient and personal. 
-Cookies store useful information on your computer to help us improve the efficiency and relevance of our site for you. 
-In some cases, they are essential to making the site work properly. By accessing this site, you consent to the use of cookies. 
+            Why We Use Cookies
+            This site uses cookies to make your browsing experience more convenient and personal.
+            Cookies store useful information on your computer to help us improve the efficiency and relevance of our site for you.
+            In some cases, they are essential to making the site work properly. By accessing this site, you consent to the use of cookies.
 For more information, refer to our privacy policy and cookie policy.<br></br>
             Wir verwenden Cookies, um Inhalte und Anzeigen diser Website zu personalisieren und die aktuelle eingeloggte Sitzung zu speichern.
            </span>

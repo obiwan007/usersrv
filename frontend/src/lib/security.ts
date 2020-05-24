@@ -27,7 +27,7 @@ class Security {
 
   async refresh() {
     const uri = window.location.origin; // GRAPHQL ? GRAPHQL : "http://gqlsrv:8090";
-    console.log("Login clicked");
+    console.log("Refresh token");
     const response = await zipkinFetch(`${uri}/auth/refresh`, {
       method: "POST",
       credentials: "same-origin", // include, *same-origin, omit
