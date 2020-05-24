@@ -10,7 +10,6 @@
 import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
 import React from "react";
 import { Bar } from 'react-chartjs-2';
-import { withRouter } from "react-router-dom";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -46,6 +45,7 @@ interface IState {
 interface IProps {
   history?: any;
   currentTimer: any;
+  data: any;
 }
 export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
 export class BarChart extends React.PureComponent<IProps, IState> {
@@ -55,12 +55,21 @@ export class BarChart extends React.PureComponent<IProps, IState> {
     datasets: [
       {
         label: 'My First dataset',
-        backgroundColor: 'rgba(255,99,132,0.2)',
-        borderColor: 'rgba(255,99,132,1)',
-        borderWidth: 1,
-        hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-        hoverBorderColor: 'rgba(255,99,132,1)',
+        // backgroundColor: 'rgba(255,99,132,0.2)',
+        // borderColor: 'rgba(255,99,132,1)',
+        // borderWidth: 1,
+        // hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+        // hoverBorderColor: 'rgba(255,99,132,1)',
         data: [65, 59, 80, 81, 56, 55, 40]
+      },
+      {
+        label: 'My Second dataset',
+        // backgroundColor: 'rgba(255,255,132,0.2)',
+        // // borderColor: 'rgba(255,99,132,1)',
+        // borderWidth: 1,
+        // hoverBackgroundColor: 'rgba(255,99,132,1)',
+        // hoverBorderColor: 'rgba(255,99,132,1)',
+        data: [165, 39, 40, 41, 36, 85, 80]
       }
     ]
   };
@@ -87,12 +96,12 @@ export class BarChart extends React.PureComponent<IProps, IState> {
   }
 
   render() {
-
+    const {data} = this.props;
     return (
       <div style={{ position: "relative", margin: "auto", width: "100%", height: '100%' }}>
         {/* <h2>Bar Example (custom size)</h2> */}
         <Bar
-          data={this.data}
+          data={data}
           // width={50}
           // height={150}
           options={{
@@ -113,4 +122,4 @@ export class BarChart extends React.PureComponent<IProps, IState> {
   // }
 }
 
-export default withStyles(styles as any)(withRouter(BarChart as any));
+export default withStyles(styles as any)(BarChart as any);

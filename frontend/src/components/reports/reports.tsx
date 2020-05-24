@@ -161,10 +161,10 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
         <TabPanel value={selectedTab} index={0}>
           <Summary></Summary>
-      </TabPanel>
+        </TabPanel>
         <TabPanel value={selectedTab} index={1}>
           <TimerList></TimerList>
-      </TabPanel>
+        </TabPanel>
         <TabPanel value={selectedTab} index={2}>
           Item Three
       </TabPanel>
@@ -173,7 +173,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
   }
 
-  
+
 
   handleChange = (event: React.ChangeEvent<{}>, selectedTab: number) => {
     // console.log('Selected', selectedTab)
@@ -186,6 +186,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     }
     return new Date(d).toLocaleDateString();
   }
+
 
   // recalcSummary( TimeEntry[]): number {
   //   let sum = 0;

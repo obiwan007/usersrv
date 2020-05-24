@@ -14,7 +14,8 @@ import ListItem from "@material-ui/core/ListItem";
 import { Assignment, ExpandLess, ExpandMore, Timer as TimerIcon } from "@material-ui/icons";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import * as _ from "lodash";
-import moment from "moment";
+import * as Moment from 'moment';
+import { extendMoment } from 'moment-range';
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { AllTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, Project, refetchAllTimerQuery, Timer as TimerEntry } from "../../graphql";
@@ -22,6 +23,8 @@ import { Timer as TimerSrv } from "../../lib/timer";
 import theme from '../../theme';
 import ProjectSelect from "../projects/projectSelect";
 import BarChart from "./barchart";
+
+const moment = extendMoment(Moment);
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -81,14 +84,16 @@ interface IProps {
 }
 
 type TimerMoment = TimerEntry & {
-  t1: moment.Moment,
-  t2: moment.Moment,
+  t1: Moment.Moment,
+  t2: Moment.Moment,
 }
 
 class ProjectGroup {
   project?: Project;
-  timeEntries: TimerEntry[] = [];
+  timeEntries: TimerMoment[] = [];
   elapsed: number = 0;
+  ranges: number[] = [];
+  dates: Moment.Moment[] = [];
 }
 
 export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
@@ -142,6 +147,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
     let allProjects: { [id: string]: ProjectGroup } = {}
     let open = true;
+    let barchart = {};
     return (
       <div>
         <AllTimerComponent
@@ -182,13 +188,25 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               }
               allProjects[id].timeEntries.push(t);
               allProjects[id].elapsed += t!.elapsedSeconds!;
-            }
-            );
-
-            console.log('All', allProjects);
-
+            });
             const count = allTimer ? allTimer.length : 0;
-            console.log("C", count)
+            if (allProjects && count > 0 && allTimer) {
+              this.calculateBarchart(allProjects, timefilter, filterTimerStart, filterTimerEnd)
+              console.log('All', allProjects);
+              const id = allTimer!.find(t => t?.project !==null)!.project!.id!;
+              console.log('ID:', id);
+              barchart = {
+                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d.format("ddd")),
+                backgroundColors: _.map(allProjects, p => this.getRandomColor()),
+                datasets: _.map(allProjects, (p, key) => ({
+                  label: p.project?.name,
+                  data: p.ranges.map(s => s/3600),
+                  backgroundColor: this.getRandomColor(),
+                }))
+              }
+
+              console.log("C", barchart)
+            }
             if (error) {
               return (
                 <div>
@@ -325,7 +343,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                       overflowY: "auto",
                       height: "50%",
                     }}>
-                    <BarChart></BarChart>
+                    <BarChart data={barchart}></BarChart>
 
                   </div>
                   <div
@@ -398,7 +416,46 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       </div >
     );
   }
+  calculateBarchart(allProjects: { [id: string]: ProjectGroup; }, timefilter: string, filterTimerStart: Moment.Moment, filterTimerEnd: Moment.Moment) {
+    if (!filterTimerStart && !filterTimerEnd) {
+      return;
+    }
+    const r = moment.range(filterTimerStart, filterTimerEnd);
+    const days = r.duration("days");
+    console.log('Diff:', r.duration("days"))
+    _.map(allProjects, p => {
+      if (days < 30) {
+        let start = filterTimerStart;
+        p.dates = new Array<Moment.Moment>(days);
+        p.ranges = new Array<number>(days);
+        p.ranges.fill(0, 0, days);
+        p.ranges.fill(0, 0, days);
+        for (let interval = 0; interval <= days; interval++) {
+          const r = moment.rangeFromInterval("days", 1, start);
+          console.log('Range', r)
+          p.dates[interval] = start;
+          p.timeEntries.forEach(t => {
+            if (t && t.elapsedSeconds && r.contains(t!.t1!)) {
 
+              p.ranges[interval] += t.elapsedSeconds!;
+            }
+          })
+
+          start = r.end;
+        }
+
+      }
+    })
+  }
+
+  getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
   private handleExpand(entry: ProjectGroup, isOpen: { [id: string]: boolean; }) {
     const id = entry!.project!.id!;
     const newOpen = _.clone(isOpen);
@@ -413,7 +470,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   setFilterTimerange(days: string) {
-    let t1 = moment();
+    let t1: Moment.Moment = moment();
     let t2 = moment().add("days", -100);
 
     switch (days) {
