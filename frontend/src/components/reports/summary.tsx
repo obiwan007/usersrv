@@ -403,7 +403,8 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                   <ListItemIcon>
                                     <TimerIcon />
                                   </ListItemIcon>
-                                  <ListItemText style={{ width: "70%" }} primary={t.description} />
+                                  <ListItemText style={{ width: "40%" }} primary={t.description} />
+                                  <ListItemText style={{ width: "20%" }} primary={this.toLocaleDate(t.timerStart)} />
                                   <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
                                   <ListItemSecondaryAction>
                                   </ListItemSecondaryAction>
@@ -435,7 +436,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       return;
     }
     const r = moment.range(filterTimerStart, filterTimerEnd);
-    const days = r.duration("days");
+    const days = r.duration("days")+2;
     console.log('Diff:', r.duration("days"))
     _.map(allProjects, p => {
       if (days < 15) {
@@ -451,7 +452,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           p.timeEntries.forEach(t => {
             if (t && t.elapsedSeconds && r.contains(t!.t1!)) {
 
-              p.ranges[interval] += t.elapsedSeconds!;
+              p.ranges[interval+1] += t.elapsedSeconds!;
             }
           })
 
@@ -460,7 +461,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
       }
       if (days > 14) {
-        const weeks = r.duration("weeks");
+        const weeks = r.duration("weeks")+1;
         let start = filterTimerStart;
         p.dates = new Array<Moment.Moment>(weeks);
         p.ranges = new Array<number>(weeks);
@@ -483,7 +484,6 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       }
     })
   }
-
   getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
     var color = '#';
