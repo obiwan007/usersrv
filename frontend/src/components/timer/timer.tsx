@@ -8,7 +8,7 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
-import { Box, Button, CircularProgress, createStyles, FormControl, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Button, CircularProgress, createStyles, FormControl, Grid, Hidden, IconButton, InputLabel, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { green, red } from "@material-ui/core/colors";
 import ListItem from "@material-ui/core/ListItem";
 import { Delete, PlayArrow, Stop, Timer as TimerIcon } from "@material-ui/icons";
@@ -18,9 +18,9 @@ import Autosizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { AllProjectsComponent, AllTimerComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, Project, refetchAllTimerQuery, StartTimerComponent, StartTimerMutation, StartTimerMutationVariables, StopTimerComponent, StopTimerMutation, StopTimerMutationVariables, Timer as TimerEntry, UpdateTimerComponent } from "../../graphql";
 import timer, { Timer as TimerSrv } from "../../lib/timer";
+import theme from '../../theme';
 import { RunningClock } from "./runningClock";
 import TimerEdit from "./timerEdit";
-
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -35,11 +35,16 @@ const styles = ({ palette, spacing }: Theme) =>
       backgroundColor: palette.background.default,
       color: palette.primary.main,
     },
+    container: {
+      paddingTop: spacing(1),
+      paddingBottom: spacing(1),
+      width: "100%"
+    },
     formControl: {
-      margin: spacing(1),
-      paddingRight: spacing(1),
-      paddingLeft: spacing(1),
-      minWidth: 120,
+      // margin: spacing(1),
+      //paddingRight: spacing(1),
+      //paddingLeft: spacing(1),
+      //minWidth: 120,
       width: "100%",
     },
     list: {
@@ -51,6 +56,14 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     selectEmpty: {
       // marginTop: 13,
+    },
+    scroll: {
+      listStyle: "none",
+      overflowY: "auto",
+      height: "calc(100vh - 230px)",
+      [theme.breakpoints.down('sm')]: {
+        height: "calc(100vh - 320px)",
+      },
     },
   });
 
@@ -201,12 +214,10 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
                                     return (
                                       <>
-                                        <Box
-                                          display="flex"
-                                          flexDirection="row"
-                                          alignItems="center"
+                                        <Grid className={classes.container} container alignItems="center" spacing={3}
                                         >
-                                          <Box flexGrow={1}>
+                                          <Grid item sm={6} xs={6}>
+
                                             <FormControl
                                               className={classes.formControl}
                                             >
@@ -224,8 +235,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 fullWidth
                                               />
                                             </FormControl>
-                                          </Box>
-                                          <Box>
+                                          </Grid>
+                                          <Grid item sm={3} xs={6}>
                                             <FormControl
                                               className={[
                                                 classes.formControl,
@@ -280,8 +291,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                   )}
                                               </Select>
                                             </FormControl>
-                                          </Box>
-                                          <Box alignItems="center">
+                                          </Grid>
+                                          <Grid item sm={1} xs={1}>
                                             <FormControl
                                               className={classes.topButtons}
                                             >
@@ -337,8 +348,8 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 }}
                                               </StopTimerComponent>
                                             </FormControl>
-                                          </Box>
-                                          <Box>
+                                          </Grid>
+                                          <Grid item sm={1} xs={2}>
                                             <FormControl
                                               className={classes.topButtons}
                                             >
@@ -354,20 +365,17 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 <Delete />
                                               </IconButton>
                                             </FormControl>
-                                          </Box>
-                                          <Box>
+                                          </Grid>
+                                          <Grid item sm={1} xs={1}>
                                             <RunningClock
                                               currentTimer={currentTimer}
                                             ></RunningClock>
-                                          </Box>
-                                        </Box>
+                                          </Grid>
+                                        </Grid>
                                         {/* ----------------------- */}
-                                        <Box
-                                          display="flex"
-                                          flexDirection="row"
-                                          alignItems="center"
+                                        <Grid className={classes.container} container alignItems="center" spacing={3}
                                         >
-                                          <Box>
+                                          <Grid item sm={6} xs={6}>
                                             <FormControl
                                               style={{ width: 250 }}
                                               className={[
@@ -404,19 +412,15 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                 )}
                                               </Select>
                                             </FormControl>
-                                          </Box>
+                                          </Grid>
                                           {/* <Box>
             <Typography variant="body2" color="textSecondary" align="center">
               {TimerSrv.hms(sum)}
             </Typography>
           </Box> */}
-                                        </Box>
+                                        </Grid>
                                         <div
-                                          className={classes.list}
-                                          style={{
-                                            height: "calc(100vh - 260px)",
-                                            minHeight: "calc(100vh - 260px)",
-                                          }}
+                                          className={classes.scroll}                                          
                                         >
                                           <Autosizer>
                                             {({ height, width }) =>
@@ -455,7 +459,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           }}
         </AllProjectsComponent>
 
-        <TimerEdit timefilter={timefilter} timer={this.state.currentTimer} addOpen={addOpen} editOpen={editOpen} onClose={()=>{this.setState({addOpen: false, editOpen: false})}}>
+        <TimerEdit timefilter={timefilter} timer={this.state.currentTimer} addOpen={addOpen} editOpen={editOpen} onClose={() => { this.setState({ addOpen: false, editOpen: false }) }}>
 
         </TimerEdit>
         {/* {this.renderDialog()} */}
