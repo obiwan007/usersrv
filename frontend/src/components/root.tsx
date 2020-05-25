@@ -34,7 +34,6 @@ import "./root.css";
 import Timer from "./timer/timer";
 import TimerMenuEntry from "./timerMenuEntry";
 import Users from "./users";
-
 // ----------------------------------------------------------------------------
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
