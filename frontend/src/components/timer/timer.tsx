@@ -292,84 +292,91 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               </Select>
                                             </FormControl>
                                           </Grid>
-                                          <Grid item sm={1} xs={1}>
-                                            <FormControl
-                                              className={classes.topButtons}
-                                            >
-                                              <StopTimerComponent>
-                                                {(stopTimer, { data }) => {
-                                                  return (
-                                                    <StartTimerComponent>
-                                                      {(
-                                                        startTimer,
-                                                        { data }
-                                                      ) => {
-                                                        return (
-                                                          <IconButton
-                                                            disabled={isLoading}
-                                                            onClick={() =>
-                                                              this.startStopTimer(
-                                                                createTimer,
-                                                                startTimer,
-                                                                stopTimer,
-                                                                currentTimer
-                                                              )
-                                                            }
-                                                            edge="start"
-                                                            color="secondary"
-                                                            aria-label="menu"
-                                                          >
-                                                            {isLoading && (
-                                                              <CircularProgress></CircularProgress>
-                                                            )}
-                                                            {!isLoading &&
-                                                              !currentTimer && (
-                                                                <PlayArrow
-                                                                  style={{
-                                                                    color:
-                                                                      green[500],
-                                                                  }}
-                                                                />
-                                                              )}
-                                                            {!isLoading &&
-                                                              currentTimer && (
-                                                                <Stop
-                                                                  style={{
-                                                                    color:
-                                                                      red[500],
-                                                                  }}
-                                                                />
-                                                              )}
-                                                          </IconButton>
-                                                        );
-                                                      }}
-                                                    </StartTimerComponent>
-                                                  );
-                                                }}
-                                              </StopTimerComponent>
-                                            </FormControl>
-                                          </Grid>
-                                          <Grid item sm={1} xs={2}>
-                                            <FormControl
-                                              className={classes.topButtons}
-                                            >
-                                              <IconButton
-                                                disabled={!isRunning}
-                                                onClick={() =>
-                                                  this.deleteTimer(currentTimer!, deleteTimer)
-                                                }
-                                                edge="start"
-                                                color="inherit"
-                                                aria-label="menu"
-                                              >
-                                                <Delete />
-                                              </IconButton>
-                                            </FormControl>
-                                          </Grid>
-                                          <Grid item sm={1} xs={1}>
-                                            <RunningClock
-                                              currentTimer={currentTimer}
-                                            ></RunningClock>
+                                          <Grid item sm={3} xs={12}>
+                                            <Grid container alignItems="center" spacing={3}>
+                                              <Hidden xsUp>
+                                                <Grid item xs={6}></Grid>
+                                              </Hidden>
+                                              <Grid item sm={3} xs={1}>
+                                                <FormControl
+                                                  className={classes.topButtons}
+                                                >
+                                                  <StopTimerComponent>
+                                                    {(stopTimer, { data }) => {
+                                                      return (
+                                                        <StartTimerComponent>
+                                                          {(
+                                                            startTimer,
+                                                            { data }
+                                                          ) => {
+                                                            return (
+                                                              <IconButton
+                                                                disabled={isLoading}
+                                                                onClick={() =>
+                                                                  this.startStopTimer(
+                                                                    createTimer,
+                                                                    startTimer,
+                                                                    stopTimer,
+                                                                    currentTimer
+                                                                  )
+                                                                }
+                                                                edge="start"
+                                                                color="secondary"
+                                                                aria-label="menu"
+                                                              >
+                                                                {isLoading && (
+                                                                  <CircularProgress></CircularProgress>
+                                                                )}
+                                                                {!isLoading &&
+                                                                  !currentTimer && (
+                                                                    <PlayArrow
+                                                                      style={{
+                                                                        color:
+                                                                          green[500],
+                                                                      }}
+                                                                    />
+                                                                  )}
+                                                                {!isLoading &&
+                                                                  currentTimer && (
+                                                                    <Stop
+                                                                      style={{
+                                                                        color:
+                                                                          red[500],
+                                                                      }}
+                                                                    />
+                                                                  )}
+                                                              </IconButton>
+                                                            );
+                                                          }}
+                                                        </StartTimerComponent>
+                                                      );
+                                                    }}
+                                                  </StopTimerComponent>
+                                                </FormControl>
+                                              </Grid>
+                                              <Grid item sm={3} xs={2}>
+                                                <FormControl
+                                                  className={classes.topButtons}
+                                                >
+                                                  <IconButton
+                                                    disabled={!isRunning}
+                                                    onClick={() =>
+                                                      this.deleteTimer(currentTimer!, deleteTimer)
+                                                    }
+                                                    edge="start"
+                                                    color="inherit"
+                                                    aria-label="menu"
+                                                  >
+                                                    <Delete />
+                                                  </IconButton>
+                                                </FormControl>
+                                              </Grid>
+                                              <Grid item sm={3}>
+                                                <RunningClock
+                                                  currentTimer={currentTimer}
+                                                ></RunningClock>
+                                              </Grid>
+                                            </Grid>
                                           </Grid>
                                         </Grid>
                                         {/* ----------------------- */}
@@ -420,7 +427,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
           </Box> */}
                                         </Grid>
                                         <div
-                                          className={classes.scroll}                                          
+                                          className={classes.scroll}
                                         >
                                           <Autosizer>
                                             {({ height, width }) =>
