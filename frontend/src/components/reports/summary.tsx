@@ -209,7 +209,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               const id = allTimer!.find(t => t?.project !== null)!.project!.id!;
               console.log('ID:', id);
               barchart = {
-                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d.format("D MMM ddd")),
+                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d?.format("D MMM ddd")),
                 backgroundColors: _.map(allProjects, p => this.getRandomColor()),
                 datasets: _.map(allProjects, (p, key) => ({
                   label: p.project?.name,
@@ -436,23 +436,24 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       return;
     }
     const r = moment.range(filterTimerStart, filterTimerEnd);
-    const days = r.duration("days")+2;
+    const days = r.duration("days") + 2;
     console.log('Diff:', r.duration("days"))
     _.map(allProjects, p => {
       if (days < 15) {
-        let start = filterTimerStart;
+        let start = r.start;
         p.dates = new Array<Moment.Moment>(days);
         p.ranges = new Array<number>(days);
+        p.dates.fill(moment(), 0, days);
         p.ranges.fill(0, 0, days);
-        p.ranges.fill(0, 0, days);
+
         for (let interval = 0; interval <= days; interval++) {
           const r = moment.rangeFromInterval("days", 1, start);
-          console.log('Range', r)
+
           p.dates[interval] = start;
           p.timeEntries.forEach(t => {
             if (t && t.elapsedSeconds && r.contains(t!.t1!)) {
 
-              p.ranges[interval+1] += t.elapsedSeconds!;
+              p.ranges[interval + 1] += t.elapsedSeconds!;
             }
           })
 
@@ -461,15 +462,15 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
       }
       if (days > 14) {
-        const weeks = r.duration("weeks")+1;
-        let start = filterTimerStart;
+        const weeks = r.duration("weeks") + 1;
+        let start = r.start;
         p.dates = new Array<Moment.Moment>(weeks);
         p.ranges = new Array<number>(weeks);
-        p.ranges.fill(0, 0, weeks);
+        p.dates.fill(moment(), 0, weeks);
         p.ranges.fill(0, 0, weeks);
         for (let interval = 0; interval <= weeks; interval++) {
           const r = moment.rangeFromInterval("weeks", 1, start);
-          console.log('Range', r)
+
           p.dates[interval] = start;
           p.timeEntries.forEach(t => {
             if (t && t.elapsedSeconds && r.contains(t!.t1!)) {
