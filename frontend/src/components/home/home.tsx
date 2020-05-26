@@ -67,7 +67,10 @@ const useStyles = makeStyles((theme) => ({
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export default function Home() {
+interface IProps {
+  isAuthorized: boolean;
+}
+export default function Home(props: IProps) {
   const classes = useStyles();
   const history = useHistory();
   return (
@@ -111,24 +114,27 @@ export default function Home() {
             >
               Turn your team on to productivity with My Time Tracker.
             </Typography>
-            <div className={classes.heroButtons}>
-              <Grid container spacing={2} justify="center">
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => history.push("/login")}
-                  >
-                    Sign up or Login
-                  </Button>
+            {!props.isAuthorized &&
+              <div className={classes.heroButtons}>
+                <Grid container spacing={2} justify="center">
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => history.push("/login")}
+                    >
+                      Sign up or Login
+                </Button>
+                  </Grid>
+                  {/* <Grid item>
+                <Button variant="outlined" color="primary">
+                  Secondary action
+                </Button>
+              </Grid> */}
                 </Grid>
-                {/* <Grid item>
-                  <Button variant="outlined" color="primary">
-                    Secondary action
-                  </Button>
-                </Grid> */}
-              </Grid>
-            </div>
+              </div>
+            }
+
           </Container>
         </div>
         <div className={classes.secondHero}>
@@ -150,24 +156,25 @@ export default function Home() {
             >
               The simplest time tracker to help you get things done.
             </Typography>
-            <div className={classes.heroButtons}>
-              <Grid container spacing={2} justify="center">
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => history.push("/login")}
-                  >
-                    Sign up or Login
+            {!props.isAuthorized &&
+              <div className={classes.heroButtons}>
+                <Grid container spacing={2} justify="center">
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => history.push("/login")}
+                    >
+                      Sign up or Login
                   </Button>
-                </Grid>
-                {/* <Grid item>
+                  </Grid>
+                  {/* <Grid item>
                   <Button variant="outlined" color="primary">
                     Secondary action
                   </Button>
                 </Grid> */}
-              </Grid>
-            </div>
+                </Grid>
+              </div>}
           </Container>
         </div>
 

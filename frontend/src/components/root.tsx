@@ -142,7 +142,7 @@ export function ButtonAppBar(props: any) {
         {props.isLoggedIn && (
           <>
             <Hidden xsDown implementation="css">
-              <Button component={RouterLink} to="/user" color="inherit">
+              <Button component={RouterLink} to="/login" color="inherit">
                 {props.username}
               </Button>
             </Hidden>
@@ -304,7 +304,6 @@ interface IStateRoot {
 }
 
 interface IPropsRoot { }
-// Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
 class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   public state = {
     dynamic: null,
@@ -316,22 +315,41 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     elapsed: 0,
   };
   public componentDidMount = async () => {
-    // Fetch the component dynamically
+    console.log('Mounting Root:', this.isRunningStandalone())
+    let isLoggedIn = false;
+    try {
+      isLoggedIn = await security.refresh();
+      console.log("Refreshed", isLoggedIn);
+      // isLoggedIn=false;
+      this.setState({
+        isLoggedIn,
+        picture: security.picture,
+        name: security.username,
+      });
+    } catch (ex) {
+      console.log("Logout");
+    }
 
-    // ... and keep ahold of it locally
-    const isLoggedIn = await security.refresh();
-    console.log("Refreshed", isLoggedIn);
-
-    this.setState({
-      isLoggedIn,
-      picture: security.picture,
-      name: security.username,
-    });
     if (isLoggedIn) {
       setInterval(async () => {
-        const isLoggedIn = await security.refresh();
-        console.log('Refreshed token', isLoggedIn);
-      }, 1000*3000);
+        let isLoggedIn = false;
+        try {
+          isLoggedIn = await security.refresh();
+          console.log('Refreshed token', isLoggedIn);
+        } catch (ex) {
+
+        }
+        this.setState({
+          isLoggedIn,
+        });
+
+      }, 1000 * 3000);
+    } else {
+      if (!activeRoute("/home", window.location)) {
+        console.log("Redirect to home");
+        window.location.replace("/home")
+      }
+
     }
   };
   checkTimer = () => {
@@ -339,6 +357,12 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
       elapsed: this.state.elapsed + 1
     });
   };
+
+  isRunningStandalone() {
+    return (navigator as any).standalone || (window.matchMedia('(display-mode: standalone)').matches);
+  }
+
+
   public render() {
     const { menuVisible, isLoggedIn } = this.state;
     return (
@@ -380,7 +404,9 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
                     }}
                   />
                 </Route>
-                <Route path="/home" exact component={Home} />
+                <Route path="/home" exact >
+                  <Home history={window.history} isAuthorized={isLoggedIn}  />
+                </Route>
                 <Route path="/timer" exact component={Timer} />
                 <Route path="/reports" exact component={Reports} />
                 <Route path="/projects" exact component={Projects} />

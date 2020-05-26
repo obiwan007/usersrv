@@ -16,9 +16,10 @@ interface IIndexState {
 
 interface IProps {
   history: any;
+  isAuthorized: boolean;
 }
 // Say hello from GraphQL, along with a HackerNews feed fetched by GraphQL
-class Index extends React.PureComponent<IProps, IIndexState> {
+class Index extends React.Component<IProps, IIndexState> {
   public state = {
     dynamic: null,
   };
@@ -28,7 +29,7 @@ class Index extends React.PureComponent<IProps, IIndexState> {
   public render() {
     return (
       <>
-        <Home />
+        <Home isAuthorized={this.props.isAuthorized} />
       </>
     );
   }
