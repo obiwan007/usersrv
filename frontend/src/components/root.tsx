@@ -342,12 +342,16 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
         this.setState({
           isLoggedIn,
         });
+        if (isLoggedIn === false && !activeRoute("/home", window.location)) {
+          console.log("Redirect to home");
+          window.location.href = "/home";
+        }
 
       }, 1000 * 3000);
     } else {
       if (!activeRoute("/home", window.location)) {
         console.log("Redirect to home");
-        window.location.replace("/home")
+        window.location.href = "/home";
       }
 
     }
@@ -405,7 +409,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
                   />
                 </Route>
                 <Route path="/home" exact >
-                  <Home history={window.history} isAuthorized={isLoggedIn}  />
+                  <Home history={window.history} isAuthorized={isLoggedIn} />
                 </Route>
                 <Route path="/timer" exact component={Timer} />
                 <Route path="/reports" exact component={Reports} />
