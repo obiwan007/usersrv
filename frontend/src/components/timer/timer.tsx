@@ -236,7 +236,7 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               />
                                             </FormControl>
                                           </Grid>
-                                          <Grid item sm={3} xs={6}>
+                                          <Grid item sm={4} xs={6}>
                                             <FormControl
                                               className={[
                                                 classes.formControl,
@@ -292,12 +292,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               </Select>
                                             </FormControl>
                                           </Grid>
-                                          <Grid item sm={3} xs={12}>
+                                          <Grid item sm={2} xs={12}>
                                             <Grid container alignItems="center" spacing={3}>
                                               <Hidden xsUp>
                                                 <Grid item xs={6}></Grid>
                                               </Hidden>
-                                              <Grid item sm={3} xs={1}>
+                                              <Grid item sm={4} xs={2}>
                                                 <FormControl
                                                   className={classes.topButtons}
                                                 >
@@ -354,6 +354,12 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                   </StopTimerComponent>
                                                 </FormControl>
                                               </Grid>
+
+                                              <Grid item sm={4}>
+                                                <RunningClock
+                                                  currentTimer={currentTimer}
+                                                ></RunningClock>
+                                              </Grid>
                                               <Grid item sm={3} xs={2}>
                                                 <FormControl
                                                   className={classes.topButtons}
@@ -370,11 +376,6 @@ export class Timer extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                                     <Delete />
                                                   </IconButton>
                                                 </FormControl>
-                                              </Grid>
-                                              <Grid item sm={3}>
-                                                <RunningClock
-                                                  currentTimer={currentTimer}
-                                                ></RunningClock>
                                               </Grid>
                                             </Grid>
                                           </Grid>
