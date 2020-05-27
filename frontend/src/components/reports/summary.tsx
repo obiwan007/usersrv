@@ -9,9 +9,9 @@
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
 import DateFnsUtils from '@date-io/date-fns';
-import { Button, Collapse, createStyles, FormControl, Grid, InputLabel, List, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Button, Collapse, createStyles, FormControl, FormControlLabel, Grid, InputLabel, List, ListItemIcon, ListItemSecondaryAction, ListItemText, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
-import { Assignment, ExpandLess, ExpandMore, Timer as TimerIcon } from "@material-ui/icons";
+import { Assignment, ExpandLess, ExpandMore, Money as MoneyIcon, Timer as TimerIcon } from "@material-ui/icons";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import * as _ from "lodash";
 import * as Moment from 'moment';
@@ -68,9 +68,9 @@ const styles = ({ palette, spacing }: Theme) =>
     },
     scroll: {
       overflowY: "auto",
-      height: "calc(100vh - 240px)",
+      height: "calc(100vh - 248px)",
       [theme.breakpoints.down('sm')]: {
-        height: "calc(100vh - 315px)",
+        height: "calc(100vh - 325px)",
       },
     },
   });
@@ -84,6 +84,8 @@ interface IState {
   currentTimer: TimerEntry;
   filterTimerEnd: any;
   filterTimerStart: any;
+  filterIsBilled: boolean;
+  filterIsUnbilled: boolean;
   isOpen: { [id: string]: boolean };
 }
 interface IProps {
@@ -141,6 +143,8 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       currentTimer: {},
       filterTimerEnd: null,
       filterTimerStart: null,
+      filterIsBilled: false,
+      filterIsUnbilled: true,
       isOpen: {},
     };
   }
@@ -161,7 +165,7 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   render() {
-    const { isOpen, filterProject, filterTimerStart, filterTimerEnd, timefilter, addOpen, editOpen } = this.state;
+    const { isOpen, filterIsBilled, filterIsUnbilled, filterProject, filterTimerStart, filterTimerEnd, timefilter, addOpen, editOpen } = this.state;
     const { classes } = this.props;
     let allTimer: TimerMoment[] | null | undefined = [];
 
@@ -196,30 +200,37 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             if (filterTimerStart && filterTimerEnd) {
               allTimer = allTimer?.filter((a: TimerMoment) => a.t1.isBefore(filterTimerEnd) && a.t1.isAfter(filterTimerStart));
             }
+            if (filterIsBilled == false || filterIsUnbilled === false) {
+            allTimer = allTimer?.filter((a: TimerMoment) => 
+            (filterIsBilled && (a.isBilled === true))
+            || (filterIsUnbilled && (a.isBilled === false))
+            
+            );
+            }
             allTimer.forEach(t => {
               const id = t.project?.id!;
               if (!allProjects[id]) {
-                allProjects[id] = new ProjectGroup();
+            allProjects[id] = new ProjectGroup();
                 if (t!.project) {
-                  allProjects[id].project = t!.project
-                } else {
-                  allProjects[id].project = { id: "-1", name: "Unknown" }
-                }
+            allProjects[id].project = t!.project
+          } else {
+            allProjects[id].project = { id: "-1", name: "Unknown" }
+          }
               }
               allProjects[id].timeEntries.push(t);
               allProjects[id].elapsed += t!.elapsedSeconds!;
             });
             const count = allTimer ? allTimer.length : 0;
             if (allProjects && count > 0 && allTimer) {
-              this.calculateBarchart(allProjects, timefilter, filterTimerStart, filterTimerEnd)
+            this.calculateBarchart(allProjects, timefilter, filterTimerStart, filterTimerEnd)
               console.log('All', allProjects);
               const id = allTimer!.find(t => t?.project !== null)!.project!.id!;
               console.log('ID:', id);
               barchart = {
-                labels: allProjects[id]?.dates.map((d: Moment.Moment) => d?.format("D MMM ddd")),
+            labels: allProjects[id]?.dates.map((d: Moment.Moment) => d?.format("D MMM ddd")),
                 backgroundColors: _.map(allProjects, p => this.getRandomColor()),
                 datasets: _.map(allProjects, (p, key) => ({
-                  label: p.project?.name,
+            label: p.project?.name,
                   data: p.ranges.map(s => s / 3600),
                   backgroundColor: this.getRandomColor(),
 
@@ -231,21 +242,21 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
             if (error) {
               return (
                 <div>
-                  <h1>
-                    Error retrieving Timer list &mdash;{" "}
-                    {error.message}
-                  </h1>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() =>
-                      this.props.history.push("/login")
-                    }
-                  >
-                    Login
+            <h1>
+              Error retrieving Timer list &mdash;{" "}
+              {error.message}
+            </h1>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() =>
+                this.props.history.push("/login")
+              }
+            >
+              Login
                                           </Button>
-                  {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
-                </div>
+            {/* <Button variant="contained" color="secondary" onClick={() => this.refreshClick()}>Refresh</Button> */}
+          </div>
               );
             }
 
@@ -254,191 +265,256 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
             return (
               <>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
 
-                  <Grid container spacing={3}
-                    className={classes.container}
+              <Grid container spacing={3}
+                className={classes.container}
+              >
+                <Grid item sm={3} xs={6}>
+                  <FormControl
+                    className={[
+                      classes.formControl,
+                      classes.selectEmpty,
+                    ].join(" ")}
                   >
-                    <Grid item sm={3} xs={6}>
-                      <FormControl
-                        className={[
-                          classes.formControl,
-                          classes.selectEmpty,
-                        ].join(" ")}
-                      >
-                        <InputLabel>Filter</InputLabel>
-                        <Select
-                          className={classes.selectEmpty}
-                          value={timefilter}
+                    <InputLabel>Filter</InputLabel>
+                    <Select
+                      className={classes.selectEmpty}
+                      value={timefilter}
 
-                          onChange={(event) => {
-                            this.setFilterTimerange(event.target.value! as string)
+                      onChange={(event) => {
+                        this.setFilterTimerange(event.target.value! as string)
 
-                          }}
-                        // inputProps={{
-                        //   name: "age",
-                        //   id: "age-native-simple",
-                        // }}
-                        >
-                          {this.filterSelect.map(
-                            (f: any) => (
-                              <MenuItem
-                                aria-label="None"
-                                value={f.key}
-                                key={f.key}
-                              >
-                                {f.value}
-                              </MenuItem>
-                            )
-                          )}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    <Grid item sm={3} xs={6}>
-
-                      <FormControl
-                        className={[
-                          classes.formControl,
-                          classes.selectEmpty,
-                        ].join(" ")}
-                      >
-                        <ProjectSelect
-                          project={filterProject}
-                          onChanged={(p: Project) => this.setState({ filterProject: p })}
-                        >
-                        </ProjectSelect>
-                      </FormControl>
-                    </Grid>
-                    <Grid item sm={3} xs={6}>
-                      <FormControl
-                        style={{ marginTop: -5 }}
-                        className={[
-                          classes.formControl,
-                        ].join(" ")}>
-                        <KeyboardDatePicker
-                          margin="dense"
-                          id="date-picker-dialog"
-                          label="Start"
-                          value={filterTimerStart}
-                          onChange={(date) => {
-                            let filterTimerStart = date?.toISOString()!;
-
-                            this.setState({
-                              filterTimerStart,
-                            });
-                          }
-                          }
-                          KeyboardButtonProps={{
-                            'aria-label': 'change date',
-                          }}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item sm={3} xs={6}>
-                      <FormControl
-                        style={{ marginTop: -5 }}
-                        className={[
-                          classes.formControl,
-                        ].join(" ")}>
-
-                        <KeyboardDatePicker
-                          margin="dense"
-                          id="time-picker"
-                          label="End"
-                          value={filterTimerEnd}
-                          onChange={(date) => {
-                            let filterTimerEnd = date?.toISOString()!;
-                            console.log(filterTimerEnd);
-                            this.setState({
-                              filterTimerEnd: filterTimerEnd,
-                            });
-                          }
-                          }
-                          KeyboardButtonProps={{
-                            'aria-label': 'change time',
-                          }}
-                        />
-                      </FormControl>
-
-                    </Grid>
-
-                  </Grid>
-                </MuiPickersUtilsProvider>
-                <div 
-                  className={classes.scroll}
-                >
-                  <div
-                    style={{
-                      overflowY: "auto",
-                      height: "50%",
-                    }}>
-                    <BarChart data={barchart} options={this.options}></BarChart>
-
-                  </div>
-                  <div
-                    className={classes.list}
-                    style={{
-                      overflowY: "auto",
-                      height: "50%",
-                    }}
-                  >
-
-                    <List
-                      component="nav"
-                      aria-label="main mailbox folders"
+                      }}
+                    // inputProps={{
+                    //   name: "age",
+                    //   id: "age-native-simple",
+                    // }}
                     >
-                      {_.map(allProjects, (entry: ProjectGroup, index) => (
-                        <>
-                          <ListItem button key={index} onClick={() => {
-                            this.handleExpand(entry, isOpen);
-                          }}>
-                            <ListItemIcon>
-                              <Assignment />
-                            </ListItemIcon>
-                            <ListItemText style={{ width: "70%" }} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
-                            <ListItemText style={{ width: "80px" }} primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>
-                            <ListItemSecondaryAction>
-                              <Typography
-                                // component="h1"
-                                // variant="h2"
-                                align="right"
-                                color="textPrimary"
-                              //gutterBottom
-                              >
+                      {this.filterSelect.map(
+                        (f: any) => (
+                          <MenuItem
+                            aria-label="None"
+                            value={f.key}
+                            key={f.key}
+                          >
+                            {f.value}
+                          </MenuItem>
+                        )
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-                                {this.getIsOpen(entry) ? <ExpandLess /> : <ExpandMore />}
-                              </Typography>
+                <Grid item sm={3} xs={6}>
 
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                          <Collapse in={this.getIsOpen(entry)} timeout="auto" unmountOnExit>
-                            <List dense={true} component="div" disablePadding>
-                              {entry.timeEntries.map(t =>
-                                (<ListItem button className={classes.nested}>
-                                  <ListItemIcon>
-                                    <TimerIcon />
-                                  </ListItemIcon>
-                                  <ListItemText style={{ width: "40%" }} primary={t.description} />
-                                  <ListItemText style={{ width: "20%" }} primary={this.toLocaleDate(t.timerStart)} />
-                                  <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
-                                  <ListItemSecondaryAction>
-                                  </ListItemSecondaryAction>
+                  <FormControl
+                    className={[
+                      classes.formControl,
+                      classes.selectEmpty,
+                    ].join(" ")}
+                  >
+                    <ProjectSelect
+                      project={filterProject}
+                      onChanged={(p: Project) => this.setState({ filterProject: p })}
+                    >
+                    </ProjectSelect>
+                  </FormControl>
+                </Grid>
+                <Grid item sm={2} xs={4}>
+                  <FormControl
+                    style={{ marginTop: -5 }}
+                    className={[
+                      classes.formControl,
+                    ].join(" ")}>
+                    <KeyboardDatePicker
+                      margin="dense"
+                      id="date-picker-dialog"
+                      label="Start"
+                      value={filterTimerStart}
+                      onChange={(date) => {
+                        let filterTimerStart = date?.toISOString()!;
+
+                        this.setState({
+                          filterTimerStart,
+                        });
+                      }
+                      }
+                      KeyboardButtonProps={{
+                        'aria-label': 'change date',
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item sm={2} xs={4}>
+                  <FormControl
+                    style={{ marginTop: -5 }}
+                    className={[
+                      classes.formControl,
+                    ].join(" ")}>
+
+                    <KeyboardDatePicker
+                      margin="dense"
+                      id="time-picker"
+                      label="End"
+                      value={filterTimerEnd}
+                      onChange={(date) => {
+                        let filterTimerEnd = date?.toISOString()!;
+                        console.log(filterTimerEnd);
+                        this.setState({
+                          filterTimerEnd: filterTimerEnd,
+                        });
+                      }
+                      }
+                      KeyboardButtonProps={{
+                        'aria-label': 'change time',
+                      }}
+                    />
+                  </FormControl>
+
+                </Grid>
+
+                {/* // Billed Unbilled */}
+
+                <Grid item sm={1} xs={2}>
+                  <FormControl
+                    style={{ marginTop: -5 }}
+                    className={[
+                      classes.formControl,
+                    ].join(" ")}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={this.state.filterIsBilled}
+                          onChange={(event) => {
+                            let filterIsBilled = event.target.checked;
+                            console.log(filterIsBilled);
+                            this.setState({
+                              filterIsBilled: filterIsBilled,
+                            });
+                          }
+                          }
+                          name="checkedB"
+                          color="primary"
+                        />
+                      }
+                      label="Billed"
+                    />
+
+                  </FormControl>
+
+                  {/* </Grid>
+                    <Grid item sm={3} xs={6}> */}
+                  <FormControl
+                    style={{ marginTop: -5 }}
+                    className={[
+                      classes.formControl,
+                    ].join(" ")}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={this.state.filterIsUnbilled}
+                          onChange={(event) => {
+                            let filterIsUnbilled = event.target.checked;
+                            this.setState({
+                              filterIsUnbilled: filterIsUnbilled,
+                            });
+                          }
+                          }
+                          name="checkedB"
+                          color="primary"
+                        />
+                      }
+                      label="Unbilled"
+                    />
+
+                  </FormControl>
+
+                </Grid>
+
+              </Grid>
+            </MuiPickersUtilsProvider>
+            <div
+              className={classes.scroll}
+            >
+              <div
+                style={{
+                  overflowY: "auto",
+                  height: "50%",
+                }}>
+                <BarChart data={barchart} options={this.options}></BarChart>
+
+              </div>
+              <div
+                className={classes.list}
+                style={{
+                  overflowY: "auto",
+                  height: "50%",
+                }}
+              >
+
+                <List
+                  component="nav"
+                  aria-label="main mailbox folders"
+                >
+                  {_.map(allProjects, (entry: ProjectGroup, index) => (
+                    <>
+                      <ListItem button key={index} onClick={() => {
+                        this.handleExpand(entry, isOpen);
+                      }}>
+                        <ListItemIcon>
+                          <Assignment />
+                        </ListItemIcon>
+                        <ListItemText style={{ width: "70%" }} primary={entry!.project!.name! + " (" + entry!.timeEntries.length + ")"} ></ListItemText>
+                        <ListItemText style={{ width: "80px" }} primary={TimerSrv.hms(entry!.elapsed)} ></ListItemText>
+                        <ListItemSecondaryAction>
+                          <Typography
+                            // component="h1"
+                            // variant="h2"
+                            align="right"
+                            color="textPrimary"
+                          //gutterBottom
+                          >
+
+                            {this.getIsOpen(entry) ? <ExpandLess /> : <ExpandMore />}
+                          </Typography>
+
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                      <Collapse in={this.getIsOpen(entry)} timeout="auto" unmountOnExit>
+                        <List dense={true} component="div" disablePadding>
+                          {entry.timeEntries.map(t =>
+                            (<ListItem button className={classes.nested}>
+                              <ListItemIcon>
+                                <TimerIcon />
+                              </ListItemIcon>
+                              <ListItemText style={{ width: "40%" }} primary={t.description} />
+                              <ListItemIcon>
+                                {t.isBilled &&
+                                  <MoneyIcon />
+                                }
+
+                              </ListItemIcon>
+                              <ListItemText style={{ width: "15%" }} primary={this.toLocaleDate(t.timerStart)} />
+
+                              <ListItemText primary={TimerSrv.hms(t.elapsedSeconds)} />
+                              <ListItemSecondaryAction>
+                              </ListItemSecondaryAction>
 
 
-                                </ListItem>)
-                              )
-                              }
+                            </ListItem>)
+                          )
+                          }
 
-                            </List>
-                          </Collapse>
-                        </>
-                      ))}
+                        </List>
+                      </Collapse>
+                    </>
+                  ))}
 
-                    </List>
-                  </div>
-                </div>
-              </>
+                </List>
+              </div>
+            </div>
+          </>
             )
           }}
         </AllTimerComponent>

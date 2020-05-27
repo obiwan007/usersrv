@@ -9,11 +9,11 @@
 // Emotion styled component
 import { MutationFunction } from '@apollo/react-common';
 import DateFnsUtils from '@date-io/date-fns';
-import { Button, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Button, Checkbox, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import * as _ from "lodash";
 import React from "react";
 import { AllProjectsComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, refetchAllTimerQuery, Timer as TimerEntry, TimerInput, UpdateTimerComponent, UpdateTimerMutation, UpdateTimerMutationVariables } from "../../graphql";
-
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -85,7 +85,7 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     //clearInterval(this.interval!);
   }
 
-  componentDidUpdate(nextProps: IProps) {    
+  componentDidUpdate(nextProps: IProps) {
     if (nextProps.timer !== this.props.timer) {
       this.setState({ currentTimer: Object.assign({}, this.props.timer), addOpen: this.props.addOpen, editOpen: this.props.editOpen })
     }
@@ -299,9 +299,18 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                   </Grid>
                                 </MuiPickersUtilsProvider>
                               </FormControl>
-
-
-
+                              <FormControl className={classes.formControl}>
+                                <FormControlLabel
+                                  control={<Checkbox checked={currentTimer!.isBilled!} onChange={(data) => {
+                                    currentTimer.isBilled = data.target.checked;
+                                    console.log(currentTimer);
+                                    this.setState({
+                                      currentTimer: _.cloneDeep(currentTimer),
+                                    });
+                                  }} name="checkedA" />}
+                                  label="Is Billed"
+                                />
+                              </FormControl>
                             </form>
                           </DialogContent>
                           <DialogActions>
@@ -351,9 +360,10 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       description: newData.description,
       project: newData.project?.id,
       timerStart: newData.timerStart,
+      isBilled: newData.isBilled,
     };
-    if (!newData.isRunning){
-      data.timerEnd =  newData.timerEnd;
+    if (!newData.isRunning) {
+      data.timerEnd = newData.timerEnd;
     }
     console.log('Newdata', data)
     if (this.state.editOpen && updateClient) {
