@@ -12,8 +12,9 @@ import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { Project, Timer as TimerEntry } from "../../graphql";
+import Filter, { FilterData } from "./filter";
+import ReportDetails from "./reportDetails";
 import Summary from "./summary";
-import TimerList from "./timerList";
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -64,6 +65,7 @@ interface IState {
   filterTimerEnd: any;
   filterTimerStart: any;
   selectedTab: number;
+  filter: FilterData;
 }
 interface IProps {
   history?: any;
@@ -129,6 +131,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
       filterTimerEnd: null,
       filterTimerStart: null,
       selectedTab: 0,
+      filter: new FilterData(),
     };
   }
 
@@ -146,13 +149,19 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   }
 
   render() {
-    const { selectedTab, filterProject, filterTimerStart, filterTimerEnd, timefilter, addOpen, editOpen } = this.state;
+    const { filter, selectedTab, filterProject, filterTimerStart, filterTimerEnd, timefilter, addOpen, editOpen } = this.state;
     const { classes } = this.props;
     let allTimer: TimerMoment[] | null | undefined = [];
-
+    console.log("Filter", filter);
     return (
       <div>
-
+        <div style={{paddingLeft: 5, paddingRight:5, width: "100%"}}>
+          <Filter filter={filter} onUpdate={(filter: FilterData) => {
+            console.log("Onpdate", JSON.stringify(filter, null, 2));
+            this.setState({ filter })
+          }}>
+          </Filter>
+        </div>
         <Tabs value={selectedTab} onChange={this.handleChange} aria-label="simple tabs example">
           <Tab label="Summary" />
           <Tab label="Details" />
@@ -160,10 +169,10 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         </Tabs>
 
         <TabPanel value={selectedTab} index={0}>
-          <Summary></Summary>
+          <Summary filter={filter}></Summary>
         </TabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <TimerList></TimerList>
+          <ReportDetails filter={filter}></ReportDetails>
         </TabPanel>
         <TabPanel value={selectedTab} index={2}>
           Item Three
