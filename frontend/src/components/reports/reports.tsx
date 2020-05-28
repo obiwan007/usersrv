@@ -158,7 +158,7 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
         <div style={{paddingLeft: 5, paddingRight:5, width: "100%"}}>
           <Filter filter={filter} onUpdate={(filter: FilterData) => {
             console.log("Onpdate", JSON.stringify(filter, null, 2));
-            this.setState({ filter })
+            this.setState({ filter: Object.assign({}, filter) })
           }}>
           </Filter>
         </div>

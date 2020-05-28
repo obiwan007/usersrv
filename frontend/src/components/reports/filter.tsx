@@ -140,7 +140,7 @@ export class Filter extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
     const { onUpdate, classes } = this.props;
 
-    const filter = Object.assign({}, this.props.filter);
+    const filter = this.props.filter;
 
     const { timefilter, filterProject, filterTimerStart, filterTimerEnd, filterIsUnbilled, filterIsBilled } = filter;
 
