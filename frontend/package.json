@@ -55,6 +55,7 @@
     "react-scripts": "3.4.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.5",
+    "rxjs": "^6.5.5",
     "subscriptions-transport-ws": "^0.9.16",
     "typescript": "^3.7.5",
     "zipkin": "^0.19.1",

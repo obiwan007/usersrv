@@ -7,14 +7,17 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import { Box, createStyles, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Box, createStyles, Grid, IconButton, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { GetApp as ExportIcon } from '@material-ui/icons';
 import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
+import { BehaviorSubject } from "rxjs";
 import { Project, Timer as TimerEntry } from "../../graphql";
 import Filter, { FilterData } from "./filter";
 import ReportDetails from "./reportDetails";
 import Summary from "./summary";
+
 // ----------------------------------------------------------------------------
 
 const styles = ({ palette, spacing }: Theme) =>
@@ -115,6 +118,8 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     { key: "thismonth", value: "This Month" },
     { key: "lastmonth", value: "Last Month" },
   ];
+
+  exportClicked = new BehaviorSubject(false);
   /**
    *
    *
@@ -155,24 +160,36 @@ export class Reports extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     console.log("Filter", filter);
     return (
       <div>
-        <div style={{paddingLeft: 5, paddingRight:5, width: "100%"}}>
+        <div style={{ paddingLeft: 5, paddingRight: 5, width: "100%" }}>
           <Filter filter={filter} onUpdate={(filter: FilterData) => {
             console.log("Onpdate", JSON.stringify(filter, null, 2));
             this.setState({ filter: Object.assign({}, filter) })
           }}>
           </Filter>
         </div>
-        <Tabs value={selectedTab} onChange={this.handleChange} aria-label="simple tabs example">
-          <Tab label="Summary" />
-          <Tab label="Details" />
-          <Tab label="Item Three" />
-        </Tabs>
+        <Grid container>
+          <Grid item sm={11}>
+            <Tabs value={selectedTab} onChange={this.handleChange} aria-label="simple tabs example">
+              <Tab label="Summary" />
+              <Tab label="Details" />
+              <Tab label="Item Three" />
+            </Tabs>
+          </Grid>
+          <Grid item sm={1}>
+            {
+              selectedTab === 1 &&
+              <IconButton onClick={() => this.exportClicked.next(true)} color="primary" aria-label="add to shopping cart">
+                <ExportIcon />
+              </IconButton>
+            }
 
+          </Grid>
+        </Grid>
         <TabPanel value={selectedTab} index={0}>
           <Summary filter={filter}></Summary>
         </TabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <ReportDetails filter={filter}></ReportDetails>
+          <ReportDetails export={this.exportClicked.asObservable()} filter={filter}></ReportDetails>
         </TabPanel>
         <TabPanel value={selectedTab} index={2}>
           Item Three

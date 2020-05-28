@@ -15,6 +15,7 @@ import moment from "moment";
 import React from "react";
 import Autosizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { Observable, Subscription } from 'rxjs';
 import { AllTimerComponent, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, refetchAllTimerQuery, Timer as TimerEntry } from "../../graphql";
 import { Timer as TimerSrv } from "../../lib/timer";
 import TimerEdit from "../timer/timerEdit";
@@ -69,9 +70,10 @@ interface IState {
 interface IProps {
   history?: any;
   filter: FilterData;
+  export: Observable<boolean>;
 }
 
-type TimerMoment = TimerEntry & { 
+type TimerMoment = TimerEntry & {
   t1: moment.Moment,
   t2: moment.Moment,
 }
@@ -89,6 +91,10 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
     { key: "thismonth", value: "This Month" },
     { key: "lastmonth", value: "Last Month" },
   ];
+  subExport?: Subscription;
+
+
+
   /**
    *
    *
@@ -98,7 +104,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
     this.state = {
       sum: 0,
       addOpen: false,
-      editOpen: false,      
+      editOpen: false,
       currentTimer: {},
     };
   }
@@ -110,10 +116,15 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
     // this.interval = setInterval(() => {
     //   this.checkTimer();
     // }, 500);
-    
+
+    this.subExport = this.props.export.subscribe((pressed) => {
+      console.log("Export clicked", pressed);
+    });
+
   }
   componentWillUnmount() {
     //clearInterval(this.interval!);
+    this.subExport!.unsubscribe();
   }
 
   render() {
@@ -159,10 +170,10 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
                     allTimer = allTimer?.filter((a: TimerMoment) =>
                       (filterIsBilled && (a.isBilled === true))
                       || (filterIsUnbilled && (a.isBilled === false))
-      
+
                     );
                   }
-                  
+
                   const count = allTimer ? allTimer.length : 0;
                   console.log("C", count)
                   if (error) {
@@ -194,8 +205,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
                       <div
                         className={classes.list}
                         style={{
-                          height: "calc(100vh - 200px)",
-                          minHeight: "calc(100vh - 200px)",
+                          height: "calc(100vh - 260px)",
                         }}
                       >
                         <Autosizer>
@@ -279,7 +289,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
     );
   }
 
-  
+
 
   deleteTimer = (entity: TimerEntry, deleteTimer: MutationFunction<DeleteTimerMutation, DeleteTimerMutationVariables>) => {
     deleteTimer({
