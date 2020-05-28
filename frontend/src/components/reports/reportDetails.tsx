@@ -11,11 +11,13 @@ import { MutationFunction } from "@apollo/react-common";
 import { Button, createStyles, Hidden, IconButton, ListItemIcon, ListItemSecondaryAction, ListItemText, Theme, WithStyles, withStyles } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import { Delete, Timer as TimerIcon } from "@material-ui/icons";
+import * as FileSaver from 'file-saver';
 import moment from "moment";
 import React from "react";
 import Autosizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { Observable, Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
 import { AllTimerComponent, DeleteTimerComponent, DeleteTimerMutation, DeleteTimerMutationVariables, refetchAllTimerQuery, Timer as TimerEntry } from "../../graphql";
 import { Timer as TimerSrv } from "../../lib/timer";
 import TimerEdit from "../timer/timerEdit";
@@ -78,6 +80,10 @@ type TimerMoment = TimerEntry & {
   t2: moment.Moment,
 }
 
+const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+const fileExtension = '.xlsx';
+
+
 export type PROPS_WITH_STYLES = IProps & WithStyles<typeof styles>;
 export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
@@ -93,7 +99,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
   ];
   subExport?: Subscription;
 
-
+  allTimer: TimerMoment[] | null | undefined = [];
 
   /**
    *
@@ -119,6 +125,8 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
 
     this.subExport = this.props.export.subscribe((pressed) => {
       console.log("Export clicked", pressed);
+      if (pressed) { this.exportToCSV(this.allTimer, "timerexport"); }
+
     });
 
   }
@@ -133,7 +141,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
 
     const { timefilter, filterProject, filterTimerStart, filterTimerEnd, filterIsUnbilled, filterIsBilled } = this.props.filter;
 
-    let allTimer: TimerMoment[] | null | undefined = [];
+
 
     return (
       <div>
@@ -152,7 +160,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
                   // Any errors? Say so!
                   // allTimer = _.cloneDeep(data);
 
-                  allTimer = data?.allTimer ? data?.allTimer?.map(t => {
+                  this.allTimer = data?.allTimer ? data?.allTimer?.map(t => {
                     return {
                       ...t,
                       t1: moment(t?.timerStart!),
@@ -160,21 +168,21 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
                     };
                   }) : [];
 
-                  if (filterProject?.id && !loading && allTimer) {
-                    allTimer = allTimer.filter((a: TimerMoment) => a?.project?.id === filterProject.id);
+                  if (filterProject?.id && !loading && this.allTimer) {
+                    this.allTimer = this.allTimer.filter((a: TimerMoment) => a?.project?.id === filterProject.id);
                   }
                   if (filterTimerStart && filterTimerEnd) {
-                    allTimer = allTimer?.filter((a: TimerMoment) => a.t1.isBefore(filterTimerEnd) && a.t1.isAfter(filterTimerStart));
+                    this.allTimer = this.allTimer?.filter((a: TimerMoment) => a.t1.isBefore(filterTimerEnd) && a.t1.isAfter(filterTimerStart));
                   }
                   if (filterIsBilled === false || filterIsUnbilled === false) {
-                    allTimer = allTimer?.filter((a: TimerMoment) =>
+                    this.allTimer = this.allTimer?.filter((a: TimerMoment) =>
                       (filterIsBilled && (a.isBilled === true))
                       || (filterIsUnbilled && (a.isBilled === false))
 
                     );
                   }
 
-                  const count = allTimer ? allTimer.length : 0;
+                  const count = this.allTimer ? this.allTimer.length : 0;
                   console.log("C", count)
                   if (error) {
                     return (
@@ -215,7 +223,7 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
                               width={width}
                               itemCount={count}
                               itemSize={80}
-                              itemData={{ allTimer, deleteTimer }}
+                              itemData={{ allTimer: this.allTimer, deleteTimer }}
                             // style={{
                             //   height: "calc(100vh - 445px)",
                             //   minHeight: "calc(100vh - 445px)",
@@ -290,6 +298,26 @@ export class ReportDetails extends React.PureComponent<PROPS_WITH_STYLES, IState
   }
 
 
+  exportToCSV = (csvData: TimerMoment[] | null | undefined, fileName: string) => {
+
+    const conv = csvData?.map(t => ({
+      name: t.description,
+      project: t.project?.name,
+      client: t.project?.client?.name,
+       start: new Date(t.timerStart!), 
+       end: new Date(t.timerEnd!), 
+       elapsedSeconds: t.elapsedSeconds,
+       elapsedHours: t.elapsedSeconds!/3600
+    }));
+    console.log("Exporting", conv);
+    if (conv) {
+      const ws = XLSX.utils.json_to_sheet(conv);
+      const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(data, fileName + fileExtension);
+    }
+  }
 
   deleteTimer = (entity: TimerEntry, deleteTimer: MutationFunction<DeleteTimerMutation, DeleteTimerMutationVariables>) => {
     deleteTimer({

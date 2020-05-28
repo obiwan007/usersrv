@@ -14,28 +14,48 @@ export type Scalars = {
   Float: number;
 };
 
-export type AllTimerFilter = {
-  dayrange?: Maybe<Scalars['String']>;
+export type Query = {
+   __typename?: 'Query';
+  hello: Scalars['String'];
+  User?: Maybe<User>;
+  allUsers?: Maybe<Array<Maybe<User>>>;
+  allTimer?: Maybe<Array<Maybe<Timer>>>;
+  runningTimer?: Maybe<Timer>;
+  getTimer?: Maybe<Timer>;
+  getProject?: Maybe<Project>;
+  allProjects?: Maybe<Array<Maybe<Project>>>;
+  getClient?: Maybe<Client>;
+  allClients?: Maybe<Array<Maybe<Client>>>;
 };
 
-export type Client = {
-   __typename?: 'Client';
+
+export type QueryHelloArgs = {
+  name: Scalars['String'];
+};
+
+
+export type QueryUserArgs = {
   id?: Maybe<Scalars['String']>;
-  description?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  address?: Maybe<Scalars['String']>;
 };
 
-export type ClientInput = {
+
+export type QueryAllTimerArgs = {
+  filter: AllTimerFilter;
+};
+
+
+export type QueryGetTimerArgs = {
   id?: Maybe<Scalars['String']>;
-  description?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  address?: Maybe<Scalars['String']>;
 };
 
-export type CreateTimerInput = {
-  description?: Maybe<Scalars['String']>;
-  project?: Maybe<Scalars['String']>;
+
+export type QueryGetProjectArgs = {
+  id?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetClientArgs = {
+  id?: Maybe<Scalars['String']>;
 };
 
 export type Mutation = {
@@ -114,67 +134,41 @@ export type MutationDeleteClientArgs = {
   clientId: Scalars['String'];
 };
 
-export type Project = {
-   __typename?: 'Project';
+export type User = {
+   __typename?: 'User';
   id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  description?: Maybe<Scalars['String']>;
-  team?: Maybe<Scalars['String']>;
-  client?: Maybe<Client>;
-  status?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
 };
 
-export type ProjectInput = {
+export type UserInput = {
+  name?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+  password?: Maybe<Scalars['String']>;
+};
+
+export type AllTimerFilter = {
+  dayrange?: Maybe<Scalars['String']>;
+};
+
+export type CreateTimerInput = {
+  description?: Maybe<Scalars['String']>;
+  project?: Maybe<Scalars['String']>;
+};
+
+export type TimerInput = {
   id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  team?: Maybe<Scalars['String']>;
+  teammember?: Maybe<Scalars['String']>;
   client?: Maybe<Scalars['String']>;
-  status?: Maybe<Scalars['String']>;
-};
-
-export type Query = {
-   __typename?: 'Query';
-  hello: Scalars['String'];
-  User?: Maybe<User>;
-  allUsers?: Maybe<Array<Maybe<User>>>;
-  allTimer?: Maybe<Array<Maybe<Timer>>>;
-  runningTimer?: Maybe<Timer>;
-  getTimer?: Maybe<Timer>;
-  getProject?: Maybe<Project>;
-  allProjects?: Maybe<Array<Maybe<Project>>>;
-  getClient?: Maybe<Client>;
-  allClients?: Maybe<Array<Maybe<Client>>>;
-};
-
-
-export type QueryHelloArgs = {
-  name: Scalars['String'];
-};
-
-
-export type QueryUserArgs = {
-  id?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryAllTimerArgs = {
-  filter: AllTimerFilter;
-};
-
-
-export type QueryGetTimerArgs = {
-  id?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetProjectArgs = {
-  id?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetClientArgs = {
-  id?: Maybe<Scalars['String']>;
+  project?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  elapsedSeconds?: Maybe<Scalars['Int']>;
+  timerStart?: Maybe<Scalars['String']>;
+  timerEnd?: Maybe<Scalars['String']>;
+  isRunning?: Maybe<Scalars['Boolean']>;
+  isBilled?: Maybe<Scalars['Boolean']>;
 };
 
 export type Timer = {
@@ -193,32 +187,38 @@ export type Timer = {
   isBilled?: Maybe<Scalars['Boolean']>;
 };
 
-export type TimerInput = {
+export type ProjectInput = {
   id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  teammember?: Maybe<Scalars['String']>;
+  team?: Maybe<Scalars['String']>;
   client?: Maybe<Scalars['String']>;
-  project?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  elapsedSeconds?: Maybe<Scalars['Int']>;
-  timerStart?: Maybe<Scalars['String']>;
-  timerEnd?: Maybe<Scalars['String']>;
-  isRunning?: Maybe<Scalars['Boolean']>;
-  isBilled?: Maybe<Scalars['Boolean']>;
+  status?: Maybe<Scalars['String']>;
 };
 
-export type User = {
-   __typename?: 'User';
+export type Project = {
+   __typename?: 'Project';
   id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  email?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  team?: Maybe<Scalars['String']>;
+  client?: Maybe<Client>;
+  status?: Maybe<Scalars['String']>;
 };
 
-export type UserInput = {
+export type ClientInput = {
+  id?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  email?: Maybe<Scalars['String']>;
-  password?: Maybe<Scalars['String']>;
+  address?: Maybe<Scalars['String']>;
+};
+
+export type Client = {
+   __typename?: 'Client';
+  id?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  address?: Maybe<Scalars['String']>;
 };
 
 export type AllClientsQueryVariables = {};
@@ -357,6 +357,10 @@ export type AllTimerQuery = (
     & { project?: Maybe<(
       { __typename?: 'Project' }
       & Pick<Project, 'id' | 'name'>
+      & { client?: Maybe<(
+        { __typename?: 'Client' }
+        & Pick<Client, 'id' | 'name'>
+      )> }
     )> }
   )>>> }
 );
@@ -759,6 +763,10 @@ export const AllTimerDocument = gql`
     project {
       id
       name
+      client {
+        id
+        name
+      }
     }
   }
 }

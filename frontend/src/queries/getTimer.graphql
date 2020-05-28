@@ -7,10 +7,14 @@ query AllTimer($d: AllTimerFilter!) {
     isRunning
     isBilled
     tags
-    elapsedSeconds
+    elapsedSeconds    
     project {
       id
       name
+      client {
+      id
+      name
+    }
     }
   }
 }
