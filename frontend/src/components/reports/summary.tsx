@@ -9,6 +9,7 @@
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
 import { Button, Collapse, createStyles, List, ListItemIcon, ListItemSecondaryAction, ListItemText, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { blue, cyan, deepPurple, green, indigo, lightBlue, lightGreen, lime, pink, purple, red, teal } from '@material-ui/core/colors';
 import ListItem from "@material-ui/core/ListItem";
 import { Assignment, ExpandLess, ExpandMore, Money as MoneyIcon, Timer as TimerIcon } from "@material-ui/icons";
 import * as _ from "lodash";
@@ -20,7 +21,6 @@ import { Timer as TimerSrv } from "../../lib/timer";
 import theme from '../../theme';
 import BarChart from "./barchart";
 import { FilterData } from './filter';
-
 const moment = extendMoment(Moment);
 // ----------------------------------------------------------------------------
 
@@ -71,6 +71,22 @@ const styles = ({ palette, spacing }: Theme) =>
       },
     },
   });
+
+  let colorIndex = 0;
+const colors = [
+  red[500],
+  pink[500],
+  cyan[500],
+  purple[500],
+  green[500],
+  deepPurple[500],
+  indigo[500],
+  lime[500],
+  blue[500],
+  lightBlue[500],
+  teal[500],
+  lightGreen[500],
+]
 
 interface IState {
   sum: number;
@@ -203,12 +219,13 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
               console.log('All', allProjects);
               const id = allTimer!.find(t => t?.project !== null)!.project!.id!;
               console.log('ID:', id);
+              colorIndex = 0;
               barchart = {
                 labels: allProjects[id]?.dates.map((d: Moment.Moment) => d?.format("D MMM ddd")),
-                backgroundColors: _.map(allProjects, p => this.getRandomColor()),
+                backgroundColors: _.map(allProjects, (p) => this.getRandomColor()),
                 datasets: _.map(allProjects, (p, key) => ({
                   label: p.project?.name,
-                  data: p.ranges.map(s => s / 3600),
+                  data: p.ranges.map((s) => s / 3600),
                   backgroundColor: this.getRandomColor(),
 
                 }))
@@ -387,12 +404,18 @@ export class Summary extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     })
   }
   getRandomColor() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
+    // var letters = '0123456789ABCDEF'.split('');
+    // var color = '#';
+    // for (var i = 0; i < 6; i++) {
+    //   color += letters[Math.floor(Math.random() * 16)];
+    // }
+    colorIndex++;
+
+    if (colorIndex >= colors.length) {
+      colorIndex = 0;
     }
-    return color;
+    return colors[colorIndex];
+
   }
   private handleExpand(entry: ProjectGroup, isOpen: { [id: string]: boolean; }) {
     const id = entry!.project!.id!;
