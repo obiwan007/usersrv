@@ -10,7 +10,7 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
-import { AppBar, Button, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, useTheme } from "@material-ui/core";
+import { AppBar, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, useTheme } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
@@ -120,21 +120,14 @@ export function ButtonAppBar(props: any) {
         )}
         <Typography variant="h6" className={classes.title}>
           <Hidden xsDown implementation="css">
-            My Time Tracker
+            trackOtime
           </Hidden>
           <Hidden smUp implementation="css">
-            MTT
+            trackOtime
           </Hidden>
         </Typography>
-        {/* <Link
-            component={RouterLink} to="/login"
-            variant="body1"
-            color="inherit"
-            href="/login"
-          >
-            Login
-          </Link> */}
-        {!props.isLoggedIn && (
+
+        {/* {!props.isLoggedIn && (
           <Button component={RouterLink} to="/login" color="inherit">
             Login
           </Button>
@@ -150,7 +143,7 @@ export function ButtonAppBar(props: any) {
               {props.username}
             </Avatar>
           </>
-        )}
+        )} */}
       </Toolbar>
     </AppBar>
     // </div >
@@ -175,6 +168,7 @@ export function MainMenu(props: any) {
   let history = useHistory();
   const { container, mobileOpen, handleDrawerToggle, closeDrawer } = props;
   const theme = useTheme();
+  const { picture, isLoggedIn, username } = props;
 
   let currentTimer: TimerEntry | undefined = undefined;
 
@@ -254,6 +248,18 @@ export function MainMenu(props: any) {
             <ListItemText primary={o.txt} />
           </ListItem>
         ))}
+        <ListItem 
+          style={{position: "fixed", bottom: 0, width: "200px"}}
+        
+        button onClick={closeDrawer} component={RouterLink} to={"/login"}>
+          <ListItemIcon>
+            <Avatar alt="Remy Sharp" src={picture}>
+              {props.username}
+            </Avatar>
+
+          </ListItemIcon>
+          <ListItemText primary={isLoggedIn && username} />
+        </ListItem>
       </List>
     </div>
   );
@@ -388,6 +394,10 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           {isLoggedIn && (
             <MainMenu
               {...this.state}
+              username={this.state.name}
+              picture={this.state.picture}
+              isLoggedIn={this.state.isLoggedIn}
+
               handleDrawerToggle={() =>
                 this.setState({ menuVisible: !menuVisible })
               }
