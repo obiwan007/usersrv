@@ -39,17 +39,18 @@ class Index extends React.PureComponent<IProps, IIndexState> {
         <Container maxWidth="sm">
           {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
           <Paper  >
-            <h1>Login</h1>
+            <h1>Login/Signup</h1>
             <Grid container spacing={3} justify="center" direction="row" alignItems="center">
-              <Grid item xs>
+              <Grid item>
                 <FormControl>
                   <Button
-                    variant="contained"
-                    color="primary"
+                    variant="outlined"
                     onClick={() => this.loginClick(0)}
                   >
-                    Signin with Google
-                   </Button>
+                    <img
+                      style={{ width: "250px" }}
+                      src="btn_google_signin_dark_normal_web@2x.png"></img>
+                  </Button>
 
                 </FormControl>
               </Grid>
@@ -57,15 +58,16 @@ class Index extends React.PureComponent<IProps, IIndexState> {
             </Grid>
 
             <Grid container spacing={3} justify="center" direction="row" alignItems="center">
-              <Grid item xs>
+              <Grid item>
                 <FormControl >
                   <Button
-                    variant="contained"
-                    color="primary"
+                    variant="outlined"
                     fullWidth={true}
                     onClick={() => this.loginClick(2)}
                   >
-                    Signin with Microsoft
+                     <img
+                      style={{ width: "250px" }}
+                      src="ms-symbollockup_signin_dark.svg"></img>
                   </Button>
                 </FormControl>
               </Grid>
