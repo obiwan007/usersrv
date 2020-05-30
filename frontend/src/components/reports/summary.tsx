@@ -9,7 +9,7 @@
 // Emotion styled component
 import { MutationFunction } from "@apollo/react-common";
 import { Button, Collapse, createStyles, List, ListItemIcon, ListItemSecondaryAction, ListItemText, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
-import { blue, cyan, deepPurple, green, indigo, lightBlue, lightGreen, lime, pink, purple, red, teal } from '@material-ui/core/colors';
+import { amber, blue, blueGrey, brown, cyan, deepOrange, deepPurple, green, grey, indigo, lightBlue, lightGreen, lime, orange, pink, purple, red, teal, yellow } from '@material-ui/core/colors';
 import ListItem from "@material-ui/core/ListItem";
 import { Assignment, ExpandLess, ExpandMore, Money as MoneyIcon, Timer as TimerIcon } from "@material-ui/icons";
 import * as _ from "lodash";
@@ -72,7 +72,7 @@ const styles = ({ palette, spacing }: Theme) =>
     },
   });
 
-  let colorIndex = 0;
+let colorIndex = 0;
 const colors = [
   red[500],
   pink[500],
@@ -86,6 +86,14 @@ const colors = [
   lightBlue[500],
   teal[500],
   lightGreen[500],
+  yellow[500],
+  amber[500],
+  orange[500],
+  deepOrange[500],
+  brown[500],
+  grey[500],
+  blueGrey[500],
+
 ]
 
 interface IState {
