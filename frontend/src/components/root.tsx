@@ -367,7 +367,6 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     if (isLoggedIn) {
       const permission = Notification.permission;
       console.log("Allowed ", permission)
-      this.setState({ openNotification: true });
       if (permission !== "granted") {
         this.setState({ openNotification: true });
       }
