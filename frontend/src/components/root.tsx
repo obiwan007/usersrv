@@ -10,13 +10,14 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
-import { AppBar, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, useTheme } from "@material-ui/core";
+import { AppBar, Button, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Slide, Snackbar, Toolbar, useTheme } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Drawer from "@material-ui/core/Drawer";
 import Hidden from "@material-ui/core/Hidden";
 import Link from "@material-ui/core/Link";
+import { TransitionProps } from '@material-ui/core/transitions/transition';
 import Typography from "@material-ui/core/Typography";
-import { Assignment, Brightness7, Home as HomeIcon, Label, MonetizationOn, People, ShowChart } from "@material-ui/icons";
+import { Assignment, Brightness7, Close as CloseIcon, Home as HomeIcon, Label, MonetizationOn, People, ShowChart } from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
 import React from "react";
 import CookieConsent from "react-cookie-consent";
@@ -248,10 +249,10 @@ export function MainMenu(props: any) {
             <ListItemText primary={o.txt} />
           </ListItem>
         ))}
-        <ListItem 
-          style={{position: "fixed", bottom: 0, width: "200px"}}
-        
-        button onClick={closeDrawer} component={RouterLink} to={"/login"}>
+        <ListItem
+          style={{ position: "fixed", bottom: 0, width: "200px" }}
+
+          button onClick={closeDrawer} component={RouterLink} to={"/login"}>
           <ListItemIcon>
             <Avatar alt="Remy Sharp" src={picture}>
               {props.username}
@@ -307,6 +308,7 @@ interface IStateRoot {
   menuVisible: boolean;
   isRunning: boolean;
   elapsed: number;
+  openNotification: boolean;
 }
 
 interface IPropsRoot { }
@@ -319,6 +321,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
     menuVisible: false,
     isRunning: false,
     elapsed: 0,
+    openNotification: false,
   };
   public componentDidMount = async () => {
     console.log('Mounting Root:', this.isRunningStandalone())
@@ -361,6 +364,14 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
       }
 
     }
+    if (isLoggedIn) {
+      const permission = Notification.permission;
+      console.log("Allowed ", permission)
+      this.setState({ openNotification: true });
+      if (permission !== "granted") {
+        this.setState({ openNotification: true });
+      }
+    }
   };
   checkTimer = () => {
     this.setState({
@@ -374,7 +385,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
 
 
   public render() {
-    const { menuVisible, isLoggedIn } = this.state;
+    const { menuVisible, isLoggedIn, openNotification } = this.state;
     return (
       <div>
         {/* <Global styles={globalStyles} /> */}
@@ -450,10 +461,44 @@ For more information, refer to our privacy policy and cookie policy.<br></br>
             Wir verwenden Cookies, um Inhalte und Anzeigen diser Website zu personalisieren und die aktuelle eingeloggte Sitzung zu speichern.
            </span>
         </CookieConsent>
-
+        <Snackbar
+          open={openNotification}
+          onClose={() => this.closeGrant()}
+          TransitionComponent={this.TransitionUp}
+          message="Allow Notifications for long running timers."
+          action={
+            <React.Fragment>
+              <Button color="primary" size="small" onClick={() => this.closeGrant(true)}>
+                ALLOW
+              </Button>
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                onClick={() => this.closeGrant()}
+              >
+                <CloseIcon />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
       </div>
     );
   }
+
+  async closeGrant(allow: boolean = false) {
+    this.setState({ openNotification: false });
+    if (allow) {
+      const notify = await Notification.requestPermission();
+      console.log("Allowed ", notify)
+      TimerSrv.notifyMessage("Thx for allowing notifications", "We will notify you if some important event occured.");
+    }
+  }
+
+  TransitionUp(props: TransitionProps) {
+    return <Slide {...props} direction="up" />;
+  }
+  
+
 }
 
 export default withRouter(Root as any);

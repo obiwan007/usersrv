@@ -99,7 +99,7 @@ export class Timer {
     return this.currentTimer.elapsed();
   }
 
-  notifyMessage(msg: string, body: string) {
+  static notifyMessage(msg: string, body: string) {
     const permission = Notification.permission;
     console.log("Allowed ", permission)
     if (permission === "granted") {

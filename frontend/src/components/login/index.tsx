@@ -4,12 +4,8 @@
 // IMPORTS
 
 /* NPM */
-import { Button, Container, FormControl, Grid, IconButton, Paper, Slide } from "@material-ui/core";
-import Snackbar from '@material-ui/core/Snackbar';
-import { TransitionProps } from '@material-ui/core/transitions/transition';
-import CloseIcon from '@material-ui/icons/Close';
+import { Button, Container, FormControl, Grid, Paper } from "@material-ui/core";
 import React from "react";
-import TimerSrv from "../../lib/timer";
 
 
 /* Local */
@@ -18,7 +14,6 @@ import TimerSrv from "../../lib/timer";
 
 interface IIndexState {
   dynamic: React.SFC | null;
-  openNotification: boolean;
 }
 
 interface IProps {
@@ -29,26 +24,15 @@ interface IProps {
 class Index extends React.PureComponent<IProps, IIndexState> {
   public state = {
     dynamic: null,
-    openNotification: false,
   };
 
   public componentDidMount = async () => {
-    // Fetch the component dynamically
-
-    // ... and keep ahold of it locally
     this.setState({});
-    const permission = Notification.permission;
-    console.log("Allowed ", permission)
-    this.setState({ openNotification: true });
-    if (permission !== "granted") {
-      this.setState({ openNotification: true });
-    }
-
   };
 
   public render() {
     // const DynamicComponent = this.state.dynamic || (() => <h2>Loading...</h2>);
-    const { openNotification } = this.state;
+    const { } = this.state;
     return (
       <>
         <Container maxWidth="sm">
@@ -89,41 +73,8 @@ class Index extends React.PureComponent<IProps, IIndexState> {
             </Grid>
           </Paper>
         </Container>
-        <Snackbar
-          open={openNotification}
-          onClose={() => this.closeGrant()}
-          TransitionComponent={this.TransitionUp}
-          message="Allow Notifications for long running timers."
-          action={
-            <React.Fragment>
-              <Button color="primary" size="small" onClick={() => this.closeGrant(true)}>
-                ALLOW
-              </Button>
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                onClick={() => this.closeGrant()}
-              >
-                <CloseIcon />
-              </IconButton>
-            </React.Fragment>
-          }
-        />
       </>
     );
-  }
-
-  async closeGrant(allow: boolean = false) {
-    this.setState({ openNotification: false });
-    if (allow) {
-      const notify = await Notification.requestPermission();
-      console.log("Allowed ", notify)
-      TimerSrv.notifyMessage("Thx for allowing notifications","We will notify you if some important event occured.");
-    }
-  }
-
-  TransitionUp(props: TransitionProps) {
-    return <Slide {...props} direction="up" />;
   }
   async loginClick(mode: number) {
     console.log("Redirect");
@@ -145,6 +96,7 @@ class Index extends React.PureComponent<IProps, IIndexState> {
     //   this.props.history.replace("/auth/login");
     // }
   }
+  
 }
 
 export default Index;
