@@ -1,6 +1,6 @@
 {
-  "short_name": "My Time Tracker",
-  "name": "My Time Tracker",
+  "short_name": "trackOtime",
+  "name": "trackOtime the free time tracker for freelance work.",
   "icons": [
     {
       "src": "favicon.ico",

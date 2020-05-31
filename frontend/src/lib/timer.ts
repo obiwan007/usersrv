@@ -98,6 +98,18 @@ export class Timer {
   elapsed(): number {
     return this.currentTimer.elapsed();
   }
+
+  notifyMessage(msg: string, body: string) {
+    const permission = Notification.permission;
+    console.log("Allowed ", permission)
+    if (permission === "granted") {
+      const n = new Notification(msg, { body: body, icon: 'logo512.png' });
+      n.onclick = () => {
+        console.log('Clicked on notification');
+      };
+    }
+  }
+
   // Entries(filter = "0"): TimeEntry[] {
   //   this.entries.sort(function (a, b) {
   //     if (a.timerStart > b.timerStart) {
