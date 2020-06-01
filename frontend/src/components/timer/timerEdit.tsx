@@ -8,13 +8,14 @@
 // Query to get top stories from HackerNews
 // Emotion styled component
 import { MutationFunction } from '@apollo/react-common';
-import DateFnsUtils from '@date-io/date-fns';
 import { Button, Checkbox, createStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
-import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { KeyboardDateTimePicker } from '@material-ui/pickers';
 import * as _ from "lodash";
+import moment from "moment";
 import React from "react";
 import { AllProjectsComponent, CreateTimerComponent, CreateTimerMutation, CreateTimerMutationVariables, refetchAllTimerQuery, Timer as TimerEntry, TimerInput, UpdateTimerComponent, UpdateTimerMutation, UpdateTimerMutationVariables } from "../../graphql";
 // ----------------------------------------------------------------------------
+const is12 = ((moment(new Date(2014, 1, 1, 15, 0, 0, 0)).format("LLL").indexOf("PM") > -1));
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
@@ -101,6 +102,7 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
   renderDialog = () => {
     const { addOpen, editOpen, currentTimer } = this.state;
     const { classes } = this.props;
+
     return (
       <AllProjectsComponent>
         {({ data, loading, error }) => {
@@ -209,29 +211,27 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
 
                               <FormControl className={classes.formControl}>
-                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                  <Grid container justify="space-around">
-                                    <Grid item>
-                                      <KeyboardDatePicker
-                                        margin="normal"
-                                        id="date-picker-dialog"
-                                        label="Date Start"
-                                        format="MM/dd/yyyy"
-                                        value={currentTimer.timerStart}
-                                        onChange={(date) => {
-                                          currentTimer.timerStart = date?.toISOString()!;
-                                          console.log(currentTimer);
-                                          this.setState({
-                                            currentTimer: currentTimer,
-                                          });
-                                        }
-                                        }
-                                        KeyboardButtonProps={{
-                                          'aria-label': 'change date',
-                                        }}
-                                      />
-                                    </Grid>
-                                    <Grid item>
+                                <Grid container justify="flex-start" spacing={2}>
+                                  <Grid item>
+                                    <KeyboardDateTimePicker
+                                      margin="normal"
+                                      id="date-picker-dialog"
+                                      label="Date Start"
+                                      // format="MM/dd/yyyy"
+                                      format="LLL"
+                                      ampm={is12}
+                                      value={currentTimer.timerStart}
+                                      onChange={(date) => {
+                                        currentTimer.timerStart = date?.toISOString()!;
+                                        console.log(currentTimer);
+                                        this.setState({
+                                          currentTimer: Object.assign({}, currentTimer),
+                                        });
+                                      }
+                                      }
+                                    />
+                                  </Grid>
+                                  {/* <Grid item>
                                       <KeyboardTimePicker
                                         margin="normal"
                                         id="time-picker"
@@ -249,31 +249,29 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                           'aria-label': 'change time',
                                         }}
                                       />
-                                    </Grid>
+                                    </Grid> */}
 
-                                    {!currentTimer.isRunning &&
-                                      <>
-                                        <Grid item>
-                                          <KeyboardDatePicker
-                                            margin="normal"
-                                            id="date-picker-dialog"
-                                            label="End"
-                                            format="MM/dd/yyyy"
-                                            value={currentTimer.timerEnd}
-                                            onChange={(date) => {
-                                              currentTimer.timerEnd = date?.toISOString()!;
-                                              console.log(currentTimer);
-                                              this.setState({
-                                                currentTimer: currentTimer,
-                                              });
-                                            }
-                                            }
-                                            KeyboardButtonProps={{
-                                              'aria-label': 'change date',
-                                            }}
-                                          />
-                                        </Grid>
-                                        <Grid item>
+                                  {!currentTimer.isRunning &&
+                                    <>
+                                      <Grid item>
+                                        <KeyboardDateTimePicker
+                                          margin="normal"
+                                          id="date-picker-dialog"
+                                          label="End"
+                                          format="LLL"
+                                          ampm={is12}
+                                          value={currentTimer.timerEnd}
+                                          onChange={(date) => {
+                                            currentTimer.timerEnd = date?.toISOString()!;
+                                            console.log(currentTimer);
+                                            this.setState({
+                                              currentTimer: Object.assign({}, currentTimer),
+                                            });
+                                          }
+                                          }
+                                        />
+                                      </Grid>
+                                      {/* <Grid item>
                                           <KeyboardTimePicker
                                             margin="normal"
                                             id="time-picker"
@@ -283,7 +281,7 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               currentTimer.timerEnd = date?.toISOString()!;
                                               console.log(currentTimer);
                                               this.setState({
-                                                currentTimer: currentTimer,
+                                                currentTimer:  Object.assign({}, currentTimer),
                                               });
                                             }
                                             }
@@ -291,13 +289,12 @@ export class TimerEdit extends React.PureComponent<PROPS_WITH_STYLES, IState> {
                                               'aria-label': 'change time',
                                             }}
                                           />
-                                        </Grid>
-                                      </>
-                                    }
+                                        </Grid> */}
+                                    </>
+                                  }
 
 
-                                  </Grid>
-                                </MuiPickersUtilsProvider>
+                                </Grid>
                               </FormControl>
                               <FormControl className={classes.formControl}>
                                 <FormControlLabel

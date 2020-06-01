@@ -7,9 +7,8 @@
 /* Local */
 // Query to get top stories from HackerNews
 // Emotion styled component
-import DateFnsUtils from '@date-io/date-fns';
 import { createStyles, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Switch, Theme, WithStyles, withStyles } from "@material-ui/core";
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import * as Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import React from "react";
@@ -146,174 +145,172 @@ export class Filter extends React.PureComponent<PROPS_WITH_STYLES, IState> {
 
 
     return (
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
 
-        <Grid container spacing={3}
-          className={classes.container}
-        >
-          <Grid item sm={3} xs={6}>
-            <FormControl
-              className={[
-                classes.formControl,
-                classes.selectEmpty,
-              ].join(" ")}
+      <Grid container spacing={3}
+        className={classes.container}
+      >
+        <Grid item sm={3} xs={6}>
+          <FormControl
+            className={[
+              classes.formControl,
+              classes.selectEmpty,
+            ].join(" ")}
+          >
+            <InputLabel>Filter</InputLabel>
+            <Select
+              className={classes.selectEmpty}
+              value={timefilter}
+
+              onChange={(event) => {
+                this.setFilterTimerange(filter, event.target.value! as string)
+
+              }}
+            // inputProps={{
+            //   name: "age",
+            //   id: "age-native-simple",
+            // }}
             >
-              <InputLabel>Filter</InputLabel>
-              <Select
-                className={classes.selectEmpty}
-                value={timefilter}
+              {this.filterSelect.map(
+                (f: any) => (
+                  <MenuItem
+                    aria-label="None"
+                    value={f.key}
+                    key={f.key}
+                  >
+                    {f.value}
+                  </MenuItem>
+                )
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
 
-                onChange={(event) => {
-                  this.setFilterTimerange(filter, event.target.value! as string)
+        <Grid item sm={3} xs={6}>
 
-                }}
-              // inputProps={{
-              //   name: "age",
-              //   id: "age-native-simple",
-              // }}
-              >
-                {this.filterSelect.map(
-                  (f: any) => (
-                    <MenuItem
-                      aria-label="None"
-                      value={f.key}
-                      key={f.key}
-                    >
-                      {f.value}
-                    </MenuItem>
-                  )
-                )}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item sm={3} xs={6}>
-
-            <FormControl
-              className={[
-                classes.formControl,
-                classes.selectEmpty,
-              ].join(" ")}
+          <FormControl
+            className={[
+              classes.formControl,
+              classes.selectEmpty,
+            ].join(" ")}
+          >
+            <ProjectSelect
+              project={filterProject}
+              onChanged={(p: Project) => {
+                filter.filterProject = p;
+                onUpdate(filter);
+              }}
             >
-              <ProjectSelect
-                project={filterProject}
-                onChanged={(p: Project) => {
-                  filter.filterProject = p;
-                  onUpdate(filter);
-                }}
-              >
-              </ProjectSelect>
-            </FormControl>
-          </Grid>
-          <Grid item sm={2} xs={4}>
-            <FormControl
-              style={{ marginTop: -5 }}
-              className={[
-                classes.formControl,
-              ].join(" ")}>
-              <KeyboardDatePicker
-                margin="dense"
-                id="date-picker-dialog"
-                label="Start"
-                value={filterTimerStart}
-                onChange={(date) => {
-                  let filterTimerStart = date?.toISOString()!;
+            </ProjectSelect>
+          </FormControl>
+        </Grid>
+        <Grid item sm={2} xs={4}>
+          <FormControl
+            style={{ marginTop: -5 }}
+            className={[
+              classes.formControl,
+            ].join(" ")}>
+            <KeyboardDatePicker
+              margin="dense"
+              id="date-picker-dialog"
+              label="Start"
+              value={filterTimerStart}
+              onChange={(date) => {
+                let filterTimerStart = date?.toISOString()!;
 
-                  filter.filterTimerStart = filterTimerStart;
-                  onUpdate(filter);
+                filter.filterTimerStart = filterTimerStart;
+                onUpdate(filter);
 
-                }
-                }
-                KeyboardButtonProps={{
-                  'aria-label': 'change date',
-                }}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item sm={2} xs={4}>
-            <FormControl
-              style={{ marginTop: -5 }}
-              className={[
-                classes.formControl,
-              ].join(" ")}>
+              }
+              }
+              KeyboardButtonProps={{
+                'aria-label': 'change date',
+              }}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item sm={2} xs={4}>
+          <FormControl
+            style={{ marginTop: -5 }}
+            className={[
+              classes.formControl,
+            ].join(" ")}>
 
-              <KeyboardDatePicker
-                margin="dense"
-                id="time-picker"
-                label="End"
-                value={filterTimerEnd}
-                onChange={(date) => {
-                  let filterTimerEnd = date?.toISOString()!;
-                  console.log(filterTimerEnd);
+            <KeyboardDatePicker
+              margin="dense"
+              id="time-picker"
+              label="End"
+              value={filterTimerEnd}
+              onChange={(date) => {
+                let filterTimerEnd = date?.toISOString()!;
+                console.log(filterTimerEnd);
 
-                  filter.filterTimerEnd = filterTimerEnd;
-                  onUpdate(filter);
+                filter.filterTimerEnd = filterTimerEnd;
+                onUpdate(filter);
 
-                }
-                }
-                KeyboardButtonProps={{
-                  'aria-label': 'change time',
-                }}
-              />
-            </FormControl>
-
-          </Grid>
-
-          {/* // Billed Unbilled */}
-
-          <Grid item sm={1} xs={2}>
-            <FormControl
-              style={{ marginTop: -5 }}
-              className={[
-                classes.formControl,
-              ].join(" ")}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={filterIsBilled}
-                    onChange={(event) => {
-                      filter.filterIsBilled = event.target.checked;
-                      onUpdate(filter);
-                    }
-                    }
-                    name="checkedB"
-                    color="primary"
-                  />
-                }
-                label="Billed"
-              />
-
-            </FormControl>
-
-            {/* </Grid>
-                    <Grid item sm={3} xs={6}> */}
-            <FormControl
-              style={{ marginTop: -5 }}
-              className={[
-                classes.formControl,
-              ].join(" ")}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={filterIsUnbilled}
-                    onChange={(event) => {
-                      filter.filterIsUnbilled = event.target.checked;
-                      onUpdate(filter);
-                    }
-                    }
-                    name="checkedB"
-                    color="primary"
-                  />
-                }
-                label="Unbilled"
-              />
-
-            </FormControl>
-
-          </Grid>
+              }
+              }
+              KeyboardButtonProps={{
+                'aria-label': 'change time',
+              }}
+            />
+          </FormControl>
 
         </Grid>
-      </MuiPickersUtilsProvider>
+
+        {/* // Billed Unbilled */}
+
+        <Grid item sm={1} xs={2}>
+          <FormControl
+            style={{ marginTop: -5 }}
+            className={[
+              classes.formControl,
+            ].join(" ")}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={filterIsBilled}
+                  onChange={(event) => {
+                    filter.filterIsBilled = event.target.checked;
+                    onUpdate(filter);
+                  }
+                  }
+                  name="checkedB"
+                  color="primary"
+                />
+              }
+              label="Billed"
+            />
+
+          </FormControl>
+
+          {/* </Grid>
+                    <Grid item sm={3} xs={6}> */}
+          <FormControl
+            style={{ marginTop: -5 }}
+            className={[
+              classes.formControl,
+            ].join(" ")}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={filterIsUnbilled}
+                  onChange={(event) => {
+                    filter.filterIsUnbilled = event.target.checked;
+                    onUpdate(filter);
+                  }
+                  }
+                  name="checkedB"
+                  color="primary"
+                />
+              }
+              label="Unbilled"
+            />
+
+          </FormControl>
+
+        </Grid>
+
+      </Grid>
     );
   }
 
@@ -351,7 +348,7 @@ export class Filter extends React.PureComponent<PROPS_WITH_STYLES, IState> {
     filter.timefilter = days;
     filter.filterTimerStart = t2;
     filter.filterTimerEnd = t1;
-    console.log("Filter", JSON.stringify(filter,null,2));
+    console.log("Filter", JSON.stringify(filter, null, 2));
     this.props.onUpdate(filter)
   }
 

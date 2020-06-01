@@ -10,6 +10,7 @@
 // Global styles
 // import globalStyles from "@/global/styles";
 // import { Global } from "@emotion/core";
+import MomentUtils from "@date-io/moment";
 import { AppBar, Button, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Slide, Snackbar, Toolbar, useTheme } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Drawer from "@material-ui/core/Drawer";
@@ -19,6 +20,10 @@ import { TransitionProps } from '@material-ui/core/transitions/transition';
 import Typography from "@material-ui/core/Typography";
 import { Assignment, Brightness7, Close as CloseIcon, Home as HomeIcon, Label, MonetizationOn, People, ShowChart } from "@material-ui/icons";
 import MenuIcon from "@material-ui/icons/Menu";
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import * as moment from 'moment';
+import 'moment/locale/de';
+import 'moment/locale/fr';
 import React from "react";
 import CookieConsent from "react-cookie-consent";
 import { Link as RouterLink, Redirect, Route, Switch, useHistory, useLocation, withRouter } from "react-router-dom";
@@ -79,6 +84,14 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbar: theme.mixins.toolbar,
 }));
+
+const getNavigatorLanguage = () => {
+  if (navigator.languages && navigator.languages.length) {
+    return navigator.languages[0];
+  } else {
+    return (navigator as any).userLanguage || navigator.language || (navigator as any).browserLanguage || 'en';
+  }
+}
 
 function Copyright() {
   return (
@@ -325,6 +338,10 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
   };
   public componentDidMount = async () => {
     console.log('Mounting Root:', this.isRunningStandalone())
+
+    moment.locale(getNavigatorLanguage());
+    console.log('Language', getNavigatorLanguage());
+    console.log("Date", moment.locale());
     let isLoggedIn = false;
     try {
       isLoggedIn = await security.refresh();
@@ -419,6 +436,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
           )}
 
           <div className="content" style={{ flexGrow: 1, padding: 10 }}>
+          <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={moment.locale()}>
             <ScrollTop>
               <Switch>
                 <Route path="/" exact component={Home}>
@@ -439,6 +457,7 @@ class Root extends React.PureComponent<IPropsRoot, IStateRoot> {
                 <Route path="/login" component={Login} />
               </Switch>
             </ScrollTop>
+            </MuiPickersUtilsProvider>
           </div>
         </div>
         {/* <Copyright></Copyright> */}
