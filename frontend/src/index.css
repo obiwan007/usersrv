@@ -16,3 +16,8 @@ code {
 content {
   height: 300px
 }
+
+
+.MuiPickersToolbarText-toolbarTxt{
+  font-size: 28px!important;
+}
