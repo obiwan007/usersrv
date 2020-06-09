@@ -42,3 +42,30 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+# Postgres preparation
+
+## Install
+
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo apt install postgresql-client-common
+sudo -i -u postgres
+
+## Add access from docker
+
+/etc/posgress/xx/pg_hba.conf and postgresql.conf
+
+## DB postgres password change
+su - postgres
+$ psql
+psql (10.12 (Ubuntu 10.12-0ubuntu0.18.04.1))
+postgres=# \password
+Enter new password:
+
+## Create DB:
+
+sudo -u postgres createdb usersrv
+sudo -u postgres createdb projectsrv
+sudo -u postgres createdb clientsrv
+sudo -u postgres createdb timersrv
