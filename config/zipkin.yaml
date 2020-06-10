@@ -18,10 +18,8 @@ spec:
           resources:
             limits:
               memory: 512Mi
-              cpu: 0.2
             requests:
               memory: 256Mi
-              cpu: 0.2
           ports:
             - containerPort: 9411
             - containerPort: 16686
