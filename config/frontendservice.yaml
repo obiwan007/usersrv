@@ -23,8 +23,10 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
+              cpu: 0.2
               memory: 512Mi
             requests:
+              cpu: 0.2
               memory: 256Mi
           env:
             - name: GRAPHQL
