@@ -2,14 +2,16 @@ package gql
 
 import (
 	"context"
-	"log"
+
+	"github.com/leodotcloud/log"
+
 	"strconv"
 
 	pb "github.com/obiwan007/usersrv/proto"
 )
 
 func (r *Resolver) AllTimer(ctx context.Context, args *AllTimerRequest) (*[]*TimerResolver, error) {
-	log.Println(*args.Filter.Dayrange)
+	log.Infof("Range %d", *args.Filter.Dayrange)
 	dayRange, err := strconv.Atoi(*args.Filter.Dayrange)
 	if err != nil {
 		dayRange = -1
@@ -48,7 +50,7 @@ func (r *Resolver) RunningTimer(ctx context.Context) (*TimerResolver, error) {
 }
 
 func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerResolver, error) {
-	log.Println("ID", *arg.ID)
+	log.Infof("ID %s", *arg.ID)
 
 	token, err := validateToken(ctx)
 	if err != nil {
@@ -68,7 +70,7 @@ func (r *Resolver) GetTimer(ctx context.Context, arg *GetTimerRequest) (*TimerRe
 }
 
 func (r *Resolver) DeleteTimer(ctx context.Context, arg *DeleteTimerRequest) (*TimerResolver, error) {
-	log.Println("ID", arg.TimerId)
+	log.Infof("ID %s", arg.TimerId)
 
 	token, err := validateToken(ctx)
 	if err != nil {
@@ -88,7 +90,7 @@ func (r *Resolver) DeleteTimer(ctx context.Context, arg *DeleteTimerRequest) (*T
 }
 
 func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*TimerResolver, error) {
-	log.Println("startTimer ID", arg.TimerId)
+	log.Infof("startTimer ID %s", arg.TimerId)
 	token, err := validateToken(ctx)
 	if err != nil {
 		return nil, err
@@ -105,7 +107,7 @@ func (r *Resolver) StartTimer(ctx context.Context, arg *StartTimerRequest) (*Tim
 }
 
 func (r *Resolver) StopTimer(ctx context.Context, arg *StopTimerRequest) (*TimerResolver, error) {
-	log.Println("stopTimer ID", arg.TimerId)
+	log.Infof("stopTimer ID %s", arg.TimerId)
 	token, err := validateToken(ctx)
 	if err != nil {
 		return nil, err
@@ -141,7 +143,7 @@ func (r *Resolver) CreateTimer(ctx context.Context, arg *CreateTimerRequest) (*T
 	return &s, nil
 }
 func (r *Resolver) UpdateTimer(ctx context.Context, arg *UpdateTimerRequest) (*TimerResolver, error) {
-	log.Println("Update", arg.T.ID)
+	log.Infof("Update %s", arg.T.ID)
 	token, err := validateToken(ctx)
 	if err != nil {
 		return nil, err

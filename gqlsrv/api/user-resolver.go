@@ -2,7 +2,6 @@ package gql
 
 import (
 	"context"
-	"fmt"
 
 	api "github.com/obiwan007/usersrv/proto"
 	// "github.com/pkg/errors"
@@ -19,7 +18,6 @@ func (r *Resolver) User(ctx context.Context, args struct{ Id *string }) (*UserRe
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(res)
 	s := UserResolver{
 		R: &User{Name: res.Name, Email: res.Email, ID: res.Id},
 	}

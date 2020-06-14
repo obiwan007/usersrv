@@ -17,8 +17,9 @@ package gql
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+
+	"github.com/leodotcloud/log"
 
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/opentracing/opentracing-go"
@@ -65,7 +66,7 @@ func auth(next http.Handler) http.Handler {
 		// if err != nil {
 		// 	fmt.Println(err)
 		// }
-		fmt.Println("Token found", token, jwt)
+		log.Debugf("Token found %s %s", token, jwt)
 		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", jwt)))
 	})
 }

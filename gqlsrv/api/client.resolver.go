@@ -2,7 +2,8 @@ package gql
 
 import (
 	"context"
-	"log"
+
+	"github.com/leodotcloud/log"
 
 	pb "github.com/obiwan007/usersrv/proto"
 )
@@ -39,7 +40,7 @@ func (r *Resolver) CreateClient(ctx context.Context, arg *CreateClientRequest) (
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Create", arg.C.Description)
+	log.Infof("Create %v", arg.C.Description)
 	t := clientGql2pb(&arg.C)
 	t.Jwt = token.Raw
 	result, err := r.clientSvc.Add(ctx, t)
@@ -58,7 +59,7 @@ func (r *Resolver) UpdateClient(ctx context.Context, arg *UpdateClientRequest) (
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Update", arg.C.ID)
+	log.Infof("Update %v", arg.C.ID)
 
 	t := clientGql2pb(&arg.C)
 	t.Jwt = token.Raw
@@ -78,7 +79,7 @@ func (r *Resolver) GetClient(ctx context.Context, arg *GetClientRequest) (*Clien
 	if err != nil {
 		return nil, err
 	}
-	log.Println("ID", *arg.ID)
+	log.Infof("ID %v", *arg.ID)
 
 	t := &pb.Id{Id: *arg.ID, Jwt: token.Raw}
 	result, err := r.clientSvc.Get(ctx, t)
@@ -97,7 +98,7 @@ func (r *Resolver) DeleteClient(ctx context.Context, arg *DeleteClientRequest) (
 	if err != nil {
 		return nil, err
 	}
-	log.Println("ID", *&arg.ClientId)
+	log.Infof("ID %v", *&arg.ClientId)
 
 	t := &pb.Id{Id: arg.ClientId, Jwt: token.Raw}
 	result, err := r.clientSvc.Del(ctx, t)

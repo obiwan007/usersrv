@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/leodotcloud/log"
+	"github.com/leodotcloud/log/server"
 
 	"github.com/namsral/flag"
 
@@ -74,6 +76,7 @@ var (
 func main() {
 	// Your credentials should be obtained from the Google
 	// Developer Console (https://console.developers.google.com).
+	server.StartServerWithDefaults()
 
 	myFigure := figure.NewFigure("GQLSRV", "", true)
 	myFigure.Print()
@@ -163,14 +166,14 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Println("Listening on port 8090")
-	log.Fatal(srv.ListenAndServe())
+	log.Infof("Listening on port 8090")
+	log.Fatalf("Exit", srv.ListenAndServe())
 	// log.Fatal(srv.ListenAndServeTLS("server.rsa.crt", "server.rsa.key"))
 }
 
 func AddContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method, "-", r.RequestURI)
+		log.Infof(r.Method, "-", r.RequestURI)
 		cookie, _ := r.Cookie("username")
 		if cookie != nil {
 			//Add data to context

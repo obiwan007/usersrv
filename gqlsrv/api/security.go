@@ -3,7 +3,9 @@ package gql
 import (
 	"context"
 	"fmt"
-	"log"
+
+	"github.com/leodotcloud/log"
+
 	"net/http"
 	"time"
 
@@ -15,7 +17,7 @@ import (
 var SigningKey = []byte("thiswillbeoverwrittenlater")
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	log.Println("Endpoint Hit: homePage")
+	log.Infof("Endpoint Hit: homePage")
 	fmt.Fprintf(w, "Hello World")
 
 }
@@ -39,25 +41,25 @@ func getToken(username, picture, mandant, email string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(SigningKey)
-	log.Println("Generated Token")
+	log.Infof("Generated Token")
 	return ss, err
 }
 
 func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Handling Authorization", r.URL.String())
+		log.Infof("Handling Authorization %s", r.URL.String())
 		ctx := r.Context()
 		var foundAuth *string = nil
 		for _, cookie := range r.Cookies() {
 			if cookie.Name == "Auth" {
 				foundAuth = &cookie.Value
-				log.Println("Authorization Cookie given")
+				log.Infof("Authorization Cookie given")
 				break
 			}
 		}
 		if r.Header["Authorization"] != nil {
 			foundAuth = &r.Header["Authorization"][0]
-			log.Println("Authorization Header given")
+			log.Infof("Authorization Header given")
 		}
 
 		if foundAuth != nil {
@@ -70,14 +72,14 @@ func isAuthorized(next http.Handler) http.Handler {
 			})
 
 			if err != nil {
-				log.Println("ERROR: Invalid token:", err.Error())
+				log.Errorf("ERROR: Invalid token: %v", err.Error())
 				// fmt.Fprintf(w, err.Error())
 				token = nil
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 			if token.Valid != true {
-				log.Println(token.Valid)
+				log.Infof("Valid Token %v", token.Valid)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -95,7 +97,7 @@ func isAuthorized(next http.Handler) http.Handler {
 			// 	next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "jwt", token)))
 			// }
 		} else {
-			log.Println("No Token provided")
+			log.Infof("No Token provided")
 			// fmt.Fprintf(w, "Not Authorized")
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}

@@ -2,7 +2,8 @@ package gql
 
 import (
 	"context"
-	"log"
+
+	"github.com/leodotcloud/log"
 
 	pb "github.com/obiwan007/usersrv/proto"
 )
@@ -39,7 +40,7 @@ func (r *Resolver) CreateProject(ctx context.Context, arg *CreateProjectRequest)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Create", arg.P.Description)
+	log.Infof("Create %v", arg.P.Description)
 	t := projectGql2pb(&arg.P)
 	t.Jwt = token.Raw
 
@@ -59,7 +60,7 @@ func (r *Resolver) UpdateProject(ctx context.Context, arg *UpdateProjectRequest)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Update", arg.P.ID)
+	log.Infof("Update %v", arg.P.ID)
 
 	t := projectGql2pb(&arg.P)
 	t.Jwt = token.Raw
@@ -79,7 +80,7 @@ func (r *Resolver) GetProject(ctx context.Context, arg *GetProjectRequest) (*Pro
 	if err != nil {
 		return nil, err
 	}
-	log.Println("ID", *arg.ID)
+	log.Infof("ID %v", *arg.ID)
 
 	t := &pb.Id{Id: *arg.ID, Jwt: token.Raw}
 	result, err := r.projectSvc.Get(ctx, t)
@@ -98,7 +99,7 @@ func (r *Resolver) DeleteProject(ctx context.Context, arg *DeleteProjectRequest)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("ID", *&arg.ProjectId)
+	log.Infof("ID %v", *&arg.ProjectId)
 
 	t := &pb.Id{Id: arg.ProjectId, Jwt: token.Raw}
 	result, err := r.projectSvc.Del(ctx, t)

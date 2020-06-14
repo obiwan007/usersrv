@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
+	"github.com/leodotcloud/log"
+
 	"net/http"
 	"time"
 
@@ -126,7 +128,7 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := existingToken.Claims.(*claims.MyCustomClaims)
-	log.Println("Refresh Subject:", claims.Subject)
+	log.Infof("Refresh Subject: %v", claims.Subject)
 	token, err := getToken(claims.Name, claims.Picture, claims.Mandant, claims.Subject)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
@@ -169,20 +171,20 @@ func handleRefresh(w http.ResponseWriter, r *http.Request) {
 
 func handleAppleLogin(w http.ResponseWriter, r *http.Request) {
 	url := appleOauthConfig.AuthCodeURL(oauthStateString)
-	log.Println("Handling Apple Login Redirect", appleOauthConfig.ClientID)
+	log.Infof("Handling Apple Login Redirect %v", appleOauthConfig.ClientID)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func handleMicrosoftLogin(w http.ResponseWriter, r *http.Request) {
 	url := microsoftOauthConfig.AuthCodeURL(oauthStateString)
-	log.Println("Handling Microsoft Login Redirect", microsoftOauthConfig.ClientID)
+	log.Infof("Handling Microsoft Login Redirect %v", microsoftOauthConfig.ClientID)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
 
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
-	log.Println("Handling Google Login Redirect", googleOauthConfig.ClientID)
+	log.Infof("Handling Google Login Redirect %v", googleOauthConfig.ClientID)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	return
 }
@@ -191,12 +193,12 @@ func handleDefaultLogin(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["provider"]
 
 	if !ok || len(keys[0]) < 1 {
-		log.Println("Url Param 'provider' is missing")
+		log.Infof("Url Param 'provider' is missing")
 		handleGoogleLogin(w, r)
 		return
 	}
 	key := keys[0]
-	log.Println("Url Param 'provider' is: " + string(key))
+	log.Infof("Url Param 'provider' is: %v" + string(key))
 	switch key {
 	case "apple":
 		handleAppleLogin(w, r)
@@ -215,8 +217,8 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	log.Println("Content", content)
-	log.Println("Name", content.Name)
+	log.Infof("Content %v", content)
+	log.Infof("Name %v", content.Name)
 	token, err := getToken(content.Name, content.Picture, "0", content.Email)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
@@ -233,15 +235,15 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 
 func handleMicrosoftCallback(w http.ResponseWriter, r *http.Request) {
 	authorizationCode := r.URL.Query().Get("code")
-	log.Println("Code:", authorizationCode)
+	log.Infof("Code: %v", authorizationCode)
 	content, err := getUserInfoMicrosoft(r.FormValue("state"), r.FormValue("code"))
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	log.Println("Name", content.Name)
-	log.Println("Email", content.Email)
+	log.Infof("Name %v", content.Name)
+	log.Infof("Email %v", content.Email)
 	token, err := getToken(content.Name, content.Picture, "0", content.Email)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
@@ -272,14 +274,14 @@ func getUserInfoMicrosoft(state string, code string) (*UserInfoMicrosoft, error)
 	if state != oauthStateString {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
-	log.Println("Code:", code, microsoftOauthConfig.RedirectURL)
+	log.Infof("Code: %v", code, microsoftOauthConfig.RedirectURL)
 
 	// opts:=[]oauth2.AuthCodeOption{"wl.email",},
 	token, err := microsoftOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
-	log.Println("Access token retrieved from Azure", token.AccessToken)
+	log.Infof("Access token retrieved from Azure %v", token.AccessToken)
 	url := "https://graph.microsoft.com/v1.0/me"
 	// Create a Bearer string by appending string access token
 	var bearer = "Bearer " + token.AccessToken
@@ -302,7 +304,7 @@ func getUserInfoMicrosoft(state string, code string) (*UserInfoMicrosoft, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
 	}
-	log.Println("Content", string(contents))
+	log.Infof("Content %v", string(contents))
 
 	var result UserInfoMicrosoft
 	if err := json.Unmarshal(contents, &result); err != nil {
@@ -343,8 +345,8 @@ func handleAppleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	log.Println("Content", content)
-	log.Println("Name", content.Name)
+	log.Infof("Content %v", content)
+	log.Infof("Name %v", content.Name)
 	token, err := getToken(content.Name, content.Picture, "0", content.Email)
 	if err != nil {
 		http.Error(w, err.Error(), 400)

@@ -27,6 +27,7 @@ require (
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/leodotcloud/log v0.1.1
 	github.com/lib/pq v1.4.0
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/modern-go/reflect2 v1.0.1 // indirect
