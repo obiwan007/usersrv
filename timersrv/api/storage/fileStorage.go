@@ -19,14 +19,19 @@ type FileStorage struct{ Db *ent.Client }
 
 func NewFileStorage(dbconnection string) *FileStorage {
 	log.Println("DB Connection", dbconnection)
-	client, err := ent.Open("postgres", dbconnection)
+	opts := []ent.Option{
+		ent.Debug(),
+	}
+	client, err := ent.Open("postgres", dbconnection, opts...)
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	log.Println("DB connected")
 
 	// run the auto migration tool.
-	if err := client.Debug().Schema.Create(context.Background()); err != nil {
+	ctx := context.Background()
+
+	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 

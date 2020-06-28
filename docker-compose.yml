@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: ./user_Dockerfile
+    environment:
+      - DBCONNECTIONUSER=user=postgres password=1234postgres1234 host=docker.for.mac.host.internal dbname=user port=5432 sslmode=disable
     ports:
       - 10000:10000
     networks:
@@ -32,7 +34,7 @@ services:
       context: .
       dockerfile: ./Dockerfile_timer
     environment:
-      - DBCONNECTIONTIMER="postgres://host.docker.internal:5432/timer?sslmode=disable"
+      - DBCONNECTIONTIMER=user=postgres password=1234postgres1234 host=docker.for.mac.host.internal dbname=timer port=5432 sslmode=disable
     ports:
       - 10001:10001
     networks:
@@ -45,7 +47,7 @@ services:
       context: .
       dockerfile: ./Dockerfile_project
     environment:
-      - DBCONNECTIONPROJECT="postgres://host.docker.internal:5432/project?sslmode=disable"
+      - DBCONNECTIONPROJECT=postgres://postgres:1234postgres1234@192.168.178.32:5432/project?sslmode=disable
     ports:
       - 10002:10002
     networks:
@@ -58,7 +60,7 @@ services:
       context: .
       dockerfile: ./Dockerfile_client
     environment:
-      - DBCONNECTIONCLIENT="postgres://host.docker.internal:5432/client?sslmode=disable"
+      - DBCONNECTIONCLIENT=postgres://postgres:1234postgres1234@192.168.178.32:5432/client?sslmode=disable
       - POSTGRES_HOST="host.docker.internal"
     ports:
       - 10003:10003

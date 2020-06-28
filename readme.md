@@ -162,3 +162,39 @@ Show Dashboard
 
 `kubectl expose deployment nginx-deployment --port=80 --type=LoadBalancer`
 
+- Rancher fluentd secret config for logging;
+`<parse>
+        @type regexp
+        expression /^(?<time>.+) (?<stream>stdout|stderr)( (?<logtag>.))? (?<log>.*)$/
+        time_format %Y-%m-%dT%H:%M:%S.%N%z
+ </parse>`
+
+ ### Database
+
+* Install
+
+ `apt-get install postgresql`
+
+* Change permissions:
+
+ `sudo vi /etc/postgresql/12/main/pg_hba.conf`
+
+ `host    all             all              0.0.0.0/0                       md5
+host    all             all              ::/0                            md5`
+
+* user postgress
+
+`sudo -u postgres psql`
+
+`postgres=# \password`
+
+* create databases
+
+`sudo -u postgres createdb <dbname>`
+
+clientsrv
+projectsrv
+timersrv
+usersrv
+
+https://mx.​ogseu0itmevmpymz.​myfritz.​net:443/auth/callback

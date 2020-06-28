@@ -9,6 +9,7 @@ import (
 
 	"github.com/leodotcloud/log"
 	"github.com/leodotcloud/log/server"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/namsral/flag"
 
@@ -21,6 +22,9 @@ import (
 	gql "github.com/obiwan007/usersrv/gqlsrv/api"
 	"github.com/obiwan007/usersrv/pkg"
 	pb "github.com/obiwan007/usersrv/proto"
+
+	// zipkintracer "github.com/openzipkin-contrib/zipkin-go-opentracing"
+	openzipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
 )
 
 var (
@@ -55,23 +59,22 @@ var (
 // 	service_name_call_get     = "callGet"
 // )
 
-// func newTracer() (opentracing.Tracer, zipkintracer.Collector, error) {
-// 	collector, err := openzipkin.NewHTTPCollector(endpoint_url)
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	recorder := openzipkin.NewRecorder(collector, true, host_url, service_name_cache_client)
-// 	tracer, err := openzipkin.NewTracer(
-// 		recorder,
-// 		openzipkin.ClientServerSameSpan(true))
+func NewTracer(servicename string, grpcurl, zipkinurl string) (opentracing.Tracer, openzipkin.Collector, error) {
+	collector, err := openzipkin.NewHTTPCollector(zipkinurl)
+	if err != nil {
+		return nil, nil, err
+	}
+	recorder := openzipkin.NewRecorder(collector, true, grpcurl, servicename)
+	tracer, err := openzipkin.NewTracer(
+		recorder, openzipkin.ClientServerSameSpan(true))
 
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	opentracing.SetGlobalTracer(tracer)
+	if err != nil {
+		return nil, nil, err
+	}
+	opentracing.SetGlobalTracer(tracer)
 
-// 	return tracer, collector, nil
-// }
+	return tracer, collector, nil
+}
 
 func main() {
 	// Your credentials should be obtained from the Google
@@ -84,7 +87,9 @@ func main() {
 
 	gql.SigningKey = []byte(*signingKey)
 
-	params := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "gqpservice"}
+	gqlTracer, _, err := NewTracer("gql service", "0.0.0.0:0", *zipkin)
+
+	params := &pkg.CommandParams{TlsForGrpc: tlsForGrpc, Balancer: balancer, CertFile: caFile, Zipkin: zipkin, Tracename: "service"}
 
 	s, err := getSchema("../schema/schema.graphql")
 	if err != nil {
@@ -112,22 +117,31 @@ func main() {
 		log.Fatalf("fail to connect to etcd: %v", err)
 	}
 	defer cli.Close()
-
-	connUserSrv, tracer, err := pkg.CreateClient(params, *userSrv)
+	p1 := *params
+	p1.Tracename = "userservice"
+	connUserSrv, tracer, err := pkg.CreateClient(&p1, *userSrv)
 	defer connUserSrv.Close()
 	gqlUserSrvClient := pb.NewUserServiceClient(connUserSrv)
 
-	connTimerSrv, tracer, err := pkg.CreateClient(params, *timerSrv)
+	p2 := *params
+	p2.Tracename = "timerservice"
+	connTimerSrv, tracer, err := pkg.CreateClient(&p2, *timerSrv)
 	defer connTimerSrv.Close()
 	gqlTimerSrvClient := pb.NewTimerServiceClient(connTimerSrv)
 
-	connProjectSrv, tracer, err := pkg.CreateClient(params, *projectSrv)
+	p3 := *params
+	p3.Tracename = "projectservice"
+	connProjectSrv, tracer, err := pkg.CreateClient(&p3, *projectSrv)
 	defer connProjectSrv.Close()
 	gqlProjectSrvClient := pb.NewProjectServiceClient(connProjectSrv)
 
-	connClientSrv, tracer, err := pkg.CreateClient(params, *clientSrv)
+	p4 := *params
+	p4.Tracename = "clientservice"
+	connClientSrv, tracer, err := pkg.CreateClient(&p4, *clientSrv)
 	defer connClientSrv.Close()
 	gqlClientSrvClient := pb.NewClientServiceClient(connClientSrv)
+
+	log.Infof("Tracer: %v", tracer)
 
 	gql.UserSrvClient = gqlUserSrvClient
 
@@ -139,7 +153,7 @@ func main() {
 
 	// schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
 	schema := graphql.MustParseSchema(s, resolver, graphql.UseStringDescriptions(), graphql.Tracer(trace.OpenTracingTracer{}))
-	mux := gql.NewRouter(schema, tracer,
+	mux := gql.NewRouter(schema, gqlTracer,
 		&gql.AuthSecret{ClientID: gClientID, ClientSecr: gClientSecr, RedirectUrl: gRedirect},
 		&gql.AuthSecret{ClientID: aClientID, ClientSecr: aClientSecr, RedirectUrl: aRedirect},
 		&gql.AuthSecret{ClientID: mClientID, ClientSecr: mClientSecr, RedirectUrl: mRedirect, Tenant: mTenant})

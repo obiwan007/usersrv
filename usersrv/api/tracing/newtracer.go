@@ -23,7 +23,7 @@ func NewTracer(servicename string, grpcurl, zipkinurl string) (opentracing.Trace
 	if err != nil {
 		return nil, nil, err
 	}
-	opentracing.SetGlobalTracer(tracer)
+	//opentracing.SetGlobalTracer(tracer)
 
 	return tracer, collector, nil
 }

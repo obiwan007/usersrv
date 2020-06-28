@@ -48,6 +48,10 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 		if err != nil {
 			return nil, err
 		}
+		err = drv.DB().Ping()
+		if err != nil {
+			return nil, fmt.Errorf("Ping Failed: %v", err)
+		}
 		return NewClient(append(options, Driver(drv))...), nil
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)

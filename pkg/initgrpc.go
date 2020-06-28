@@ -29,7 +29,7 @@ func PrepareOptsTracing(p *CommandParams) ([]grpc.ServerOption, zipkintracer.Col
 	grpc.EnableTracing = true
 	var opts []grpc.ServerOption
 	// Create the Server
-	tracer, collector, err := tracing.NewTracer(p.Tracename, fmt.Sprintf("localhost:%d", *p.Port), *p.Zipkin)
+	tracer, collector, err := tracing.NewTracer(p.Tracename, fmt.Sprintf("0.0.0.0:%d", *p.Port), *p.Zipkin)
 	if err != nil {
 		panic(err)
 	}
@@ -63,14 +63,14 @@ func PrepareOptsTracing(p *CommandParams) ([]grpc.ServerOption, zipkintracer.Col
 func CreateClient(p *CommandParams, destURL string) (*grpc.ClientConn, opentracing.Tracer, error) {
 	var opts []grpc.DialOption
 
-	log.Println("Perpare grpc client", destURL)
-	_, collector, err := tracing.NewTracer(p.Tracename, destURL, *p.Zipkin)
+	log.Printf("Perpare grpc client %s Service: %s", destURL, p.Tracename)
+	tracer, collector, err := tracing.NewTracer(p.Tracename+"Client", destURL, *p.Zipkin)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Client Logging to Zipkin:", *p.Zipkin)
 	defer collector.Close()
-	tracer := opentracing.GlobalTracer()
+	//tracer := opentracing.GlobalTracer()
 	opts = append(opts, grpc.WithUnaryInterceptor(
 		otgrpc.OpenTracingClientInterceptor(tracer, otgrpc.LogPayloads())))
 	opts = append(opts, grpc.WithStreamInterceptor(
@@ -95,7 +95,7 @@ func CreateClient(p *CommandParams, destURL string) (*grpc.ClientConn, opentraci
 	opts = append(opts, grpc.WithTimeout(10*time.Second))
 
 	// opts = append(opts, grpc.WithBlock())
-	log.Println("Dial", destURL)
+	log.Printf("Dial: %s %v", destURL, opts)
 
 	conn, err := grpc.Dial(destURL, opts...)
 	// } else {
