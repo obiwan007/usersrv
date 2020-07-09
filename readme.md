@@ -22,48 +22,7 @@ Some libraries to mention:
 
 ## Services (excluding external)
 
-<pre>
-                                           +-------------------------------------------------------------------------------------------------------+  
-   Browser                                 | k3s                                                          +--------+                               |  
-+----------------------+                   |                                                              |user    |                               |  
-|React Client          |                   |                                                             /|service |                               |  
-|                      |                   |                                                             ||        |                               |  
-|                      |                   |                                                            / |        |                               |  
-|                      |                   |                                                           /  |        |                               |  
-|                      |                   |                                                           |  +--------+                               |  
-|                      |                   |                                                          /                                            |  
-|                      |                   |                                                         /    +--------+                               |  
-|                      |                   |                                                        /     |timer   |                               |  
-+----------------------+                   |                                                        |     |service |                               |  
-            |                              |                                                       /      -        |                               |  
-            |                              |                                                    GRPC    -/|        |                               |  
-            |                              +--------+                                             |    /  |        |                               |  
-            |                              |traefik |                                            /    /   +--------+                               |  
-            |                              |ingress |                                           /   -/                                             |  
-            |                              |        |     +------------------+       +--------+ |  /      +--------+                               |  
-            |                              |        |     |nginx             |       |api     |/  /       |client  |                               |  
-            |   REST/GraphQL               |        |     |frontend          |       |service | -/        |service |                               |  
-            +------------------------------|        |-----|                  |-------|        |/     -----|        |                               |  
-                                           |        |     |                  |       |        |-----/     |        |                               |  
-                                           |        |     +------------------+       |        |\          |        |                               |  
-                                           |        |                                +--------+ -\        +--------+                               |  
-                                           |        |                                             -\                                               |  
-                                           |        |                                               \     +--------+                               |  
-                                           +--------+                                                -\   |project |                               |  
-                                           |                                                           -\ |service |                               |  
-                                           |                                                             -|        |                               |  
-                                           |                                                              |        |                               |  
-                                           |                     ++                                       |        |                               |  
-                                           |                                                              +--------+                               |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           |                                                                                                       |  
-                                           +-------------------------------------------------------------------------------------------------------+  
-</pre>
+[![](https://mermaid.ink/img/eyJjb2RlIjoiZ3JhcGggTFJcbiAgIFxuXG4gICAgQVtXZWJjbGllbnRdIC0tPnxodG1sL1JFU1QvR3JhcGhRTHwgQih0cmFlZmlrIGlzdGlvKVxuICAgIEIgLS0-IHxIVE1MfENbbmdpbnhdXG4gICAgQiAtLT4gfEdyYXBoUUwvUkVTVHwgRFthcGkgc2VydmljZV1cbiAgICBEIC0tPnxHUlBDfCBFW1VzZXIgc2VydmljZV1cbiAgICBEIC0tPnxHUlBDfCBGW1RpbWVyIFNlcnZpY2VdXG4gICAgRCAtLT58R1JQQ3wgR1tQcm9qZWN0IFNlcnZpY2VdXG4gICAgRCAtLT58R1JQQ3wgSFtDbGllbnQgU2VydmljZV1cblxuICAgIEUgLS0-IHxEQnxJW1BHXVxuICAgIEYgLS0-IHxEQnxKW1BHXVxuICAgIEcgLS0-IHxEQnxLW1BHXVxuICAgIEggLS0-IHxEQnxMW1BHXVxuICAgICAgXG5cbiAgICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiZ3JhcGggTFJcbiAgIFxuXG4gICAgQVtXZWJjbGllbnRdIC0tPnxodG1sL1JFU1QvR3JhcGhRTHwgQih0cmFlZmlrIGlzdGlvKVxuICAgIEIgLS0-IHxIVE1MfENbbmdpbnhdXG4gICAgQiAtLT4gfEdyYXBoUUwvUkVTVHwgRFthcGkgc2VydmljZV1cbiAgICBEIC0tPnxHUlBDfCBFW1VzZXIgc2VydmljZV1cbiAgICBEIC0tPnxHUlBDfCBGW1RpbWVyIFNlcnZpY2VdXG4gICAgRCAtLT58R1JQQ3wgR1tQcm9qZWN0IFNlcnZpY2VdXG4gICAgRCAtLT58R1JQQ3wgSFtDbGllbnQgU2VydmljZV1cblxuICAgIEUgLS0-IHxEQnxJW1BHXVxuICAgIEYgLS0-IHxEQnxKW1BHXVxuICAgIEcgLS0-IHxEQnxLW1BHXVxuICAgIEggLS0-IHxEQnxMW1BHXVxuICAgICAgXG5cbiAgICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ)
 
 
 ### Frontend
